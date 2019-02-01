@@ -24,12 +24,13 @@ brew services start tor
 Setup osquery config:
 
 ```sh
-sudo cp -r /usr/local/Cellar/osquery/3.3.0_1/share/osquery /var/osquery
-sudo cp osquery.conf /var/osquery/
+sudo cp -r /usr/local/share/osquery /var/osquery
+sudo cp osquery.conf /var/osquery/osquery.conf
 ```
 
-To start `osqueryd`:
+To start `osqueryd` as a launchd:
 
 ```sh
-sudo osqueryctl start
+sudo cp /var/osquery/com.facebook.osqueryd.plist /Library/LaunchDaemons/
+sudo launchctl load /Library/LaunchDaemons/com.facebook.osqueryd.plist
 ```
