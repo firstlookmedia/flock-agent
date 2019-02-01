@@ -21,16 +21,28 @@ brew install osquery logstash tor git
 brew services start tor
 ```
 
-Setup osquery config:
+Configure osquery:
 
 ```sh
 sudo cp -r /usr/local/share/osquery /var/osquery
 sudo cp osquery.conf /var/osquery/osquery.conf
 ```
 
-To start `osqueryd` as a launchd:
+Start osqueryd as background service:
 
 ```sh
 sudo cp /var/osquery/com.facebook.osqueryd.plist /Library/LaunchDaemons/
 sudo launchctl load /Library/LaunchDaemons/com.facebook.osqueryd.plist
+```
+
+Configure logstash:
+
+```sh
+cp logstash.conf /usr/local/etc/logstash/logstash.conf
+```
+
+Start logstash as a background service:
+
+```sh
+brew services start logstash
 ```
