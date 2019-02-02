@@ -56,6 +56,8 @@ Start logstash as a background service:
 brew services start logstash
 ```
 
-### A note about Homebrew and osquery
+### A note about Homebrew, osquery, and logstash
 
 I've decided against installing osquery via Homebrew. By default, all Homebrew packages are owned by the unprivileged user, so you can `brew install` stuff without `sudo`. But `osqueryd`, the background daemon, gets automatically launched as root. This means there's a privilege escalation in there. If an attacker gets a shell, they can modify `/usr/local/bin/osqueryd` (without root), and then the next time the computer reboots, when `osqueryd` gets launched as root, they've escalated privileges. Instead, osquery should be installed using the [official .pkg file](https://osquery.io/downloads). Unfortunately this means there isn't an easy method to auto-update osquery. So instead, Flock Agent itself can be responsible for downloading and installing osquery updates.
+
+After more testing, I've learned that logstash has the same problem. It needs to read `/var/log/osquery/osqueryd.results.log`, but it's only readable by root, which means the logstash background daemon needs to run as root, but if we install logstash with Homebrew it will be owned by the unprivileged user, and could facilitate a priv esc. There isn't a Mac .pkg for logstash, but there are [official binary releases](https://www.elastic.co/downloads/logstash) on the Elastic website. We can download log `logstash-6.6.0.zip`, unzip it, and then run it as root with `sudo bin/logstash -f path/to/logstash.conf`. Another issue it requires Java, so we may need to install a Java .pkg as well.
