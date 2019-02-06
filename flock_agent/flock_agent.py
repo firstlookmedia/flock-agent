@@ -69,6 +69,8 @@ class FlockAgent(object):
                 self.print_error('osquery did not install successfully')
                 self.quit_early()
 
+        print('')
+
     def print_banner(self):
         s = 'Flock Agent {}'.format(self.version)
 
@@ -91,6 +93,7 @@ class FlockAgent(object):
 
     def quit_early(self):
         self.print_error('Encountered an error, quitting early')
+        print('')
 
     def download_software(self, output_dir, software):
         filename = software['url'].split('/')[-1]

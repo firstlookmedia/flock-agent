@@ -1,6 +1,34 @@
 # Flock Agent
 
-No software yet, just notes to start out with.
+This is the macOS endpoint agent to manage the software required to send data to Flock.
+
+## Getting started
+
+Flock Agent isn't packaged yet. To install from the source tree, first install Python 3.7 (from python.org, or probably `brew install python@3`). Then install pipenv:
+
+```sh
+pip3 install pipenv
+```
+
+Install the pip environment:
+
+```sh
+pipenv install
+```
+
+Run the agent software like this:
+
+```sh
+pipenv run ./flock-agent
+```
+
+Without any commands, it will check the status of the software managed by Flock Agent. To actually automatically install and configure this software, use `--install`:
+
+```sh
+pipenv run ./flock-agent --install
+```
+
+## Notes
 
 Install osquery:
 
