@@ -9,8 +9,8 @@ class Display(object):
     def __init__(self, version):
         self.version = version
 
-    def banner(self, version):
-        s = 'Flock Agent {}'.format(version)
+    def banner(self):
+        s = 'Flock Agent {}'.format(self.version)
 
         print('{}{}╔{}╗{}'.format( attr('bold'), fg('dark_green_sea'), '═'*(len(s)+2), attr('reset') ))
         print('{}{}║ {}{}{} ║{}'.format( attr('bold'), fg('light_sky_blue_3a'), fg('light_yellow'), s, fg('light_sky_blue_3a'), attr('reset') ))

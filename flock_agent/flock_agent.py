@@ -35,6 +35,8 @@ class FlockAgent(object):
         self.status = Status(self.display, self.software, self.config_path)
         self.install = Install(self.display, self.status, self.software, self.config_path)
 
+        self.display.banner()
+
     def exec_status(self):
         """
         Check the status of all software managed by Flock Agent
@@ -53,10 +55,8 @@ class FlockAgent(object):
         if not status:
             all_good = False
 
-        self.display.newline()
         if not all_good:
             self.display.install_message()
-            self.display.newline()
 
     def exec_install(self):
         """
@@ -76,6 +76,8 @@ class FlockAgent(object):
                 self.display.error('osquery did not install successfully')
                 return self.quit_early()
 
+            self.display.newline()
+
         # Configure osquery
         status = self.status.is_osquery_configured()
         if not status:
@@ -86,6 +88,8 @@ class FlockAgent(object):
             if not status:
                 self.display.error('osquery could not be configured properly')
                 return self.quit_early()
+
+            self.display.newline()
 
         # Install OpenJDK
         status = self.status.is_openjdk_installed()
@@ -101,7 +105,7 @@ class FlockAgent(object):
                 self.display.error('OpenJDK did not install successfully')
                 return self.quit_early()
 
-        self.display.newline()
+            self.display.newline()
 
     def quit_early(self):
         self.display.error('Encountered an error, quitting early')
