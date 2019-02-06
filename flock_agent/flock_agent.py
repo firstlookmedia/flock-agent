@@ -7,8 +7,18 @@ from colored import fg, bg, attr
 class FlockAgent(object):
     def __init__(self, version):
         self.version = version
+        self.print_banner()
 
-        # Absolute paths for binaries Flock Agent runs
+        # Information about software to be installed
+        self.software = {
+            'osquery': {
+                'version': '3.3.2',
+                'download_url': 'https://pkg.osquery.io/darwin/osquery-3.3.2.pkg',
+                'sha256': '6ac1baa9bd13fcf3bd4c1b20a020479d51e26a8ec81783be7a8692d2c4a9926a'
+            }
+        }
+
+        # Absolute paths for binaries to subprocess
         self.bins = {
             'pkgutil': '/usr/sbin/pkgutil'
         }
@@ -19,9 +29,9 @@ class FlockAgent(object):
     def print_banner(self):
         s = 'Flock Agent {}'.format(self.version)
 
-        print('{}{}╔{}╗{}'.format( attr('bold'), fg('grey_15'), '═'*(len(s)+2), attr('reset') ))
-        print('{}{}║ {}{}{} ║{}'.format( attr('bold'), fg('grey_15'), fg('yellow_3a'), s, fg('grey_15'), attr('reset') ))
-        print('{}{}╚{}╝{}'.format( attr('bold'), fg('grey_15'), '═'*(len(s)+2), attr('reset') ))
+        print('{}{}╔{}╗{}'.format( attr('bold'), fg('dark_green_sea'), '═'*(len(s)+2), attr('reset') ))
+        print('{}{}║ {}{}{} ║{}'.format( attr('bold'), fg('light_sky_blue_3a'), fg('light_yellow'), s, fg('light_sky_blue_3a'), attr('reset') ))
+        print('{}{}╚{}╝{}'.format( attr('bold'), fg('light_sky_blue_3b'), '═'*(len(s)+2), attr('reset') ))
 
     def print_status_check(self, message, passed):
         if passed:
@@ -34,10 +44,28 @@ class FlockAgent(object):
         """
         Check the status of all software managed by Flock Agent
         """
-        self.print_banner()
-        self.print_status_check('osquery 3.3.2 is installed', self.is_osquery_installed() == "3.3.2")
+        all_good = True
+
+        status = self.is_osquery_installed() == self.software['osquery']['version']
+        if not status:
+            all_good = False
+        self.print_status_check('osquery {} is installed'.format(self.software['osquery']['version']), status)
+
+        status = self.is_osquery_configured()
+        if not status:
+            all_good = False
         self.print_status_check('osquery is configured properly', self.is_osquery_configured())
         print('')
+
+        if not all_good:
+            print('Fix by running: {}flock-agent --install{}'.format(fg('light_blue'), attr('reset')))
+            print('')
+
+    def install(self):
+        """
+        Install and configure software managed by Flock Agent
+        """
+        pass
 
     def is_osquery_installed(self):
         """
