@@ -36,7 +36,7 @@ class FlockAgent(object):
         """
         all_good = True
 
-        status = self.is_osquery_installed() == self.software['osquery']['version']
+        status = self.is_osquery_installed()
         if not status:
             all_good = False
 
@@ -55,11 +55,19 @@ class FlockAgent(object):
         """
         tmpdir = tempfile.mkdtemp(prefix='flockagent-')
 
-        status = self.is_osquery_installed() == self.software['osquery']['version']
+        status = self.is_osquery_installed()
         if not status:
-            if not self.download_software(tmpdir, self.software['osquery']):
+            filename = self.download_software(tmpdir, self.software['osquery'])
+            if not filename:
                 self.quit_early()
                 return
+
+            self.install_pkg(filename)
+
+            status = self.is_osquery_installed()
+            if not status:
+                self.print_error('osquery did not install successfully')
+                self.quit_early()
 
     def print_banner(self):
         s = 'Flock Agent {}'.format(self.version)
@@ -123,6 +131,14 @@ class FlockAgent(object):
             return False
 
         return download_path
+
+    def install_pkg(self, filename):
+        self.print_info('Type your password to install package')
+        cmd = 'osascript -e \'do shell script "installer -pkg {} -target /" with administrator privileges\''.format(filename)
+        try:
+            subprocess.run(cmd, shell=True, capture_output=True, check=True)
+        except subprocess.CalledProcessError:
+            self.print_error('Package install failed')
 
     def is_osquery_installed(self):
         """
