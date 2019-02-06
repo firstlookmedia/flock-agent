@@ -83,7 +83,7 @@ class FlockAgent(object):
         print('{} {}'.format(status, message))
 
     def print_info(self, message):
-        print('{}{}★{} {}'.format(attr('bold'), fg('light_blue'), attr('reset'), message))
+        print('{}{}○{} {}'.format(attr('bold'), fg('light_blue'), attr('reset'), message))
 
     def print_error(self, message):
         print('{}{}!{} {}'.format(attr('bold'), fg('red'), attr('reset'), message))
