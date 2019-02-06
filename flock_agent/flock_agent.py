@@ -24,7 +24,9 @@ class FlockAgent(object):
 
         # Absolute paths for binaries to subprocess
         self.bins = {
-            'pkgutil': '/usr/sbin/pkgutil'
+            'pkgutil': '/usr/sbin/pkgutil',
+            'osascript': '/usr/bin/osascript',
+            'installer': '/usr/sbin/installer'
         }
 
         # Path to config files within the module
@@ -137,7 +139,8 @@ class FlockAgent(object):
 
     def install_pkg(self, filename):
         self.print_info('Type your password to install package')
-        cmd = 'osascript -e \'do shell script "installer -pkg {} -target /" with administrator privileges\''.format(filename)
+        cmd = '{} -e \'do shell script "{} -pkg {} -target /" with administrator privileges\''.format(
+            self.bins['osascript'], self.bins['installer'], filename)
         try:
             subprocess.run(cmd, shell=True, capture_output=True, check=True)
         except subprocess.CalledProcessError:
