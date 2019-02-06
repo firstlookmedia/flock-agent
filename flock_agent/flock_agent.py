@@ -7,12 +7,12 @@ import requests
 import tempfile
 import hashlib
 import shutil
-from colored import fg, bg, attr
+
+from . import display
 
 class FlockAgent(object):
     def __init__(self, version):
-        self.version = version
-        self.print_banner()
+        display.banner(version)
 
         # Information about software to be installed
         self.software = {
@@ -42,7 +42,7 @@ class FlockAgent(object):
 
         print('')
         if not all_good:
-            print('Fix by running: {}flock-agent --install{}'.format(fg('light_blue'), attr('reset')))
+            display.install_message()
             print('')
 
     def install(self):
@@ -63,7 +63,7 @@ class FlockAgent(object):
 
             status = self.is_osquery_installed()
             if not status:
-                self.print_error('osquery did not install successfully')
+                display.error('osquery did not install successfully')
                 self.quit_early(tmpdir)
                 return
 
@@ -79,38 +79,18 @@ class FlockAgent(object):
 
             status = self.is_osquery_configured()
             if not status:
-                self.print_error('osquery could not be configured properly')
+                display.error('osquery could not be configured properly')
                 self.quit_early(tmpdir)
                 return
 
         shutil.rmtree(tmpdir, ignore_errors=True)
         print('')
 
-    def print_banner(self):
-        s = 'Flock Agent {}'.format(self.version)
-
-        print('{}{}╔{}╗{}'.format( attr('bold'), fg('dark_green_sea'), '═'*(len(s)+2), attr('reset') ))
-        print('{}{}║ {}{}{} ║{}'.format( attr('bold'), fg('light_sky_blue_3a'), fg('light_yellow'), s, fg('light_sky_blue_3a'), attr('reset') ))
-        print('{}{}╚{}╝{}'.format( attr('bold'), fg('light_sky_blue_3b'), '═'*(len(s)+2), attr('reset') ))
-
-    def print_status_check(self, message, passed):
-        if passed:
-            status = '{}{}✓{}'.format(attr('bold'), fg('green'), attr('reset'))
-        else:
-            status = '{}{}✘{}'.format(attr('bold'), fg('red'), attr('reset'))
-        print('{} {}'.format(status, message))
-
-    def print_info(self, message):
-        print('{}{}○{} {}'.format(attr('bold'), fg('light_blue'), attr('reset'), message))
-
-    def print_error(self, message):
-        print('{}{}!{} {}'.format(attr('bold'), fg('red'), attr('reset'), message))
-
     def quit_early(self, tmpdir=None):
         if tmpdir:
             shutil.rmtree(tmpdir, ignore_errors=True)
 
-        self.print_error('Encountered an error, quitting early')
+        display.error('Encountered an error, quitting early')
         print('')
 
     def download_software(self, output_dir, software):
@@ -121,12 +101,11 @@ class FlockAgent(object):
         m = hashlib.sha256()
 
         # Download the software
-        self.print_info('Downloading {}'.format(software['url']))
+        display.info('Downloading {}'.format(software['url']))
         with open(download_path, "wb") as f:
             r = requests.get(software['url'], stream=True)
             total_length = r.headers.get('content-length')
 
-            sys.stdout.write('{}'.format(fg('light_blue')))
             if total_length is None: # no content length header
                 f.write(r.content)
                 m.update(r.content) # update the checksum
@@ -140,43 +119,43 @@ class FlockAgent(object):
                     done = int(50 * dl / total_length)
                     sys.stdout.write("\r%s%s" % ('▓'*done, '჻'*(50-done)))
                     sys.stdout.flush()
-                sys.stdout.write('\n{}'.format(attr('reset')))
+                sys.stdout.write('\n')
                 sys.stdout.flush()
 
         # Check the sha256 checksum
         sha256 = m.hexdigest()
         if sha256 == software['sha256']:
-            self.print_info('SHA256 checksum matches')
+            display.info('SHA256 checksum matches')
         else:
-            self.print_error('SHA256 checksum doesn\'t match!')
+            display.error('SHA256 checksum doesn\'t match!')
             return False
 
         return download_path
 
     def install_pkg(self, filename):
-        self.print_info('Type your password to install package')
+        display.info('Type your password to install package')
         cmd = '/usr/bin/osascript -e \'do shell script "/usr/sbin/installer -pkg {} -target /" with administrator privileges\''.format(
             filename)
         try:
             subprocess.run(cmd, shell=True, capture_output=True, check=True)
         except subprocess.CalledProcessError:
-            self.print_error('Package install failed')
+            display.error('Package install failed')
 
     def copy_file_as_root(self, dest_path, src_filename):
         """
         Copies a conf file called src_filename into dest_path, as root
         """
-        self.print_info('Copying config file {}'.format(dest_path))
+        display.info('Copying config file {}'.format(dest_path))
         src_path = os.path.join(self.config_path, src_filename)
 
-        self.print_info('Type your password to copy config file')
+        display.info('Type your password to copy config file')
         cmd = '/usr/bin/osascript -e \'do shell script "/bin/cp {} {}" with administrator privileges\''.format(
             src_path, dest_path)
         try:
             subprocess.run(cmd, shell=True, capture_output=True, check=True)
             return True
         except subprocess.CalledProcessError:
-            self.print_error('Copying file failed')
+            display.error('Copying file failed')
             return False
 
     def is_osquery_installed(self):
@@ -193,7 +172,7 @@ class FlockAgent(object):
             # osquery isn't installed
             status = False
 
-        self.print_status_check('osquery {} is installed'.format(self.software['osquery']['version']), status)
+        display.status_check('osquery {} is installed'.format(self.software['osquery']['version']), status)
         return status
 
     def is_osquery_configured(self):
@@ -206,7 +185,7 @@ class FlockAgent(object):
         if not self.exists_and_has_same_content('/private/var/osquery/osquery.flags', 'osquery.flags'):
             status = False
 
-        self.print_status_check('osquery is configured properly', status)
+        display.status_check('osquery is configured properly', status)
         return status
 
     def exists_and_has_same_content(self, dest_path, src_filename):
