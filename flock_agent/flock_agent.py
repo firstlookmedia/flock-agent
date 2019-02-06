@@ -8,11 +8,13 @@ import tempfile
 import hashlib
 import shutil
 
-from . import display
+from .display import Display
+
 
 class FlockAgent(object):
     def __init__(self, version):
-        display.banner(version)
+        self.version = version
+        self.display = Display(self.version)
 
         # Information about software to be installed
         self.software = {
@@ -42,7 +44,7 @@ class FlockAgent(object):
 
         print('')
         if not all_good:
-            display.install_message()
+            self.display.install_message()
             print('')
 
     def install(self):
@@ -63,7 +65,7 @@ class FlockAgent(object):
 
             status = self.is_osquery_installed()
             if not status:
-                display.error('osquery did not install successfully')
+                self.display.error('osquery did not install successfully')
                 self.quit_early(tmpdir)
                 return
 
@@ -79,7 +81,7 @@ class FlockAgent(object):
 
             status = self.is_osquery_configured()
             if not status:
-                display.error('osquery could not be configured properly')
+                self.display.error('osquery could not be configured properly')
                 self.quit_early(tmpdir)
                 return
 
@@ -90,7 +92,7 @@ class FlockAgent(object):
         if tmpdir:
             shutil.rmtree(tmpdir, ignore_errors=True)
 
-        display.error('Encountered an error, quitting early')
+        self.display.error('Encountered an error, quitting early')
         print('')
 
     def download_software(self, output_dir, software):
@@ -101,7 +103,7 @@ class FlockAgent(object):
         m = hashlib.sha256()
 
         # Download the software
-        display.info('Downloading {}'.format(software['url']))
+        self.display.info('Downloading {}'.format(software['url']))
         with open(download_path, "wb") as f:
             r = requests.get(software['url'], stream=True)
             total_length = r.headers.get('content-length')
@@ -125,37 +127,37 @@ class FlockAgent(object):
         # Check the sha256 checksum
         sha256 = m.hexdigest()
         if sha256 == software['sha256']:
-            display.info('SHA256 checksum matches')
+            self.display.info('SHA256 checksum matches')
         else:
-            display.error('SHA256 checksum doesn\'t match!')
+            self.display.error('SHA256 checksum doesn\'t match!')
             return False
 
         return download_path
 
     def install_pkg(self, filename):
-        display.info('Type your password to install package')
+        self.display.info('Type your password to install package')
         cmd = '/usr/bin/osascript -e \'do shell script "/usr/sbin/installer -pkg {} -target /" with administrator privileges\''.format(
             filename)
         try:
             subprocess.run(cmd, shell=True, capture_output=True, check=True)
         except subprocess.CalledProcessError:
-            display.error('Package install failed')
+            self.display.error('Package install failed')
 
     def copy_file_as_root(self, dest_path, src_filename):
         """
         Copies a conf file called src_filename into dest_path, as root
         """
-        display.info('Copying config file {}'.format(dest_path))
+        self.display.info('Copying config file {}'.format(dest_path))
         src_path = os.path.join(self.config_path, src_filename)
 
-        display.info('Type your password to copy config file')
+        self.display.info('Type your password to copy config file')
         cmd = '/usr/bin/osascript -e \'do shell script "/bin/cp {} {}" with administrator privileges\''.format(
             src_path, dest_path)
         try:
             subprocess.run(cmd, shell=True, capture_output=True, check=True)
             return True
         except subprocess.CalledProcessError:
-            display.error('Copying file failed')
+            self.display.error('Copying file failed')
             return False
 
     def is_osquery_installed(self):
@@ -172,7 +174,7 @@ class FlockAgent(object):
             # osquery isn't installed
             status = False
 
-        display.status_check('osquery {} is installed'.format(self.software['osquery']['version']), status)
+        self.display.status_check('osquery {} is installed'.format(self.software['osquery']['version']), status)
         return status
 
     def is_osquery_configured(self):
@@ -185,7 +187,7 @@ class FlockAgent(object):
         if not self.exists_and_has_same_content('/private/var/osquery/osquery.flags', 'osquery.flags'):
             status = False
 
-        display.status_check('osquery is configured properly', status)
+        self.display.status_check('osquery is configured properly', status)
         return status
 
     def exists_and_has_same_content(self, dest_path, src_filename):
