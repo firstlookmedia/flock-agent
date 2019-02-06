@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import argparse
 from .flock_agent import FlockAgent
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from colored import fg, bg, attr
 
 
