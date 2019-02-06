@@ -100,3 +100,9 @@ macOS doesn't provide a way to uninstall a .pkg, but for testing purposes you ca
 sudo rm -r /private/var/osquery/ /usr/local/bin/osquery*
 sudo pkgutil --forget com.facebook.osquery
 ```
+
+Remove the osquery config like this:
+
+```sh
+sudo rm -r /private/var/osquery/osquery.conf /private/var/osquery/osquery.flags
+```
