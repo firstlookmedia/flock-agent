@@ -106,3 +106,9 @@ Remove the osquery config like this:
 ```sh
 sudo rm -r /private/var/osquery/osquery.conf /private/var/osquery/osquery.flags
 ```
+
+Uninstall OpenJDK like this:
+
+```sh
+sudo rm -rf /Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk
+```
