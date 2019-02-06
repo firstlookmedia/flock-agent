@@ -68,9 +68,7 @@ class FlockAgent(object):
         # Configure osquery
         status = self.status.is_osquery_configured()
         if not status:
-            if not self.install.copy_file_as_root('/private/var/osquery/osquery.conf', 'osquery.conf'):
-                return self.quit_early()
-            if not self.install.copy_file_as_root('/private/var/osquery/osquery.flags', 'osquery.flags'):
+            if not self.install.copy_files_as_root('/private/var/osquery/', ['osquery.conf', 'osquery.flags']):
                 return self.quit_early()
 
             status = self.status.is_osquery_configured()

@@ -72,19 +72,20 @@ class Install(object):
         except subprocess.CalledProcessError:
             self.display.error('Package install failed')
 
-    def copy_file_as_root(self, dest_path, src_filename):
+    def copy_files_as_root(self, dest_dir, src_filenames):
         """
-        Copies a conf file called src_filename into dest_path, as root
+        Copies a list of conf files (src_filenames) into directory dest_dir, as root
         """
-        self.display.info('Copying config file {}'.format(dest_path))
-        src_path = os.path.join(self.config_path, src_filename)
+        for filename in src_filenames:
+            self.display.info('Installing {}'.format(os.path.join(dest_dir, filename)))
 
-        self.display.info('Type your password to copy config file')
+        self.display.info('Type your password to install config files')
         cmd = '/usr/bin/osascript -e \'do shell script "/bin/cp {} {}" with administrator privileges\''.format(
-            src_path, dest_path)
+            ' '.join([os.path.join(self.config_path, filename) for filename in src_filenames]),
+            dest_dir)
         try:
             subprocess.run(cmd, shell=True, capture_output=True, check=True)
             return True
         except subprocess.CalledProcessError:
-            self.display.error('Copying file failed')
+            self.display.error('Copying files failed')
             return False
