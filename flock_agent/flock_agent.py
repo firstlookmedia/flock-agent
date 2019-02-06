@@ -6,6 +6,7 @@ import subprocess
 import requests
 import tempfile
 import hashlib
+import shutil
 from colored import fg, bg, attr
 
 class FlockAgent(object):
@@ -54,7 +55,7 @@ class FlockAgent(object):
         if not status:
             filename = self.download_software(tmpdir, self.software['osquery'])
             if not filename:
-                self.quit_early()
+                self.quit_early(tmpdir)
                 return
 
             self.install_pkg(filename)
@@ -62,8 +63,9 @@ class FlockAgent(object):
             status = self.is_osquery_installed()
             if not status:
                 self.print_error('osquery did not install successfully')
-                self.quit_early()
+                self.quit_early(tmpdir)
 
+        shutil.rmtree(tmpdir, ignore_errors=True)
         print('')
 
     def print_banner(self):
@@ -86,7 +88,10 @@ class FlockAgent(object):
     def print_error(self, message):
         print('{}{}!{} {}'.format(attr('bold'), fg('red'), attr('reset'), message))
 
-    def quit_early(self):
+    def quit_early(self, tmpdir=None):
+        if tmpdir:
+            shutil.rmtree(tmpdir, ignore_errors=True)
+
         self.print_error('Encountered an error, quitting early')
         print('')
 
