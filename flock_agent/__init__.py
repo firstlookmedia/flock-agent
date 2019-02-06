@@ -13,6 +13,6 @@ def main():
     args = parser.parse_args()
 
     if args.install:
-        agent.install()
+        agent.exec_install()
     else:
-        agent.status()
+        agent.exec_status()

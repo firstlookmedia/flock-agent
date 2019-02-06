@@ -2,6 +2,9 @@ from colored import fg, bg, attr
 
 
 class Display(object):
+    """
+    All of the pretty CLI output
+    """
     def __init__(self, version):
         self.version = version
 
@@ -27,3 +30,6 @@ class Display(object):
 
     def install_message(self):
         print('Fix by running: {}flock-agent --install{}'.format(fg('light_blue'), attr('reset')))
+
+    def newline(self):
+        print('')
