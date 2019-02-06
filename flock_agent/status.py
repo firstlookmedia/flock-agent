@@ -14,7 +14,7 @@ class Status(object):
 
     def is_osquery_installed(self):
         """
-        If osquery is installed, returns the version. If not installed, returns False
+        Returns true if osquery is installed
         """
         ret = None
         try:
@@ -40,6 +40,15 @@ class Status(object):
             status = False
 
         self.display.status_check('osquery is configured properly', status)
+        return status
+
+    def is_openjdk_installed(self):
+        """
+        Returns true of openjdk is installed
+        """
+        status = os.path.exists(self.software['openjdk']['install_path'])
+
+        self.display.status_check('OpenJDK {} is installed'.format(self.software['openjdk']['version']), status)
         return status
 
     def exists_and_has_same_content(self, dest_path, src_filename):

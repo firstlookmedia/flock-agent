@@ -17,6 +17,12 @@ class FlockAgent(object):
                 'version': '3.3.2',
                 'url': 'https://pkg.osquery.io/darwin/osquery-3.3.2.pkg',
                 'sha256': '6ac1baa9bd13fcf3bd4c1b20a020479d51e26a8ec81783be7a8692d2c4a9926a'
+            },
+            'openjdk': {
+                'version': '11.0.2',
+                'url': 'https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_osx-x64_bin.tar.gz',
+                'sha256': 'f365750d4be6111be8a62feda24e265d97536712bc51783162982b8ad96a70ee',
+                'install_path': '/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk'
             }
         }
 
@@ -42,10 +48,14 @@ class FlockAgent(object):
         if not status:
             all_good = False
 
-        print('')
+        status = self.status.is_openjdk_installed()
+        if not status:
+            all_good = False
+
+        self.display.newline()
         if not all_good:
             self.display.install_message()
-            print('')
+            self.display.newline()
 
     def exec_install(self):
         """
