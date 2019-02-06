@@ -22,13 +22,6 @@ class FlockAgent(object):
             }
         }
 
-        # Absolute paths for binaries to subprocess
-        self.bins = {
-            'pkgutil': '/usr/sbin/pkgutil',
-            'osascript': '/usr/bin/osascript',
-            'installer': '/usr/sbin/installer'
-        }
-
         # Path to config files within the module
         self.config_path = os.path.join(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))), 'config')
 
@@ -139,8 +132,7 @@ class FlockAgent(object):
 
     def install_pkg(self, filename):
         self.print_info('Type your password to install package')
-        cmd = '{} -e \'do shell script "{} -pkg {} -target /" with administrator privileges\''.format(
-            self.bins['osascript'], self.bins['installer'], filename)
+        cmd = '/usr/bin/osascript -e \'do shell script "/usr/sbin/installer -pkg {} -target /" with administrator privileges\''.format(filename)
         try:
             subprocess.run(cmd, shell=True, capture_output=True, check=True)
         except subprocess.CalledProcessError:
@@ -152,7 +144,7 @@ class FlockAgent(object):
         """
         ret = None
         try:
-            p = subprocess.run([self.bins['pkgutil'], '--pkg-info', 'com.facebook.osquery'],
+            p = subprocess.run(['/usr/sbin/pkgutil', '--pkg-info', 'com.facebook.osquery'],
                 capture_output=True, check=True)
             version = p.stdout.decode().split('\n')[1].split(' ')[1]
             status = version == self.software['osquery']['version']
