@@ -22,7 +22,8 @@ class FlockAgent(object):
                 'version': '11.0.2',
                 'url': 'https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_osx-x64_bin.tar.gz',
                 'sha256': 'f365750d4be6111be8a62feda24e265d97536712bc51783162982b8ad96a70ee',
-                'install_path': '/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk'
+                'install_path': '/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk',
+                'extract_path': '/Library/Java/JavaVirtualMachines'
             }
         }
 
@@ -84,6 +85,20 @@ class FlockAgent(object):
             status = self.status.is_osquery_configured()
             if not status:
                 self.display.error('osquery could not be configured properly')
+                return self.quit_early()
+
+        # Install OpenJDK
+        status = self.status.is_openjdk_installed()
+        if not status:
+            filename = self.install.download_software(self.software['openjdk'])
+            if not filename:
+                return self.quit_early()
+
+            self.install.extract_tarball_as_root(self.software['openjdk'], filename)
+
+            status = self.status.is_openjdk_installed()
+            if not status:
+                self.display.error('OpenJDK did not install successfully')
                 return self.quit_early()
 
         self.display.newline()

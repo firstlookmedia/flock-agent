@@ -89,3 +89,15 @@ class Install(object):
         except subprocess.CalledProcessError:
             self.display.error('Copying files failed')
             return False
+
+    def extract_tarball_as_root(self, software, src_tarball_filename):
+        """
+        Extract a tarball into the destination directory as root
+        """
+        self.display.info('Type your password to install .tar.gz package')
+        cmd = '/usr/bin/osascript -e \'do shell script "/usr/bin/tar -xf {} -C {}" with administrator privileges\''.format(
+            src_tarball_filename, software['extract_path'])
+        try:
+            subprocess.run(cmd, shell=True, capture_output=True, check=True)
+        except subprocess.CalledProcessError:
+            self.display.error('.tar.gz package install failed')
