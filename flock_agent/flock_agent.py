@@ -51,6 +51,7 @@ class FlockAgent(object):
         """
         tmpdir = tempfile.mkdtemp(prefix='flockagent-')
 
+        # Install osquery
         status = self.is_osquery_installed()
         if not status:
             filename = self.download_software(tmpdir, self.software['osquery'])
@@ -64,6 +65,23 @@ class FlockAgent(object):
             if not status:
                 self.print_error('osquery did not install successfully')
                 self.quit_early(tmpdir)
+                return
+
+        # Configure osquery
+        status = self.is_osquery_configured()
+        if not status:
+            if not self.copy_file_as_root('/private/var/osquery/osquery.conf', 'osquery.conf'):
+                self.quit_early(tmpdir)
+                return
+            if not self.copy_file_as_root('/private/var/osquery/osquery.flags', 'osquery.flags'):
+                self.quit_early(tmpdir)
+                return
+
+            status = self.is_osquery_configured()
+            if not status:
+                self.print_error('osquery could not be configured properly')
+                self.quit_early(tmpdir)
+                return
 
         shutil.rmtree(tmpdir, ignore_errors=True)
         print('')
@@ -137,11 +155,29 @@ class FlockAgent(object):
 
     def install_pkg(self, filename):
         self.print_info('Type your password to install package')
-        cmd = '/usr/bin/osascript -e \'do shell script "/usr/sbin/installer -pkg {} -target /" with administrator privileges\''.format(filename)
+        cmd = '/usr/bin/osascript -e \'do shell script "/usr/sbin/installer -pkg {} -target /" with administrator privileges\''.format(
+            filename)
         try:
             subprocess.run(cmd, shell=True, capture_output=True, check=True)
         except subprocess.CalledProcessError:
             self.print_error('Package install failed')
+
+    def copy_file_as_root(self, dest_path, src_filename):
+        """
+        Copies a conf file called src_filename into dest_path, as root
+        """
+        self.print_info('Copying config file {}'.format(dest_path))
+        src_path = os.path.join(self.config_path, src_filename)
+
+        self.print_info('Type your password to copy config file')
+        cmd = '/usr/bin/osascript -e \'do shell script "/bin/cp {} {}" with administrator privileges\''.format(
+            src_path, dest_path)
+        try:
+            subprocess.run(cmd, shell=True, capture_output=True, check=True)
+            return True
+        except subprocess.CalledProcessError:
+            self.print_error('Copying file failed')
+            return False
 
     def is_osquery_installed(self):
         """
