@@ -11,9 +11,13 @@ def main():
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--install', action="store_true", help="Install and configure software managed by Flock Agent")
+    group.add_argument('--purge', action="store_true", help="Completely remove software managed by Flock Agent")
     args = parser.parse_args()
 
     if args.install:
-        agent.exec_install()
-    else:
-        agent.exec_status()
+        return agent.exec_install()
+
+    if args.purge:
+        return agent.exec_purge()
+
+    agent.exec_status()

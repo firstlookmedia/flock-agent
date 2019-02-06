@@ -5,6 +5,7 @@ import inspect
 from .display import Display
 from .status import Status
 from .install import Install
+from .purge import Purge
 
 
 class FlockAgent(object):
@@ -133,6 +134,39 @@ class FlockAgent(object):
                 return self.quit_early()
 
             self.display.newline()
+
+    def exec_purge(self):
+        """
+        Completely remove software managed by Flock Agent
+        """
+        # Make list of filenames and directories to delete, and commands to run
+        filenames = []
+        dirs = []
+        commands = []
+
+        if self.status.is_osquery_installed():
+            dirs.append('/private/var/osquery/')
+            filenames.append('/usr/local/bin/osquery*')
+            commands.append('pkgutil --forget com.facebook.osquery')
+
+        if self.status.is_osquery_configured():
+            filenames.append('/private/var/osquery/osquery.conf')
+            filenames.append('/private/var/osquery/osquery.flags')
+
+        if self.status.is_openjdk_installed():
+            dirs.append('/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk')
+
+        if self.status.is_logstash_installed():
+            dirs.append('/private/var/flock-agent/opt/logstash-6.6.0')
+
+        # Delete everything
+        purge = Purge(self.display, self.status)
+        purge.delete_files(filenames)
+        purge.delete_dirs(dirs)
+        purge.run_commands(commands)
+
+        # Run status
+        self.exec_status()
 
     def quit_early(self):
         self.display.error('Encountered an error, quitting early')
