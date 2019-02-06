@@ -79,6 +79,8 @@ class Install(object):
         for filename in src_filenames:
             self.display.info('Installing {}'.format(os.path.join(dest_dir, filename)))
 
+        self.mkdir_if_doesnt_exist(dest_dir)
+
         self.display.info('Type your password to install config files')
         cmd = '/usr/bin/osascript -e \'do shell script "/bin/cp {} {}" with administrator privileges\''.format(
             ' '.join([os.path.join(self.config_path, filename) for filename in src_filenames]),
@@ -94,10 +96,22 @@ class Install(object):
         """
         Extract a tarball into the destination directory as root
         """
-        self.display.info('Type your password to install .tar.gz package')
+        self.mkdir_if_doesnt_exist(software['extract_path'])
+
+        self.display.info('Type your password to install .tar.gz package to {}'.format(software['extract_path']))
         cmd = '/usr/bin/osascript -e \'do shell script "/usr/bin/tar -xf {} -C {}" with administrator privileges\''.format(
             src_tarball_filename, software['extract_path'])
         try:
             subprocess.run(cmd, shell=True, capture_output=True, check=True)
         except subprocess.CalledProcessError:
             self.display.error('.tar.gz package install failed')
+
+    def mkdir_if_doesnt_exist(self, dir):
+        if not os.path.exists(dir):
+            self.display.info('Type your password to make directory {}'.format(dir))
+            cmd = '/usr/bin/osascript -e \'do shell script "/bin/mkdir -p {}" with administrator privileges\''.format(
+                dir)
+            try:
+                subprocess.run(cmd, shell=True, capture_output=True, check=True)
+            except subprocess.CalledProcessError:
+                self.display.error('Making directory failed')

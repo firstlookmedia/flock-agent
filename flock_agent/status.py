@@ -51,6 +51,15 @@ class Status(object):
         self.display.status_check('OpenJDK {} is installed'.format(self.software['openjdk']['version']), status)
         return status
 
+    def is_logstash_installed(self):
+        """
+        Returns true of logstash is installed
+        """
+        status = os.path.exists(self.software['logstash']['install_path'])
+
+        self.display.status_check('Logstash {} is installed'.format(self.software['logstash']['version']), status)
+        return status
+
     def exists_and_has_same_content(self, dest_path, src_filename):
         """
         Checks to see if the file at dest_path exists, and has the same content

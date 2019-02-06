@@ -24,6 +24,13 @@ class FlockAgent(object):
                 'sha256': 'f365750d4be6111be8a62feda24e265d97536712bc51783162982b8ad96a70ee',
                 'install_path': '/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk',
                 'extract_path': '/Library/Java/JavaVirtualMachines'
+            },
+            'logstash': {
+                'version': '6.6.0',
+                'url': 'https://artifacts.elastic.co/downloads/logstash/logstash-6.6.0.tar.gz',
+                'sha256': '5a9a8b9942631e9d4c3dfb8d47075276e8c2cff343841145550cc0c1cfe7bba7',
+                'install_path': '/private/var/flock-agent/opt/logstash-6.6.0',
+                'extract_path': '/private/var/flock-agent/opt'
             }
         }
 
@@ -52,6 +59,10 @@ class FlockAgent(object):
             all_good = False
 
         status = self.status.is_openjdk_installed()
+        if not status:
+            all_good = False
+
+        status = self.status.is_logstash_installed()
         if not status:
             all_good = False
 
@@ -103,6 +114,22 @@ class FlockAgent(object):
             status = self.status.is_openjdk_installed()
             if not status:
                 self.display.error('OpenJDK did not install successfully')
+                return self.quit_early()
+
+            self.display.newline()
+
+        # Install logstash
+        status = self.status.is_logstash_installed()
+        if not status:
+            filename = self.install.download_software(self.software['logstash'])
+            if not filename:
+                return self.quit_early()
+
+            self.install.extract_tarball_as_root(self.software['logstash'], filename)
+
+            status = self.status.is_logstash_installed()
+            if not status:
+                self.display.error('Logstash did not install successfully')
                 return self.quit_early()
 
             self.display.newline()

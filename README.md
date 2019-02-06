@@ -112,3 +112,9 @@ Uninstall OpenJDK like this:
 ```sh
 sudo rm -rf /Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk
 ```
+
+Uninstall logstash like this:
+
+```
+sudo rm -rf /private/var/flock-agent/opt/logstash-6.6.0
+```
