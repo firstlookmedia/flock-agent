@@ -3,20 +3,20 @@ import os
 from ..item_base import ItemBase
 
 
-class OpenJdkItem(ItemBase):
+class LogstashItem(ItemBase):
     def get_software(self):
         return {
-            'name': 'openjdk',
-            'version': '11.0.2',
-            'url': 'https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_osx-x64_bin.tar.gz',
-            'sha256': 'f365750d4be6111be8a62feda24e265d97536712bc51783162982b8ad96a70ee',
-            'install_path': '/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk',
-            'extract_path': '/Library/Java/JavaVirtualMachines'
+            'name': 'logstash',
+            'version': '6.6.0',
+            'url': 'https://artifacts.elastic.co/downloads/logstash/logstash-6.6.0.tar.gz',
+            'sha256': '5a9a8b9942631e9d4c3dfb8d47075276e8c2cff343841145550cc0c1cfe7bba7',
+            'install_path': '/private/var/flock-agent/opt/logstash-6.6.0',
+            'extract_path': '/private/var/flock-agent/opt'
         }
 
     def exec_status(self):
         status = os.path.exists(self.get_software()['install_path'])
-        self.display.status_check('OpenJDK {} is installed'.format(self.get_software()['version']), status)
+        self.display.status_check('Logstash {} is installed'.format(self.get_software()['version']), status)
         return status
 
     def exec_install(self):
@@ -30,7 +30,7 @@ class OpenJdkItem(ItemBase):
 
             status = self.exec_status()
             if not status:
-                self.display.error('OpenJDK did not install successfully')
+                self.display.error('Logstash did not install successfully')
                 return self.quit_early()
 
             self.display.newline()
@@ -39,6 +39,6 @@ class OpenJdkItem(ItemBase):
 
     def exec_purge(self):
         filenames = []
-        dirs = ['/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk']
+        dirs = ['/private/var/flock-agent/opt/logstash-6.6.0']
         commands = []
         return (filenames, dirs, commands)
