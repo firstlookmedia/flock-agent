@@ -73,6 +73,15 @@ class ItemBase(object):
         return True
 
     def download_software(self, software):
+        suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+        def humansize(nbytes):
+            i = 0
+            while nbytes >= 1024 and i < len(suffixes)-1:
+                nbytes /= 1024.
+                i += 1
+            f = ('%.2f' % nbytes).rstrip('0').rstrip('.')
+            return '%s %s' % (f, suffixes[i])
+
         filename = software['url'].split('/')[-1]
         download_path = os.path.join(self.tmpdir, filename)
 
@@ -96,7 +105,7 @@ class ItemBase(object):
                     dl += len(data)
                     f.write(data)
                     done = int(50 * dl / total_length)
-                    sys.stdout.write("\r%s%s" % ('▓'*done, '჻'*(50-done)))
+                    sys.stdout.write("\r%s%s %s" % ('▓'*done, '჻'*(50-done), humansize(dl)))
                     sys.stdout.flush()
                 sys.stdout.write('\n')
                 sys.stdout.flush()
