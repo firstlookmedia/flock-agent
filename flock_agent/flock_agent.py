@@ -103,22 +103,6 @@ class FlockAgent(object):
         #
         #     self.display.newline()
         #
-        # # Install OpenJDK
-        # status = self.status.is_openjdk_installed()
-        # if not status:
-        #     filename = self.install.download_software(self.software['openjdk'])
-        #     if not filename:
-        #         return self.quit_early()
-        #
-        #     self.install.extract_tarball_as_root(self.software['openjdk'], filename)
-        #
-        #     status = self.status.is_openjdk_installed()
-        #     if not status:
-        #         self.display.error('OpenJDK did not install successfully')
-        #         return self.quit_early()
-        #
-        #     self.display.newline()
-        #
         # # Install logstash
         # status = self.status.is_logstash_installed()
         # if not status:

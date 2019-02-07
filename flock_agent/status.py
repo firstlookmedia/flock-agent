@@ -25,15 +25,6 @@ class Status(object):
         self.display.status_check('osquery is configured properly', status)
         return status
 
-    def is_openjdk_installed(self):
-        """
-        Returns true of openjdk is installed
-        """
-        status = os.path.exists(self.software['openjdk']['install_path'])
-
-        self.display.status_check('OpenJDK {} is installed'.format(self.software['openjdk']['version']), status)
-        return status
-
     def is_logstash_installed(self):
         """
         Returns true of logstash is installed

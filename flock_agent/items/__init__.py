@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .osquery import OsqueryItem
-
+from .openjdk import OpenJdkItem
 
 class ItemList(list):
     """
@@ -11,3 +11,4 @@ class ItemList(list):
 
         # Add all of the items
         self.append( OsqueryItem(agent) )
+        self.append( OpenJdkItem(agent) )
