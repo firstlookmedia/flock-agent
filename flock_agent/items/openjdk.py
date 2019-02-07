@@ -7,10 +7,10 @@ class OpenJdkItem(ItemBase):
     def get_software(self):
         return {
             'name': 'openjdk',
-            'version': '11.0.2',
-            'url': 'https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_osx-x64_bin.tar.gz',
-            'sha256': 'f365750d4be6111be8a62feda24e265d97536712bc51783162982b8ad96a70ee',
-            'install_path': '/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk',
+            'version': '8u202-b08',
+            'url': 'https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u202-b08/OpenJDK8U-jdk_x64_mac_hotspot_8u202b08.tar.gz',
+            'sha256': '059f7c18faa6722aa636bbd79bcdff3aee6a6da5b34940b072ea6e3af85bbe1d',
+            'install_path': '/Library/Java/JavaVirtualMachines/jdk8u202-b08',
             'extract_path': '/Library/Java/JavaVirtualMachines'
         }
 
