@@ -10,7 +10,7 @@
   <string>co.elastic.logstash</string>
   <key>ProgramArguments</key>
   <array>
-    <string>/private/var/flock-agent/opt/logstash-6.6.0/logstash</string>
+    <string>/private/var/flock-agent/opt/logstash-6.6.0/bin/logstash</string>
     <string>-f /private/var/flock-agent/etc/logstash/logstash.conf</string>
   </array>
   <key>RunAtLoad</key>
