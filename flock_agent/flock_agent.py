@@ -61,16 +61,17 @@ class FlockAgent(object):
         commands = []
 
         for item in self.item_list:
-            item_filenames, item_dirs, item_commands = item.exec_purge()
-            filenames += item_filenames
-            dirs += item_dirs
-            commands += item_commands
+            if item.exec_status():
+                item_filenames, item_dirs, item_commands = item.exec_purge()
+                filenames += item_filenames
+                dirs += item_dirs
+                commands += item_commands
 
         # Delete everything
         purge = Purge(self.display)
-        purge.run_commands(commands)
-        purge.delete_files(filenames)
-        purge.delete_dirs(dirs)
-
-        # Run status
-        self.exec_status()
+        if len(commands) > 0:
+            purge.run_commands(commands)
+        if len(filenames) > 0:
+            purge.delete_files(filenames)
+        if len(dirs) > 0:
+            purge.delete_dirs(dirs)
