@@ -34,8 +34,6 @@ class LogstashConfigItem(ItemBase):
                 self.display.error('logstash could not be configured properly')
                 return self.quit_early()
 
-            self.display.newline()
-
         return True
 
     def exec_purge(self):
@@ -46,6 +44,6 @@ class LogstashConfigItem(ItemBase):
             '/private/var/flock-agent/etc/logstash/'
         ]
         commands = [
-            '/bin/launchctl unload /Library/LaunchDaemons/co.elastic.logstash.plist'
+            ['/bin/launchctl', 'unload', '/Library/LaunchDaemons/co.elastic.logstash.plist']
         ]
         return (filenames, dirs, commands)

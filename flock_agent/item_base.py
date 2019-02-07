@@ -112,11 +112,9 @@ class ItemBase(object):
         return download_path
 
     def install_pkg(self, filename):
-        self.display.info('Type your password to install package')
-        cmd = '/usr/bin/osascript -e \'do shell script "/usr/sbin/installer -pkg {} -target /" with administrator privileges\''.format(
-            filename)
         try:
-            subprocess.run(cmd, shell=True, capture_output=True, check=True)
+            cmd = ['/usr/sbin/installer', '-pkg', filename, '-target', '/']
+            subprocess.run(cmd, check=True)
         except subprocess.CalledProcessError:
             self.display.error('Package install failed')
 
@@ -124,21 +122,18 @@ class ItemBase(object):
         """
         Copies a list of conf files (src_filenames) into directory dest_dir, as root
         """
-        for filename in src_filenames:
-            self.display.info('Installing {}'.format(os.path.join(dest_dir, filename)))
-
         self.mkdir_if_doesnt_exist(dest_dir)
 
-        self.display.info('Type your password to install config files')
-        cmd = '/usr/bin/osascript -e \'do shell script "/bin/cp {} {}" with administrator privileges\''.format(
-            ' '.join([os.path.join(self.config_path, filename) for filename in src_filenames]),
-            dest_dir)
-        try:
-            subprocess.run(cmd, shell=True, capture_output=True, check=True)
-            return True
-        except subprocess.CalledProcessError:
-            self.display.error('Copying files failed')
-            return False
+        for filename in src_filenames:
+            self.display.info('Installing {}'.format(os.path.join(dest_dir, filename)))
+            try:
+                cmd = ['/bin/cp', os.path.join(self.config_path, filename), dest_dir]
+                subprocess.run(cmd, check=True)
+            except subprocess.CalledProcessError:
+                self.display.error('Copying file {} failed'.format(filename))
+                return False
+
+        return True
 
     def install_launchd(self, src_filename):
         """
@@ -147,46 +142,43 @@ class ItemBase(object):
         basename = os.path.basename(src_filename)
         dest_filename = os.path.join('/Library/LaunchDaemons/', basename)
 
-        self.display.info('Type your password to install launch daemon: {}'.format(basename))
-        cmd = '/usr/bin/osascript -e \'do shell script "/bin/cp {} {}" with administrator privileges\''.format(
-            src_filename, dest_filename)
+        self.display.info('Installing launch daemon: {}'.format(basename))
+
         try:
-            subprocess.run(cmd, shell=True, capture_output=True, check=True)
+            cmd = ['/bin/cp', src_filename, dest_filename]
+            subprocess.run(cmd, check=True)
         except subprocess.CalledProcessError:
             self.display.error('Installing launch daemon failed')
             return False
 
-        self.display.info('Type your password to load launch daemon: {}'.format(basename))
-        cmd = '/usr/bin/osascript -e \'do shell script "/bin/launchctl load {}" with administrator privileges\''.format(
-            dest_filename)
         try:
-            subprocess.run(cmd, shell=True, capture_output=True, check=True)
+            cmd = ['/bin/launchctl', 'load', dest_filename]
+            subprocess.run(cmd, check=True)
         except subprocess.CalledProcessError:
             self.display.error('Installing launch daemon failed')
             return False
 
         return True
 
-    def extract_tarball_as_root(self, software, src_tarball_filename):
+    def extract_tarball(self, software, src_tarball_filename):
         """
         Extract a tarball into the destination directory as root
         """
         self.mkdir_if_doesnt_exist(software['extract_path'])
+        basename = os.path.basename(src_tarball_filename)
 
-        self.display.info('Type your password to install .tar.gz package to {}'.format(software['extract_path']))
-        cmd = '/usr/bin/osascript -e \'do shell script "/usr/bin/tar -xf {} -C {}" with administrator privileges\''.format(
-            src_tarball_filename, software['extract_path'])
+        self.display.info('Extracting {} to {}'.format(basename, software['extract_path']))
         try:
-            subprocess.run(cmd, shell=True, capture_output=True, check=True)
+            cmd = ['/usr/bin/tar', '-xf', src_tarball_filename, '-C', software['extract_path']]
+            subprocess.run(cmd, check=True)
         except subprocess.CalledProcessError:
             self.display.error('.tar.gz package install failed')
 
     def mkdir_if_doesnt_exist(self, dir):
         if not os.path.exists(dir):
-            self.display.info('Type your password to make directory {}'.format(dir))
-            cmd = '/usr/bin/osascript -e \'do shell script "/bin/mkdir -p {}" with administrator privileges\''.format(
-                dir)
+            self.display.info('Making directory {}'.format(dir))
             try:
-                subprocess.run(cmd, shell=True, capture_output=True, check=True)
+                cmd = ['/bin/mkdir', dir]
+                subprocess.run(cmd, check=True)
             except subprocess.CalledProcessError:
                 self.display.error('Making directory failed')

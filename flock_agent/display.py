@@ -31,7 +31,7 @@ class Display(object):
         print('{}{}!{} {}'.format(attr('bold'), fg('red'), attr('reset'), message))
 
     def install_message(self):
-        print('Fix by running: {}flock-agent --install{}'.format(fg('light_blue'), attr('reset')))
+        print('Fix by running: {}sudo flock-agent --install{}'.format(fg('light_blue'), attr('reset')))
 
     def root_message(self):
         print('This action requires root: {}sudo {}{}'.format(fg('light_blue'), ' '.join(sys.argv), attr('reset')))

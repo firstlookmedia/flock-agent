@@ -15,16 +15,14 @@ class Purge(object):
         """
         for filename in filenames:
             self.display.info('Deleting file {}'.format(filename))
+            try:
+                cmd = ['/bin/rm', '-f', filename]
+                subprocess.run(cmd, check=True)
+            except subprocess.CalledProcessError:
+                self.display.error('Deleting file {} failed'.format(filename))
+                return False
 
-        self.display.info('Type your password to delete files')
-        cmd = '/usr/bin/osascript -e \'do shell script "/bin/rm -f {}" with administrator privileges\''.format(
-            ' '.join(filenames))
-        try:
-            subprocess.run(cmd, shell=True, capture_output=True, check=True)
-            return True
-        except subprocess.CalledProcessError:
-            self.display.error('Deleting files failed')
-            return False
+        return True
 
     def delete_dirs(self, dirs):
         """
@@ -32,26 +30,21 @@ class Purge(object):
         """
         for dir in dirs:
             self.display.info('Deleting directory {}'.format(dir))
+            try:
+                cmd = ['/bin/rm', '-rf', dir]
+                subprocess.run(cmd, check=True)
+            except subprocess.CalledProcessError:
+                self.display.error('Deleting directory {} failed'.format(dir))
+                return False
 
-        self.display.info('Type your password to delete directories')
-        cmd = '/usr/bin/osascript -e \'do shell script "/bin/rm -rf {}" with administrator privileges\''.format(
-            ' '.join(dirs))
-        try:
-            subprocess.run(cmd, shell=True, capture_output=True, check=True)
-            return True
-        except subprocess.CalledProcessError:
-            self.display.error('Deleting directories failed')
-            return False
+        return True
 
     def run_commands(self, commands):
         """
         Run uninstall-related commands
         """
-        for command in commands:
-            self.display.info('Type your password to run as root: {}'.format(command))
-            cmd = '/usr/bin/osascript -e \'do shell script "{}" with administrator privileges\''.format(
-                command)
+        for cmd in commands:
             try:
-                subprocess.run(cmd, shell=True, capture_output=True, check=True)
+                subprocess.run(cmd, check=True)
             except subprocess.CalledProcessError:
-                self.display.error('Command failed')
+                self.display.error('Command failed: {}'.format(' '.join(cmd)))

@@ -34,8 +34,6 @@ class OsqueryConfigItem(ItemBase):
                 self.display.error('osquery could not be configured properly')
                 return self.quit_early()
 
-            self.display.newline()
-
         return True
 
     def exec_purge(self):
@@ -46,6 +44,6 @@ class OsqueryConfigItem(ItemBase):
         ]
         dirs = []
         commands = [
-            '/bin/launchctl unload /Library/LaunchDaemons/com.facebook.osqueryd.plist'
+            ['/bin/launchctl', 'unload', '/Library/LaunchDaemons/com.facebook.osqueryd.plist']
         ]
         return (filenames, dirs, commands)

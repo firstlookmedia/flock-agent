@@ -40,12 +40,16 @@ class OsqueryItem(ItemBase):
                 self.display.error('osquery did not install successfully')
                 return self.quit_early()
 
-            self.display.newline()
-
         return True
 
     def exec_purge(self):
-        filenames = ['/usr/local/bin/osquery*']
-        dirs = ['/private/var/osquery/']
-        commands = ['pkgutil --forget com.facebook.osquery']
+        filenames = [
+            '/usr/local/bin/osquery*'
+        ]
+        dirs = [
+            '/private/var/osquery/'
+        ]
+        commands = [
+            ['pkgutil', '--forget', 'com.facebook.osquery']
+        ]
         return (filenames, dirs, commands)

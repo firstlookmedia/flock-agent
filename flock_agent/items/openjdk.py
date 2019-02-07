@@ -26,19 +26,19 @@ class OpenJdkItem(ItemBase):
             if not filename:
                 return self.quit_early()
 
-            self.extract_tarball_as_root(self.get_software(), filename)
+            self.extract_tarball(self.get_software(), filename)
 
             status = self.exec_status()
             if not status:
                 self.display.error('OpenJDK did not install successfully')
                 return self.quit_early()
 
-            self.display.newline()
-
         return True
 
     def exec_purge(self):
         filenames = []
-        dirs = [self.get_software()['install_path']]
+        dirs = [
+            self.get_software()['install_path']
+        ]
         commands = []
         return (filenames, dirs, commands)
