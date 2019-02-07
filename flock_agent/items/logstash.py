@@ -22,11 +22,11 @@ class LogstashItem(ItemBase):
     def exec_install(self):
         status = self.exec_status()
         if not status:
-            filename = self.install.download_software(self.get_software())
+            filename = self.download_software(self.get_software())
             if not filename:
                 return self.quit_early()
 
-            self.install.extract_tarball_as_root(self.get_software(), filename)
+            self.extract_tarball_as_root(self.get_software(), filename)
 
             status = self.exec_status()
             if not status:

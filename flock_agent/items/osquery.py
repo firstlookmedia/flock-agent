@@ -29,11 +29,11 @@ class OsqueryItem(ItemBase):
     def exec_install(self):
         status = self.exec_status()
         if not status:
-            filename = self.install.download_software(self.get_software())
+            filename = self.download_software(self.get_software())
             if not filename:
                 return self.quit_early()
 
-            self.install.install_pkg(filename)
+            self.install_pkg(filename)
 
             status = self.exec_status()
             if not status:

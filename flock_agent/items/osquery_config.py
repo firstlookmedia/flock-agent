@@ -6,9 +6,9 @@ from ..item_base import ItemBase
 class OsqueryConfigItem(ItemBase):
     def exec_status(self):
         status = True
-        if not self.status.exists_and_has_same_content('/private/var/osquery/osquery.conf', 'osquery.conf'):
+        if not self.file_exists_and_has_same_content('/private/var/osquery/osquery.conf', 'osquery.conf'):
             status = False
-        if not self.status.exists_and_has_same_content('/private/var/osquery/osquery.flags', 'osquery.flags'):
+        if not self.file_exists_and_has_same_content('/private/var/osquery/osquery.flags', 'osquery.flags'):
             status = False
         self.display.status_check('osquery is configured properly', status)
         return status
@@ -16,7 +16,7 @@ class OsqueryConfigItem(ItemBase):
     def exec_install(self):
         status = self.exec_status()
         if not status:
-            if not self.install.copy_files_as_root('/private/var/osquery/', ['osquery.conf', 'osquery.flags']):
+            if not self.copy_files_as_root('/private/var/osquery/', ['osquery.conf', 'osquery.flags']):
                 return self.quit_early()
 
             status = self.exec_status()

@@ -3,10 +3,7 @@ import os
 import inspect
 
 from .display import Display
-from .status import Status
-from .install import Install
 from .purge import Purge
-
 from .items import ItemList
 
 
@@ -30,10 +27,7 @@ class FlockAgent(object):
 
         # Internal objects
         self.display = Display(self.version)
-        self.status = Status(self.display, self.software, self.config_path)
-        self.install = Install(self.display, self.status, self.software, self.config_path)
-        self.purge = Purge(self.display, self.status)
-        self.item_list = ItemList(self)
+        self.item_list = ItemList(self.display, self.config_path)
 
         self.display.banner()
 
@@ -73,9 +67,10 @@ class FlockAgent(object):
             commands += item_commands
 
         # Delete everything
-        self.purge.delete_files(filenames)
-        self.purge.delete_dirs(dirs)
-        self.purge.run_commands(commands)
+        purge = Purge(self.display)
+        purge.delete_files(filenames)
+        purge.delete_dirs(dirs)
+        purge.run_commands(commands)
 
         # Run status
         self.exec_status()

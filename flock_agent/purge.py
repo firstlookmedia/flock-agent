@@ -6,9 +6,8 @@ class Purge(object):
     """
     Functionality related to uninstalling software
     """
-    def __init__(self, display, status):
+    def __init__(self, display):
         self.display = display
-        self.status = status
 
     def delete_files(self, filenames):
         """

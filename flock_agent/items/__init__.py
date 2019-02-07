@@ -8,11 +8,11 @@ class ItemList(list):
     """
     An ordered list of all items
     """
-    def __init__(self, agent):
+    def __init__(self, display, config_path):
         super(list, self).__init__()
 
         # Add all of the items
-        self.append( OsqueryItem(agent) )
-        self.append( OsqueryConfigItem(agent) )
-        self.append( OpenJdkItem(agent) )
-        self.append( LogstashItem(agent) )
+        self.append( OsqueryItem(display, config_path) )
+        self.append( OsqueryConfigItem(display, config_path) )
+        self.append( OpenJdkItem(display, config_path) )
+        self.append( LogstashItem(display, config_path) )
