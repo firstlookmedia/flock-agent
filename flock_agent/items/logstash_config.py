@@ -17,7 +17,7 @@ class LogstashConfigItem(ItemBase):
         # we need root, and I don't want to prompt for a password on status. To do that:
         # $ sudo launchctl list |grep co.elastic.logstash.plist
 
-        self.display.status_check('logstash is configured properly', status)
+        self.display.status_check('Logstash is configured properly', status)
         return status
 
     def exec_install(self):
