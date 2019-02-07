@@ -3,6 +3,7 @@ from .osquery import OsqueryItem
 from .osquery_config import OsqueryConfigItem
 from .openjdk import OpenJdkItem
 from .logstash import LogstashItem
+from .logstash_config import LogstashConfigItem
 
 class ItemList(list):
     """
@@ -16,3 +17,4 @@ class ItemList(list):
         self.append( OsqueryConfigItem(display, config_path) )
         self.append( OpenJdkItem(display, config_path) )
         self.append( LogstashItem(display, config_path) )
+        self.append( LogstashConfigItem(display, config_path) )
