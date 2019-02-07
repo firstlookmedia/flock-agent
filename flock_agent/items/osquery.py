@@ -4,24 +4,32 @@ from ..item_base import ItemBase
 
 
 class OsqueryItem(ItemBase):
+    def get_software(self):
+        return {
+            'name': 'osquery',
+            'version': '3.3.2',
+            'url': 'https://pkg.osquery.io/darwin/osquery-3.3.2.pkg',
+            'sha256': '6ac1baa9bd13fcf3bd4c1b20a020479d51e26a8ec81783be7a8692d2c4a9926a'
+        }
+
     def exec_status(self):
         ret = None
         try:
             p = subprocess.run(['/usr/sbin/pkgutil', '--pkg-info', 'com.facebook.osquery'],
                 capture_output=True, check=True)
             version = p.stdout.decode().split('\n')[1].split(' ')[1]
-            status = version == self.software['osquery']['version']
+            status = version == self.get_software()['version']
         except subprocess.CalledProcessError:
             # osquery isn't installed
             status = False
 
-        self.display.status_check('osquery {} is installed'.format(self.software['osquery']['version']), status)
+        self.display.status_check('osquery {} is installed'.format(self.get_software()['version']), status)
         return status
 
     def exec_install(self):
         status = self.exec_status()
         if not status:
-            filename = self.install.download_software(self.software['osquery'])
+            filename = self.install.download_software(self.get_software())
             if not filename:
                 return self.quit_early()
 

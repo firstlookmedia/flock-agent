@@ -9,8 +9,16 @@ class ItemBase(object):
         self.status = agent.status
         self.install = agent.install
         self.purge = agent.purge
-        self.software = agent.software
         self.config_path = agent.config_path
+
+    def get_software(self):
+        """
+        To be overridden by child classes
+        Optionally returns a dict that defines this piece of software, probably with
+        at least keys 'name', 'version', 'url', and 'sha256', and possibly 'install_path'
+        and 'extract_path'
+        """
+        return None
 
     def exec_status(self):
         """
