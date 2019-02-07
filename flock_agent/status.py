@@ -12,23 +12,6 @@ class Status(object):
         self.software = software
         self.config_path = config_path
 
-    def is_osquery_installed(self):
-        """
-        Returns true if osquery is installed
-        """
-        ret = None
-        try:
-            p = subprocess.run(['/usr/sbin/pkgutil', '--pkg-info', 'com.facebook.osquery'],
-                capture_output=True, check=True)
-            version = p.stdout.decode().split('\n')[1].split(' ')[1]
-            status = version == self.software['osquery']['version']
-        except subprocess.CalledProcessError:
-            # osquery isn't installed
-            status = False
-
-        self.display.status_check('osquery {} is installed'.format(self.software['osquery']['version']), status)
-        return status
-
     def is_osquery_configured(self):
         """
         Are the osquery configuration files in the right place and contain the right content

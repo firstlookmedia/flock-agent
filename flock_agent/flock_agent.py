@@ -7,6 +7,8 @@ from .status import Status
 from .install import Install
 from .purge import Purge
 
+from .items import ItemList
+
 
 class FlockAgent(object):
     def __init__(self, version):
@@ -42,6 +44,8 @@ class FlockAgent(object):
         self.display = Display(self.version)
         self.status = Status(self.display, self.software, self.config_path)
         self.install = Install(self.display, self.status, self.software, self.config_path)
+        self.purge = Purge(self.display, self.status)
+        self.item_list = ItemList(self)
 
         self.display.banner()
 
@@ -50,90 +54,86 @@ class FlockAgent(object):
         Check the status of all software managed by Flock Agent
         """
         all_good = True
-
-        status = self.status.is_osquery_installed()
-        if not status:
-            all_good = False
-
-        status = self.status.is_osquery_configured()
-        if not status:
-            all_good = False
-
-        status = self.status.is_openjdk_installed()
-        if not status:
-            all_good = False
-
-        status = self.status.is_logstash_installed()
-        if not status:
-            all_good = False
+        for item in self.item_list:
+            if not item.exec_status():
+                all_good = False
 
         if not all_good:
             self.display.install_message()
+
+        # all_good = True
+        #
+        # status = self.status.is_osquery_installed()
+        # if not status:
+        #     all_good = False
+        #
+        # status = self.status.is_osquery_configured()
+        # if not status:
+        #     all_good = False
+        #
+        # status = self.status.is_openjdk_installed()
+        # if not status:
+        #     all_good = False
+        #
+        # status = self.status.is_logstash_installed()
+        # if not status:
+        #     all_good = False
+        #
+        # if not all_good:
+        #     self.display.install_message()
 
     def exec_install(self):
         """
         Install and configure software managed by Flock Agent
         """
-        # Install osquery
-        status = self.status.is_osquery_installed()
-        if not status:
-            filename = self.install.download_software(self.software['osquery'])
-            if not filename:
-                return self.quit_early()
+        for item in self.item_list:
+            if not item.exec_install():
+                return
 
-            self.install.install_pkg(filename)
-
-            status = self.status.is_osquery_installed()
-            if not status:
-                self.display.error('osquery did not install successfully')
-                return self.quit_early()
-
-            self.display.newline()
-
-        # Configure osquery
-        status = self.status.is_osquery_configured()
-        if not status:
-            if not self.install.copy_files_as_root('/private/var/osquery/', ['osquery.conf', 'osquery.flags']):
-                return self.quit_early()
-
-            status = self.status.is_osquery_configured()
-            if not status:
-                self.display.error('osquery could not be configured properly')
-                return self.quit_early()
-
-            self.display.newline()
-
-        # Install OpenJDK
-        status = self.status.is_openjdk_installed()
-        if not status:
-            filename = self.install.download_software(self.software['openjdk'])
-            if not filename:
-                return self.quit_early()
-
-            self.install.extract_tarball_as_root(self.software['openjdk'], filename)
-
-            status = self.status.is_openjdk_installed()
-            if not status:
-                self.display.error('OpenJDK did not install successfully')
-                return self.quit_early()
-
-            self.display.newline()
-
-        # Install logstash
-        status = self.status.is_logstash_installed()
-        if not status:
-            filename = self.install.download_software(self.software['logstash'])
-            if not filename:
-                return self.quit_early()
-
-            self.install.extract_tarball_as_root(self.software['logstash'], filename)
-
-            status = self.status.is_logstash_installed()
-            if not status:
-                self.display.error('Logstash did not install successfully')
-                return self.quit_early()
-
-            self.display.newline()
+        # # Configure osquery
+        # status = self.status.is_osquery_configured()
+        # if not status:
+        #     if not self.install.copy_files_as_root('/private/var/osquery/', ['osquery.conf', 'osquery.flags']):
+        #         return self.quit_early()
+        #
+        #     status = self.status.is_osquery_configured()
+        #     if not status:
+        #         self.display.error('osquery could not be configured properly')
+        #         return self.quit_early()
+        #
+        #     self.display.newline()
+        #
+        # # Install OpenJDK
+        # status = self.status.is_openjdk_installed()
+        # if not status:
+        #     filename = self.install.download_software(self.software['openjdk'])
+        #     if not filename:
+        #         return self.quit_early()
+        #
+        #     self.install.extract_tarball_as_root(self.software['openjdk'], filename)
+        #
+        #     status = self.status.is_openjdk_installed()
+        #     if not status:
+        #         self.display.error('OpenJDK did not install successfully')
+        #         return self.quit_early()
+        #
+        #     self.display.newline()
+        #
+        # # Install logstash
+        # status = self.status.is_logstash_installed()
+        # if not status:
+        #     filename = self.install.download_software(self.software['logstash'])
+        #     if not filename:
+        #         return self.quit_early()
+        #
+        #     self.install.extract_tarball_as_root(self.software['logstash'], filename)
+        #
+        #     status = self.status.is_logstash_installed()
+        #     if not status:
+        #         self.display.error('Logstash did not install successfully')
+        #         return self.quit_early()
+        #
+        #     self.display.newline()
 
     def exec_purge(self):
         """
@@ -144,30 +144,31 @@ class FlockAgent(object):
         dirs = []
         commands = []
 
-        if self.status.is_osquery_installed():
-            dirs.append('/private/var/osquery/')
-            filenames.append('/usr/local/bin/osquery*')
-            commands.append('pkgutil --forget com.facebook.osquery')
-
-        if self.status.is_osquery_configured():
-            filenames.append('/private/var/osquery/osquery.conf')
-            filenames.append('/private/var/osquery/osquery.flags')
-
-        if self.status.is_openjdk_installed():
-            dirs.append('/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk')
-
-        if self.status.is_logstash_installed():
-            dirs.append('/private/var/flock-agent/opt/logstash-6.6.0')
+        for item in self.item_list:
+            item_filenames, item_dirs, item_commands = item.exec_purge()
+            filenames += item_filenames
+            dirs += item_dirs
+            commands += item_commands
 
         # Delete everything
-        purge = Purge(self.display, self.status)
-        purge.delete_files(filenames)
-        purge.delete_dirs(dirs)
-        purge.run_commands(commands)
+        self.purge.delete_files(filenames)
+        self.purge.delete_dirs(dirs)
+        self.purge.run_commands(commands)
 
         # Run status
         self.exec_status()
 
-    def quit_early(self):
-        self.display.error('Encountered an error, quitting early')
-        self.display.newline()
+        # if self.status.is_osquery_installed():
+        #     dirs.append('/private/var/osquery/')
+        #     filenames.append('/usr/local/bin/osquery*')
+        #     commands.append('pkgutil --forget com.facebook.osquery')
+        #
+        # if self.status.is_osquery_configured():
+        #     filenames.append('/private/var/osquery/osquery.conf')
+        #     filenames.append('/private/var/osquery/osquery.flags')
+        #
+        # if self.status.is_openjdk_installed():
+        #     dirs.append('/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk')
+        #
+        # if self.status.is_logstash_installed():
+        #     dirs.append('/private/var/flock-agent/opt/logstash-6.6.0')
