@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 from colored import fg, bg, attr
 
 
@@ -31,6 +32,9 @@ class Display(object):
 
     def install_message(self):
         print('Fix by running: {}flock-agent --install{}'.format(fg('light_blue'), attr('reset')))
+
+    def root_message(self):
+        print('This action requires root: {}sudo {}{}'.format(fg('light_blue'), ' '.join(sys.argv), attr('reset')))
 
     def newline(self):
         print('')

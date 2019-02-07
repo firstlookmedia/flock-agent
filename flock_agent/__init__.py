@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import argparse
 from .flock_agent import FlockAgent
 
@@ -13,6 +14,11 @@ def main():
     group.add_argument('--install', action="store_true", help="Install and configure software managed by Flock Agent")
     group.add_argument('--purge', action="store_true", help="Completely remove software managed by Flock Agent")
     args = parser.parse_args()
+
+    # For --install and --purge, force root
+    if (args.install or args.purge) and os.geteuid() != 0:
+        agent.display.root_message()
+        return
 
     if args.install:
         return agent.exec_install()
