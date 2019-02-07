@@ -27,13 +27,13 @@ Without any commands, it will check the status of the software managed by Flock 
 To automatically install and configure Flock software, use `--install`:
 
 ```sh
-pipenv run ./flock-agent --install
+pipenv run sudo ./flock-agent --install
 ```
 
 To uninstall all of the Flock software, use `--purge`:
 
 ```sh
-pipenv run ./flock-agent --purge
+pipenv run sudo ./flock-agent --purge
 ```
 
 ### A note about Homebrew
