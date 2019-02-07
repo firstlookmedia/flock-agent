@@ -1,6 +1,20 @@
 # Flock Agent
 
-This is the macOS endpoint agent to manage the software required to send data to Flock.
+Flock is a privacy-preserving fleet management system powered by osquery and the Elastic Stack.
+
+**The goal of Flock is to gain visibility into a fleet of laptops while protecting the privacy of the laptop users. It achieves this by only collecting information needed to inform security decisions, and by not allow the IT team to access arbitrary files, or execute arbitrary code, on the laptops they are monitoring.**
+
+See also the [Flock server](https://github.com/firstlookmedia/flock).
+
+## About Flock Agent
+
+Flock Agent only support macOS, at the moment. It is responsible for installing and configuring osquery, and pushing osquery logs to the Flock gateway. You configure it by providing the gateway URL. If the agent is not already registered, it registers itself with the gateway and stores the authentication token locally.
+
+Flock Agent includes a background daemon which reads the log file created by osqueryd and forwards the data onto the gateway.
+
+Exactly what data gets collected is defined is defined in `osquery.conf`, which is included within the Flock Agent package. We update this config by releasing updates to Flock Agent. **When the user is prompted to install the update, it will explain to them what new information is being collected from their computer.**
+
+To see what information is getting collected, check the [osquery.conf file](/flock_agent/config/osquery.conf). In the future we will expand this to include more complicated queries, like [detecting reverse shells](https://clo.ng/blog/osquery_reverse_shell/).
 
 ## Getting started
 
@@ -35,15 +49,3 @@ To uninstall all of the Flock software, use `--purge`:
 ```sh
 pipenv run sudo ./flock-agent --purge
 ```
-
-### A note about Homebrew
-
-At first I was going to have Flock Agent make sure Homebrew was installed, and then install osquery and logstash (and java8, which logstash requires) using `brew install`. This would be *much* simpler, but I decided against it, and here's why.
-
-All Homebrew files are owned by the unprivileged user, so you can `brew install` stuff without `sudo`. But `osqueryd`, the background daemon, gets automatically launched as root. This means there's a privilege escalation in there. If an attacker gets a shell, they can modify `/usr/local/bin/osqueryd` (without root), and then the next time the computer reboots, when `osqueryd` gets launched as root, they've escalated privileges.
-
-Logstash has the same problem. If `osqueryd` is run by root, then `/var/log/osquery/osqueryd.results.log` will only be readable by root, which means the logstash background daemon needs to run as root too. But if we install logstash with Homebrew it will be owned by the unprivileged user, and could facilitate the same sort of privilege escalation vulnerability.
-
-The other option would be to run the `osqueryd` as the unprivileged user, which would remove the privilege escalation issue. However, this would make it trivial for an attacker who gets a shell to hide their tracks from osquery: they could just kill the `osqueryd` process and prevent the launch daemon from starting again.
-
-However, I think software that Flock Agent requires, like possibly Tor, can safely be installed via Homebrew because the root user won't be running it.
