@@ -39,6 +39,6 @@ class OpenJdkItem(ItemBase):
 
     def exec_purge(self):
         filenames = []
-        dirs = ['/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk']
+        dirs = [self.get_software()['install_path']]
         commands = []
         return (filenames, dirs, commands)

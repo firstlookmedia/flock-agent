@@ -39,6 +39,6 @@ class LogstashItem(ItemBase):
 
     def exec_purge(self):
         filenames = []
-        dirs = ['/private/var/flock-agent/opt/logstash-6.6.0']
+        dirs = [self.get_software()['install_path']]
         commands = []
         return (filenames, dirs, commands)
