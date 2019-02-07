@@ -8,9 +8,9 @@ class LogstashConfigItem(ItemBase):
         status = True
         if not self.is_conf_file_installed('/private/var/flock-agent/etc/logstash/logstash.conf', 'logstash.conf'):
             status = False
-        if not self.is_conf_file_installed('/private/var/flock-agent/etc/logstash/co.elastic.logstash.plist', 'logstash.conf'):
+        if not self.is_conf_file_installed('/private/var/flock-agent/etc/logstash/co.elastic.logstash.plist', 'co.elastic.logstash.plist'):
             status = False
-        if not os.path.exists('/Library/LaunchDaemons/com.facebook.osqueryd.plist'):
+        if not os.path.exists('/Library/LaunchDaemons/co.elastic.logstash.plist'):
             status = False
 
         # Note, this isn't checking to see if the launchd is currently running because to do that
