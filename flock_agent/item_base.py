@@ -58,7 +58,7 @@ class ItemBase(object):
         self.display.newline()
         return False
 
-    def file_exists_and_has_same_content(self, dest_path, src_filename):
+    def is_conf_file_installed(self, dest_path, src_filename):
         """
         Checks to see if the file at dest_path exists, and has the same content
         as the conf file called src_filename
@@ -120,7 +120,7 @@ class ItemBase(object):
         except subprocess.CalledProcessError:
             self.display.error('Package install failed')
 
-    def copy_files_as_root(self, dest_dir, src_filenames):
+    def copy_conf_files(self, dest_dir, src_filenames):
         """
         Copies a list of conf files (src_filenames) into directory dest_dir, as root
         """
@@ -139,6 +139,33 @@ class ItemBase(object):
         except subprocess.CalledProcessError:
             self.display.error('Copying files failed')
             return False
+
+    def install_launchd(self, src_filename):
+        """
+        Install a launch daemon
+        """
+        basename = os.path.basename(src_filename)
+        dest_filename = os.path.join('/Library/LaunchDaemons/', basename)
+
+        self.display.info('Type your password to install launch daemon: {}'.format(basename))
+        cmd = '/usr/bin/osascript -e \'do shell script "/bin/cp {} {}" with administrator privileges\''.format(
+            src_filename, dest_filename)
+        try:
+            subprocess.run(cmd, shell=True, capture_output=True, check=True)
+        except subprocess.CalledProcessError:
+            self.display.error('Installing launch daemon failed')
+            return False
+
+        self.display.info('Type your password to load launch daemon: {}'.format(basename))
+        cmd = '/usr/bin/osascript -e \'do shell script "/bin/launchctl load {}" with administrator privileges\''.format(
+            dest_filename)
+        try:
+            subprocess.run(cmd, shell=True, capture_output=True, check=True)
+        except subprocess.CalledProcessError:
+            self.display.error('Installing launch daemon failed')
+            return False
+
+        return True
 
     def extract_tarball_as_root(self, software, src_tarball_filename):
         """

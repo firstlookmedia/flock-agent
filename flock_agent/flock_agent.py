@@ -68,9 +68,9 @@ class FlockAgent(object):
 
         # Delete everything
         purge = Purge(self.display)
+        purge.run_commands(commands)
         purge.delete_files(filenames)
         purge.delete_dirs(dirs)
-        purge.run_commands(commands)
 
         # Run status
         self.exec_status()
