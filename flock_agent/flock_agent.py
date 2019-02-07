@@ -11,17 +11,6 @@ class FlockAgent(object):
     def __init__(self, version):
         self.version = version
 
-        # Information about software to be installed
-        self.software = {
-            'logstash': {
-                'version': '6.6.0',
-                'url': 'https://artifacts.elastic.co/downloads/logstash/logstash-6.6.0.tar.gz',
-                'sha256': '5a9a8b9942631e9d4c3dfb8d47075276e8c2cff343841145550cc0c1cfe7bba7',
-                'install_path': '/private/var/flock-agent/opt/logstash-6.6.0',
-                'extract_path': '/private/var/flock-agent/opt'
-            }
-        }
-
         # Path to config files within the module
         self.config_path = os.path.join(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))), 'config')
 
