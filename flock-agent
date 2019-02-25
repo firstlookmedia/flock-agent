@@ -1,3 +1,11 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# This script is for running from the source tree during development
+
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.flock_agent_dev = True
+
 import flock_agent
 flock_agent.main()

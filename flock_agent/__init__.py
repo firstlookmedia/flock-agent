@@ -1,29 +1,31 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
+import signal
 import argparse
-from .flock_agent import FlockAgent
+
+from .common import Common
+from . import gui
+
 
 flock_agent_version = 0.1
 
 
 def main():
-    agent = FlockAgent(flock_agent_version)
+    # Allow Ctrl-C to smoothly quit the program instead of throwing an exception
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    parser = argparse.ArgumentParser()
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument('--install', action="store_true", help="Install and configure software managed by Flock Agent")
-    group.add_argument('--purge', action="store_true", help="Completely remove software managed by Flock Agent")
+    # Parse arguments
+    parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog,max_help_position=48))
+    parser.add_argument('--debug', action='store_true', dest='debug', help="Log debug output to stdout")
+    #parser.add_argument('--send', action='store_true', dest='send', help="Send latest logs to server, without launching GUI")
     args = parser.parse_args()
 
-    # For --install and --purge, force root
-    if (args.install or args.purge) and os.geteuid() != 0:
-        agent.display.root_message()
-        return
+    debug = args.debug
+    #send = args.send
 
-    if args.install:
-        return agent.exec_install()
+    # Create the common object
+    common = Common(debug)
 
-    if args.purge:
-        return agent.exec_purge()
-
-    agent.exec_status()
+    # Launch the GUI
+    gui.main(common)
