@@ -13,16 +13,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowIcon(self.c.gui.icon)
 
         # Header
-        header_logo_image = QtGui.QImage(self.c.get_resource_path("images/icon.png"))
-        header_logo_label = QtWidgets.QLabel()
-        header_logo_label.setPixmap(QtGui.QPixmap.fromImage(header_logo_image))
         header_label = QtWidgets.QLabel('<b><font color="#3461bc">Flock</font></b> monitors your computer for security issues while respecting your privacy')
         header_label.setMinimumWidth(410)
         header_label.setTextFormat(QtCore.Qt.RichText)
         header_label.setWordWrap(True)
         header_label.setStyleSheet(self.c.gui.css['header-label'])
         header_layout = QtWidgets.QHBoxLayout()
-        header_layout.addWidget(header_logo_label)
+        header_layout.addWidget(self.c.gui.logo)
         header_layout.addWidget(header_label)
         header_layout.addStretch()
 

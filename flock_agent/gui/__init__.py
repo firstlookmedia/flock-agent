@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import os
 import sys
+import subprocess
 from PyQt5 import QtCore, QtWidgets
 
 from .gui_common import GuiCommon
@@ -12,6 +14,12 @@ def main(common):
 
     # Attach the GuiCommon object to Common
     common.gui = GuiCommon(common)
+
+    # Warn if homebrew is not installed
+    if not os.path.exists('/usr/local/bin/brew'):
+        message = '<b>Homebrew is not installed.</b><br>Follow the instructions at <a href="https://brew.sh">https://brew.sh</a><br>to install Homebrew and then run Flock again.'
+        common.gui.alert(message, contains_links=True)
+        return
 
     # Now create the main window
     main_window = MainWindow(app, common)
