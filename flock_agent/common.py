@@ -12,12 +12,15 @@ class Common(object):
         self.debug = debug
         self.log('Common', '__init__')
 
-    def log(self, module, func, msg=''):
+    def log(self, module, func, msg='', always=False):
         if self.debug:
             final_msg = "○ {}.{}".format(module, func)
             if msg:
                 final_msg = "{}: {}".format(final_msg, msg)
             print(final_msg)
+
+        elif always:
+            print("○ {}".format(msg))
 
     def get_resource_path(self, filename):
         # In dev mode, look for resources directory relative to python file

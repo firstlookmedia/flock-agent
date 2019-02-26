@@ -32,12 +32,19 @@ class GuiCommon(object):
             """
         }
 
-    def alert(self, message, contains_links=False):
-        d = QtWidgets.QDialog()
-        d.setWindowTitle('Flock')
-        d.setWindowIcon(self.icon)
-        d.setModal(True)
-        d.setSizeGripEnabled(False)
+
+class Alert(QtWidgets.QDialog):
+    """
+    A custom alert dialog
+    """
+    def __init__(self, common, message, contains_links=False):
+        super(Alert, self).__init__()
+        self.c = common
+
+        self.setWindowTitle('Flock')
+        self.setWindowIcon(self.c.gui.icon)
+        self.setModal(True)
+        self.setSizeGripEnabled(False)
 
         message_label = QtWidgets.QLabel(message)
         if contains_links:
@@ -45,11 +52,11 @@ class GuiCommon(object):
             message_label.setOpenExternalLinks(True)
 
         message_layout = QtWidgets.QHBoxLayout()
-        message_layout.addWidget(self.logo)
+        message_layout.addWidget(self.c.gui.logo)
         message_layout.addWidget(message_label)
 
         ok_button = QtWidgets.QPushButton('Ok')
-        ok_button.clicked.connect(d.accept)
+        ok_button.clicked.connect(self.accept)
 
         buttons_layout = QtWidgets.QHBoxLayout()
         buttons_layout.addStretch()
@@ -59,6 +66,6 @@ class GuiCommon(object):
         layout.addLayout(message_layout)
         layout.addLayout(buttons_layout)
 
-        d.setLayout(layout)
+        self.setLayout(layout)
 
-        return d.exec_()
+        self.exec_()
