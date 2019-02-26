@@ -21,15 +21,7 @@ Here's how you run Flock Agent, without having to build an app bundle:
 Here's how you build an app bundle:
 
 ```sh
-install/build_pkg.sh
+./install/build_pkg.py
 ```
 
 Now you should have `dist/Flock.app`.
-
-To codesign and build a .pkg for distribution:
-
-```sh
-install/build_pkg.sh --release
-```
-
-Now you should have `dist/Flock-{version}.pkg`.
