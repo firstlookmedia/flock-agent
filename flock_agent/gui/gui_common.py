@@ -19,4 +19,11 @@ class GuiCommon(object):
             self.systray_icon = QtGui.QIcon(self.c.get_resource_path('images/systray-light.png'))
 
         # Stylesheets
-        self.css = {}
+        self.css = {
+            'header-label': """
+            QLabel {
+                font-size: 16px;
+                margin-left: 10px;
+            }
+            """
+        }
