@@ -13,9 +13,9 @@ class Settings(object):
         self.c.log("Settings", "__init__", "appdata_path: {}".format(self.appdata_path))
 
         self.default_settings = {
-            'gateway_url': '',
-            'uuid': '',
-            'token': ''
+            'gateway_url': None,
+            'gateway_token': None,
+            'gateway_username': None
         }
 
         self.load()
@@ -35,6 +35,12 @@ class Settings(object):
             try:
                 with open(self.settings_filename, 'r') as settings_file:
                     self.settings = json.load(settings_file)
+
+                # If it's missing any fields, add them from the default settings
+                for key in self.default_settings:
+                    if key not in self.settings:
+                        self.settings[key] = self.default_settings[key]
+
             except:
                 # If there's an error loading settings, fallback to default settings
                 self.c.log("Settings", "load", "error loading settings, falling back to default")
@@ -44,6 +50,12 @@ class Settings(object):
             # Save with default settings
             self.c.log("Settings", "load", "settings file doesn't exist, starting with default")
             self.settings = self.default_settings
+
+            # Figure out the default gateway username
+            res = self.c.osquery('SELECT uuid AS host_uuid FROM system_info;')
+            if res:
+                self.set('gateway_username', res[0]['host_uuid'])
+
             self.save()
 
     def save(self):
