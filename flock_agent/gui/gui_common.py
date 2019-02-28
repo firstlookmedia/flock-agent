@@ -37,7 +37,7 @@ class Alert(QtWidgets.QDialog):
     """
     A custom alert dialog
     """
-    def __init__(self, common, message, contains_links=False):
+    def __init__(self, common, message, contains_links=False, has_cancel_button=False):
         super(Alert, self).__init__()
         self.c = common
 
@@ -58,9 +58,15 @@ class Alert(QtWidgets.QDialog):
         ok_button = QtWidgets.QPushButton('Ok')
         ok_button.clicked.connect(self.accept)
 
+        if has_cancel_button:
+            cancel_button = QtWidgets.QPushButton('Cancel')
+            cancel_button.clicked.connect(self.reject)
+
         buttons_layout = QtWidgets.QHBoxLayout()
         buttons_layout.addStretch()
         buttons_layout.addWidget(ok_button)
+        if has_cancel_button:
+            buttons_layout.addWidget(cancel_button)
 
         layout = QtWidgets.QVBoxLayout()
         layout.addLayout(message_layout)
@@ -68,4 +74,5 @@ class Alert(QtWidgets.QDialog):
 
         self.setLayout(layout)
 
-        self.exec_()
+    def launch(self):
+        return self.exec_() == QtWidgets.QDialog.Accepted
