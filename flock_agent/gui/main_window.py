@@ -15,6 +15,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle('Flock')
         self.setWindowIcon(self.c.gui.icon)
 
+        flags = QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | \
+            QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowCloseButtonHint | \
+            QtCore.Qt.WindowStaysOnTopHint
+        self.setWindowFlags(flags)
+
         # Header
         header_label = QtWidgets.QLabel('<b><font color="#3461bc">Flock</font></b> monitors your computer for security issues while respecting your privacy')
         header_label.setMinimumWidth(410)
