@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-from .settings_dialog import SettingsDialog
+from .data_tab import DataTab
+from .settings_tab import SettingsTab
 from .systray import SysTray
 
 
@@ -32,26 +33,24 @@ class MainWindow(QtWidgets.QMainWindow):
         header_layout.addWidget(header_label)
         header_layout.addStretch()
 
+        # Tabs
+        self.data_tab = DataTab(self.c)
+
+        self.settings_tab = SettingsTab(self.c)
+        self.settings_tab.quit_signal.connect(self.quit)
+
+        tabs = QtWidgets.QTabWidget()
+        tabs.addTab(self.data_tab, "Data")
+        tabs.addTab(self.settings_tab, "Settings")
+
         # Layout
         layout = QtWidgets.QVBoxLayout()
         layout.addLayout(header_layout)
+        layout.addWidget(tabs)
         layout.addStretch()
         central_widget = QtWidgets.QWidget()
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
-
-        # Settings button on the status bar
-        self.settings_button = QtWidgets.QPushButton()
-        self.settings_button.setDefault(False)
-        self.settings_button.setFlat(True)
-        self.settings_button.setFixedWidth(40)
-        self.settings_button.setIcon(QtGui.QIcon(common.get_resource_path('images/settings.png')))
-        self.settings_button.clicked.connect(self.open_settings)
-
-        # Status bar
-        self.status_bar = QtWidgets.QStatusBar()
-        self.status_bar.addPermanentWidget(self.settings_button)
-        self.setStatusBar(self.status_bar)
 
         # System tray
         self.systray = SysTray(self.c)
@@ -76,12 +75,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.hide()
         else:
             self.show()
-
-    def open_settings(self):
-        self.c.log("MainWindow", "open_settings")
-        d = SettingsDialog(self.c)
-        d.quit_signal.connect(self.quit)
-        d.exec_()
 
     def quit(self):
         self.c.log("MainWindow", "quit")

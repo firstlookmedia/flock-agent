@@ -2,27 +2,17 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 
-class SettingsDialog(QtWidgets.QDialog):
+class SettingsTab(QtWidgets.QWidget):
     """
-    Flock Agent settings
+    Settings
     """
     quit_signal = QtCore.pyqtSignal()
 
     def __init__(self, common):
-        super(SettingsDialog, self).__init__()
+        super(SettingsTab, self).__init__()
         self.c = common
 
-        self.c.log('SettingsDialog', '__init__')
-
-        flags = QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | \
-            QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowCloseButtonHint | \
-            QtCore.Qt.WindowStaysOnTopHint
-        self.setWindowFlags(flags)
-
-        self.setWindowTitle('Flock Settings')
-        self.setWindowIcon(self.c.gui.icon)
-        self.setModal(True)
-        self.setSizeGripEnabled(False)
+        self.c.log('SettingsTab', '__init__')
 
         # Server
         self.server_label = QtWidgets.QLabel('What\'s the address of the server you will send data to?')
@@ -41,7 +31,7 @@ class SettingsDialog(QtWidgets.QDialog):
         # Buttons
         quit_button = QtWidgets.QPushButton('Quit Flock Agent')
         quit_button.clicked.connect(self.quit_clicked)
-        quit_button.setStyleSheet(self.c.gui.css['SettingsDialog quit_button'])
+        quit_button.setStyleSheet(self.c.gui.css['SettingsTab quit_button'])
         quit_button.setFlat(True)
 
         buttons_layout = QtWidgets.QHBoxLayout()
@@ -56,6 +46,6 @@ class SettingsDialog(QtWidgets.QDialog):
         self.setLayout(layout)
 
     def quit_clicked(self):
-        self.c.log('SettingsDialog', 'quit_clicked')
+        self.c.log('SettingsTab', 'quit_clicked')
         self.quit_signal.emit()
         self.accept()

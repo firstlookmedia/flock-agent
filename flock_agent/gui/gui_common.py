@@ -31,7 +31,7 @@ class GuiCommon(object):
                 }
                 """,
 
-            'SettingsDialog quit_button': """
+            'SettingsTab quit_button': """
                 QPushButton {
                     color: #ffffff;
                     background-color: #ea2a2a;
