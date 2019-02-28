@@ -12,8 +12,10 @@ class Common(object):
     """
     The Common class is a singleton of shared functionality throughout the app
     """
-    def __init__(self, debug):
+    def __init__(self, debug, version):
         self.debug = debug
+        self.version = version
+        
         self.log('Common', '__init__')
 
         # Load settings

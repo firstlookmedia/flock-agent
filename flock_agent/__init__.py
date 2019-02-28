@@ -25,7 +25,7 @@ def main():
     #send = args.send
 
     # Create the common object
-    common = Common(debug)
+    common = Common(debug, flock_agent_version)
 
     # Launch the GUI
     gui.main(common)
