@@ -24,12 +24,23 @@ class GuiCommon(object):
 
         # Stylesheets
         self.css = {
-            'header-label': """
-            QLabel {
-                font-size: 16px;
-                margin-left: 10px;
-            }
-            """
+            'MainWindow header_label': """
+                QLabel {
+                    font-size: 16px;
+                    margin-left: 10px;
+                }
+                """,
+
+            'SettingsDialog quit_button': """
+                QPushButton {
+                    color: #ffffff;
+                    background-color: #ea2a2a;
+                    font-weight: bold;
+                    font-size: 18px;
+                    border-radius: 5px;
+                    padding: 5px 10px 5px 10px;
+                }
+                """
         }
 
 
@@ -45,6 +56,11 @@ class Alert(QtWidgets.QDialog):
         self.setWindowIcon(self.c.gui.icon)
         self.setModal(True)
         self.setSizeGripEnabled(False)
+
+        flags = QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | \
+            QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowCloseButtonHint | \
+            QtCore.Qt.WindowStaysOnTopHint
+        self.setWindowFlags(flags)
 
         message_label = QtWidgets.QLabel(message)
         if contains_links:
@@ -71,7 +87,6 @@ class Alert(QtWidgets.QDialog):
         layout = QtWidgets.QVBoxLayout()
         layout.addLayout(message_layout)
         layout.addLayout(buttons_layout)
-
         self.setLayout(layout)
 
     def launch(self):
