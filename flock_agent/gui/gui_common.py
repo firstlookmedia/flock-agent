@@ -36,9 +36,9 @@ class GuiCommon(object):
                     color: #ffffff;
                     background-color: #ea2a2a;
                     font-weight: bold;
-                    font-size: 18px;
                     border-radius: 5px;
                     padding: 5px 10px 5px 10px;
+                    margin-top: 20px;
                 }
                 """
         }
