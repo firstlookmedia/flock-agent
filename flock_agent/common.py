@@ -3,6 +3,8 @@ import os
 import sys
 import inspect
 
+from .settings import Settings
+
 
 class Common(object):
     """
@@ -11,6 +13,9 @@ class Common(object):
     def __init__(self, debug):
         self.debug = debug
         self.log('Common', '__init__')
+
+        # Load settings
+        self.settings = Settings(self)
 
     def log(self, module, func, msg='', always=False):
         if self.debug:
