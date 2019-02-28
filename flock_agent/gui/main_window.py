@@ -1,6 +1,9 @@
+# -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-# -*- coding: utf-8 -*-
+from .systray import SysTray
+
+
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, app, common):
         super(MainWindow, self).__init__()
@@ -31,10 +34,27 @@ class MainWindow(QtWidgets.QMainWindow):
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
+        # System tray
+        self.systray = SysTray(self.c)
+        self.systray.activated.connect(self.toggle_window)
+
         # Limit the width to 500px
         self.setMinimumWidth(500)
         self.setMaximumWidth(500)
         self.show()
+
+    def toggle_window(self):
+        if self.isVisible():
+            self.hide()
+        else:
+            self.show()
+
+    def closeEvent(self, e):
+        """
+        Intercept close event, and instead minimize to systray
+        """
+        self.hide()
+        e.ignore()
 
     def shutdown(self):
         self.c.log("MainWindow", "shutdown")
