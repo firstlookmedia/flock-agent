@@ -17,11 +17,6 @@ class GuiCommon(object):
         else:
             self.systray_icon = QtGui.QIcon(self.c.get_resource_path('images/systray-light.png'))
 
-        # Preload image labels
-        logo_image = QtGui.QImage(self.c.get_resource_path("images/icon.png"))
-        self.logo = QtWidgets.QLabel()
-        self.logo.setPixmap(QtGui.QPixmap.fromImage(logo_image))
-
         # Stylesheets
         self.css = {
             'MainWindow header_label': """
@@ -62,13 +57,16 @@ class Alert(QtWidgets.QDialog):
             QtCore.Qt.WindowStaysOnTopHint
         self.setWindowFlags(flags)
 
+        logo = QtWidgets.QLabel()
+        logo.setPixmap(QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/icon.png"))))
+
         message_label = QtWidgets.QLabel(message)
         if contains_links:
             message_label.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
             message_label.setOpenExternalLinks(True)
 
         message_layout = QtWidgets.QHBoxLayout()
-        message_layout.addWidget(self.c.gui.logo)
+        message_layout.addWidget(logo)
         message_layout.addWidget(message_label)
 
         ok_button = QtWidgets.QPushButton('Ok')

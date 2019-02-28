@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
+from urllib.parse import urlparse
+
+from .gui_common import Alert
+from ..api_client import FlockApiClient, PermissionDenied, BadStatusCode, \
+    ResponseIsNotJson, RespondedWithError, InvalidResponse, ConnectionError
 
 
 class SettingsTab(QtWidgets.QWidget):
@@ -68,10 +73,36 @@ class SettingsTab(QtWidgets.QWidget):
         self.c.log('SettingsTab', 'server_button_clicked')
 
         if self.status == self.STATUS_NOT_REGISTERED:
+            # Validate server URL
+            server_url = self.server_url_edit.text()
+            o = urlparse(server_url)
+            if (o.scheme != 'http' and o.scheme != 'https') or (o.path != '' and o.path != '/') or \
+                o.params != '' or o.query != '' or o.fragment != '':
+
+                Alert(self.c, 'Invalid server URL').launch()
+                return False
+
+            # Save the server URL in settings
+            self.c.settings.set('gateway_url', server_url)
+
             # Try to register
-            pass
+            self.c.log('SettingsTab', 'server_button_clicked', 'registering with server')
+            api_client = FlockApiClient(self.c)
+            try:
+                api_client.register()
+            except PermissionDenied:
+                Alert(self.c, 'Permission denied').launch()
+            except BadStatusCode as e:
+                Alert(self.c, 'Bad status code: {}'.format(e)).launch()
+            except ResponseIsNotJson:
+                Alert(self.c, 'Server response is not JSON').launch()
+            except RespondedWithError as e:
+                Alert(self.c, 'Server error: {}'.format(e)).launch()
+            except InvalidResponse:
+                Alert(self.c, 'Server returned an invalid response').launch()
+            except ConnectionError:
+                Alert(self.c, 'Error connecting to server').launch()
 
     def quit_clicked(self):
         self.c.log('SettingsTab', 'quit_clicked')
         self.quit_signal.emit()
-        self.accept()
