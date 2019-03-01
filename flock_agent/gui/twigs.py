@@ -24,7 +24,6 @@ class TwigView(QtWidgets.QWidget):
         self.enabled_button.setFlat(True)
         self.enabled_button.setFixedWidth(64)
         self.enabled_button.setFixedHeight(32)
-        self.enabled_button.setIcon( QtGui.QIcon(self.c.get_resource_path('images/switch-enabled.png')) )
         self.enabled_button.setIconSize(QtCore.QSize(64, 32))
         self.enabled_button.setStyleSheet(self.c.gui.css['TwigView enabled_button'])
 
@@ -49,3 +48,17 @@ class TwigView(QtWidgets.QWidget):
         layout.addLayout(top_layout)
         layout.addLayout(bottom_layout)
         self.setLayout(layout)
+
+        self.update_ui()
+
+    def update_ui(self):
+        twig = self.get_twig()
+        if twig['enabled'] == 'enabled':
+            self.enabled_button.setIcon( QtGui.QIcon(self.c.get_resource_path('images/switch-enabled.png')) )
+        elif twig['enabled'] == 'disabled':
+            self.enabled_button.setIcon( QtGui.QIcon(self.c.get_resource_path('images/switch-disabled.png')) )
+        else:
+            self.enabled_button.setIcon( QtGui.QIcon(self.c.get_resource_path('images/switch-undecided.png')) )
+
+    def get_twig(self):
+        return self.c.settings.get_twig(self.twig_id)
