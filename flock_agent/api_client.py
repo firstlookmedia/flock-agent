@@ -119,6 +119,6 @@ class FlockApiClient(object):
         headers = {}
         headers['User-Agent'] = 'Flock Agent {}'.format(self.c.version)
         if auth:
-            encoded_credentials = base64.b64encode('{}:{}'.format(self.gateway_username, self.gateway_token).encode()).decode()
+            encoded_credentials = base64.b64encode('{}:{}'.format(self.c.settings.get('gateway_username'), self.c.settings.get('gateway_token')).encode()).decode()
             headers['Authorization'] = 'Basic {}'.format(encoded_credentials)
         return headers

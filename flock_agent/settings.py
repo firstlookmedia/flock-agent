@@ -21,7 +21,6 @@ class Settings(object):
         self.load()
 
     def get(self, key):
-        self.c.log("Settings", "get", key)
         return self.settings[key]
 
     def set(self, key, val):

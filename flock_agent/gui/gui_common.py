@@ -26,6 +26,13 @@ class GuiCommon(object):
                 }
                 """,
 
+            'SettingsTab server_url_label': """
+                QLabel {
+                    font-family: monospace;
+                    font-weight: bold;
+                }
+            """,
+
             'SettingsTab quit_button': """
                 QPushButton {
                     color: #ffffff;

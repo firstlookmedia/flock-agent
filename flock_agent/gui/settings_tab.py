@@ -23,7 +23,7 @@ class SettingsTab(QtWidgets.QWidget):
         self.c.log('SettingsTab', '__init__')
 
         # Determine server status
-        if self.c.settings.get('gateway_token'):
+        if self.c.settings.get('gateway_url') and self.c.settings.get('gateway_token'):
             self.status = self.STATUS_REGISTERED
         else:
             self.status = self.STATUS_NOT_REGISTERED
@@ -32,11 +32,14 @@ class SettingsTab(QtWidgets.QWidget):
         self.server_label = QtWidgets.QLabel()
         self.server_url_edit = QtWidgets.QLineEdit()
         self.server_url_edit.setPlaceholderText("https://")
+        self.server_url_label = QtWidgets.QLabel()
+        self.server_url_label.setStyleSheet(self.c.gui.css['SettingsTab server_url_label'])
         self.server_button = QtWidgets.QPushButton()
         self.server_button.clicked.connect(self.server_button_clicked)
 
         server_url_layout = QtWidgets.QHBoxLayout()
-        server_url_layout.addWidget(self.server_url_edit)
+        server_url_layout.addWidget(self.server_url_edit, stretch=1)
+        server_url_layout.addWidget(self.server_url_label, stretch=1)
         server_url_layout.addWidget(self.server_button)
 
         server_layout = QtWidgets.QVBoxLayout()
@@ -66,13 +69,26 @@ class SettingsTab(QtWidgets.QWidget):
         # Not registered yet
         if self.status == self.STATUS_NOT_REGISTERED:
             self.server_label.setText('What\'s the address of the server you will send data to?')
-            self.server_url_edit.setText('')
+            self.server_url_edit.show()
+            self.server_url_label.hide()
+            self.server_button.setEnabled(True)
             self.server_button.setText('Connect')
+
+        elif self.status == self.STATUS_REGISTERED:
+            self.server_label.setText('You\'re sending data to this server:')
+            self.server_url_edit.hide()
+            self.server_url_label.setText(self.c.settings.get('gateway_url'))
+            self.server_url_label.show()
+            self.server_button.setEnabled(True)
+            self.server_button.setText('Change Server')
 
     def server_button_clicked(self):
         self.c.log('SettingsTab', 'server_button_clicked')
 
         if self.status == self.STATUS_NOT_REGISTERED:
+            self.server_button.setEnabled(False)
+            self.server_button.setText('Registering...')
+
             # Validate server URL
             server_url = self.server_url_edit.text()
             o = urlparse(server_url)
@@ -90,6 +106,8 @@ class SettingsTab(QtWidgets.QWidget):
             api_client = FlockApiClient(self.c)
             try:
                 api_client.register()
+                api_client.ping()
+                self.status = self.STATUS_REGISTERED
             except PermissionDenied:
                 Alert(self.c, 'Permission denied').launch()
             except BadStatusCode as e:
@@ -102,6 +120,14 @@ class SettingsTab(QtWidgets.QWidget):
                 Alert(self.c, 'Server returned an invalid response').launch()
             except ConnectionError:
                 Alert(self.c, 'Error connecting to server').launch()
+
+        elif self.status == self.STATUS_REGISTERED:
+            self.c.settings.set('gateway_url', None)
+            self.c.settings.set('gateway_token', None)
+            self.c.settings.save()
+            self.status = self.STATUS_NOT_REGISTERED
+
+        self.update_ui()
 
     def quit_clicked(self):
         self.c.log('SettingsTab', 'quit_clicked')
