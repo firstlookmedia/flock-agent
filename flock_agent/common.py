@@ -15,7 +15,7 @@ class Common(object):
     def __init__(self, debug, version):
         self.debug = debug
         self.version = version
-        
+
         self.log('Common', '__init__')
 
         # Load settings
@@ -42,7 +42,7 @@ class Common(object):
 
         resource_path = os.path.join(prefix, filename)
 
-        self.log('Common', 'get_resource_path', resource_path)
+        #self.log('Common', 'get_resource_path', resource_path)
         return resource_path
 
     def osquery(self, query):
