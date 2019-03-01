@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-from .twigs_tab import TwigsTab
-from .settings_tab import SettingsTab
+from .tabs import TwigsTab, SettingsTab
 from .systray import SysTray
 
 
