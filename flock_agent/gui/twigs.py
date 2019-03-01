@@ -15,6 +15,9 @@ class TwigView(QtWidgets.QWidget):
 
         self.c.log('TwigView', '__init__', twig_id)
 
+        # Set the initial enabled status from settings
+        self.enabled_status = self.get_twig()['enabled']
+
         # Widgets
         name_label = QtWidgets.QLabel(twigs[twig_id]['name'])
         name_label.setStyleSheet(self.c.gui.css['TwigView name_label'])
@@ -26,6 +29,7 @@ class TwigView(QtWidgets.QWidget):
         self.enabled_button.setFixedHeight(32)
         self.enabled_button.setIconSize(QtCore.QSize(64, 32))
         self.enabled_button.setStyleSheet(self.c.gui.css['TwigView enabled_button'])
+        self.enabled_button.clicked.connect(self.clicked_enabled_button)
 
         description_label = QtWidgets.QLabel(twigs[twig_id]['description'])
         description_label.setStyleSheet(self.c.gui.css['TwigView description_label'])
@@ -52,13 +56,21 @@ class TwigView(QtWidgets.QWidget):
         self.update_ui()
 
     def update_ui(self):
-        twig = self.get_twig()
-        if twig['enabled'] == 'enabled':
+        if self.enabled_status == 'enabled':
             self.enabled_button.setIcon( QtGui.QIcon(self.c.get_resource_path('images/switch-enabled.png')) )
-        elif twig['enabled'] == 'disabled':
+        elif self.enabled_status == 'disabled':
             self.enabled_button.setIcon( QtGui.QIcon(self.c.get_resource_path('images/switch-disabled.png')) )
         else:
             self.enabled_button.setIcon( QtGui.QIcon(self.c.get_resource_path('images/switch-undecided.png')) )
+
+    def clicked_enabled_button(self):
+        if self.enabled_status == 'undecided':
+            self.enabled_status = 'enabled'
+        elif self.enabled_status == 'enabled':
+            self.enabled_status = 'disabled'
+        elif self.enabled_status == 'disabled':
+            self.enabled_status = 'enabled'
+        self.update_ui()
 
     def get_twig(self):
         return self.c.settings.get_twig(self.twig_id)
