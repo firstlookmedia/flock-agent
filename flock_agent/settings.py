@@ -2,6 +2,8 @@
 import os
 import json
 
+from .twigs import twigs
+
 
 class Settings(object):
     def __init__(self, common):
@@ -15,8 +17,13 @@ class Settings(object):
         self.default_settings = {
             'gateway_url': None,
             'gateway_token': None,
-            'gateway_username': None
+            'gateway_username': None,
+            'twigs': {}
         }
+
+        # Note that settings.twigs is a dictionary that maps twig_ids to dicts that describe
+        # the twig. Those dicts include the fields 'query' and 'enabled', where 'enabled'
+        # is either 'undecided', 'enabled', or 'disabled'.
 
         self.load()
 
@@ -26,6 +33,18 @@ class Settings(object):
     def set(self, key, val):
         self.c.log("Settings", "set", "{} = {}".format(key, val))
         self.settings[key] = val
+        self.save()
+
+    def get_twig(self, twig_id):
+        return self.settings['twigs'][twig_id]
+
+    def enable_twig(self, twig_id):
+        self.settings['twigs'][twig_id]['enabled'] = 'enabled'
+        self.save()
+
+    def disable_twig(self, twig_id):
+        self.settings['twigs'][twig_id]['enabled'] = 'disabled'
+        self.save()
 
     def load(self):
         self.c.log("Settings", "load")
@@ -55,7 +74,32 @@ class Settings(object):
             if res:
                 self.set('gateway_username', res[0]['host_uuid'])
 
-            self.save()
+        # Fill in new twigs, and update existing twigs
+        for twig_id in twigs:
+            add = False
+            if twig_id in self.settings['twigs']:
+                if self.settings['twigs'][twig_id]['query'] != twigs[twig_id]['query']:
+                    # The query has changed, so change enabled to undecided
+                    add = True
+
+            else:
+                # The twig doesn't exist, so add it
+                add = True
+
+            # Add or update the twig
+            if add:
+                self.settings['twigs'][twig_id] = {
+                    'query': twigs[twig_id]['query'],
+                    'enabled': 'undecided'
+                }
+
+        # Delete obsolete twigs
+        twig_ids = [twig_id for twig_id in self.settings['twigs']]
+        for twig_id in twig_ids:
+            if twig_id not in twigs:
+                del self.settings['twigs'][twig_id]
+
+        self.save()
 
     def save(self):
         self.c.log("Settings", "save")
