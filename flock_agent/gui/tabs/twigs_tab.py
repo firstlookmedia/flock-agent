@@ -8,6 +8,8 @@ class TwigsTab(QtWidgets.QWidget):
     """
     List of twigs that have been decided on
     """
+    refresh = QtCore.pyqtSignal()
+
     def __init__(self, common):
         super(TwigsTab, self).__init__()
         self.c = common
@@ -32,8 +34,16 @@ class TwigsTab(QtWidgets.QWidget):
         twigs_list.setWidgetResizable(True)
         twigs_list.setWidget(twigs_widget)
 
+        # Buttons
+        apply_button = QtWidgets.QPushButton("Apply Changes")
+        buttons_layout = QtWidgets.QHBoxLayout()
+        buttons_layout.addStretch()
+        buttons_layout.addWidget(apply_button)
+        buttons_layout.addStretch()
+
         # Layout
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(label)
         layout.addWidget(twigs_list, stretch=1)
+        layout.addLayout(buttons_layout)
         self.setLayout(layout)

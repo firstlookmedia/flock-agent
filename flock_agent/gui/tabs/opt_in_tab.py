@@ -8,6 +8,8 @@ class OptInTab(QtWidgets.QWidget):
     """
     Prompt the user to opt-in to undecided twigs
     """
+    refresh = QtCore.pyqtSignal()
+    
     def __init__(self, common):
         super(OptInTab, self).__init__()
         self.c = common
@@ -36,7 +38,7 @@ class OptInTab(QtWidgets.QWidget):
         enable_all_button = QtWidgets.QPushButton("Enable All")
         enable_all_button.setStyleSheet(self.c.gui.css['OptInTab enable_all_button'])
         enable_all_button.setFlat(True)
-        apply_button = QtWidgets.QPushButton("Apply")
+        apply_button = QtWidgets.QPushButton("Apply Changes")
 
         buttons_layout = QtWidgets.QHBoxLayout()
         buttons_layout.addStretch()

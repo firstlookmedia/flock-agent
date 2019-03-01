@@ -11,7 +11,7 @@ class SettingsTab(QtWidgets.QWidget):
     """
     Settings
     """
-    quit_signal = QtCore.pyqtSignal()
+    quit = QtCore.pyqtSignal()
 
     STATUS_NOT_REGISTERED = 0
     STATUS_REGISTERED = 1
@@ -133,4 +133,4 @@ class SettingsTab(QtWidgets.QWidget):
 
     def quit_clicked(self):
         self.c.log('SettingsTab', 'quit_clicked')
-        self.quit_signal.emit()
+        self.quit.emit()

@@ -35,11 +35,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Tabs
         self.opt_in_tab = OptInTab(self.c)
+        self.opt_in_tab.refresh.connect(self.update_ui)
 
         self.twigs_tab = TwigsTab(self.c)
+        self.twigs_tab.refresh.connect(self.update_ui)
 
         self.settings_tab = SettingsTab(self.c)
-        self.settings_tab.quit_signal.connect(self.quit)
+        self.settings_tab.quit.connect(self.quit)
 
         tabs = QtWidgets.QTabWidget()
         tabs.addTab(self.opt_in_tab, "Opt-In")
@@ -58,6 +60,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.systray = SysTray(self.c)
         self.systray.activated.connect(self.toggle_window)
 
+        self.update_ui()
         self.show()
 
     def closeEvent(self, e):
@@ -67,6 +70,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.c.log("MainWindow", "closeEvent", "Hiding window")
         self.hide()
         e.ignore()
+
+    def update_ui(self):
+        if len(self.c.settings.get_undecided_twig_ids()) > 0:
+            self.opt_in_tab.show()
+        else:
+            self.opt_in_tab.hide()
+
+        if len(self.c.settings.get_decided_twig_ids()) > 0:
+            self.twigs_tab.show()
+        else:
+            self.twigs_tab.hide()
 
     def toggle_window(self):
         self.c.log("MainWindow", "toggle_window")
