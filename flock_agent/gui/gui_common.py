@@ -54,6 +54,17 @@ class GuiCommon(object):
                 }
                 """,
 
+            'OptInTab enable_all_button': """
+                QPushButton {
+                    color: #ffffff;
+                    background-color: #2e8e2a;
+                    font-weight: bold;
+                    font-size: 18px;
+                    border-radius: 5px;
+                    padding: 5px 10px 5px 10px;
+                }
+                """,
+
             'SettingsTab server_url_label': """
                 QLabel {
                     font-family: monospace;
@@ -68,7 +79,6 @@ class GuiCommon(object):
                     font-weight: bold;
                     border-radius: 5px;
                     padding: 5px 10px 5px 10px;
-                    margin-top: 20px;
                 }
                 """
         }

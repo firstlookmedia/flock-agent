@@ -16,6 +16,7 @@ class TwigsTab(QtWidgets.QWidget):
 
         # Label
         label = QtWidgets.QLabel("This is the data that we're collecting from your computer:")
+        label.setWordWrap(True)
 
         # List of twigs
         twigs_layout = QtWidgets.QVBoxLayout()

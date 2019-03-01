@@ -15,7 +15,7 @@ class OptInTab(QtWidgets.QWidget):
         self.c.log('OptInTab', '__init__')
 
         # Label
-        label = QtWidgets.QLabel("There is new data we'd like to collect from your computer. We recommend that you consent to us collecting all of it.")
+        label = QtWidgets.QLabel("There is new data we'd like to collect from your computer. We recommend that enable all of it.")
         label.setWordWrap(True)
 
         # List of twigs
@@ -32,8 +32,21 @@ class OptInTab(QtWidgets.QWidget):
         twigs_list.setWidgetResizable(True)
         twigs_list.setWidget(twigs_widget)
 
+        # Buttons
+        enable_all_button = QtWidgets.QPushButton("Enable All")
+        enable_all_button.setStyleSheet(self.c.gui.css['OptInTab enable_all_button'])
+        enable_all_button.setFlat(True)
+        apply_button = QtWidgets.QPushButton("Apply")
+
+        buttons_layout = QtWidgets.QHBoxLayout()
+        buttons_layout.addStretch()
+        buttons_layout.addWidget(enable_all_button)
+        buttons_layout.addWidget(apply_button)
+        buttons_layout.addStretch()
+
         # Layout
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(label)
         layout.addWidget(twigs_list, stretch=1)
+        layout.addLayout(buttons_layout)
         self.setLayout(layout)
