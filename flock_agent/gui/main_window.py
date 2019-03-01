@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-from .tabs import TwigsTab, SettingsTab
+from .tabs import OptInTab, TwigsTab, SettingsTab
 from .systray import SysTray
 
 
@@ -34,12 +34,15 @@ class MainWindow(QtWidgets.QMainWindow):
         header_layout.addStretch()
 
         # Tabs
+        self.opt_in_tab = OptInTab(self.c)
+
         self.twigs_tab = TwigsTab(self.c)
 
         self.settings_tab = SettingsTab(self.c)
         self.settings_tab.quit_signal.connect(self.quit)
 
         tabs = QtWidgets.QTabWidget()
+        tabs.addTab(self.opt_in_tab, "Opt-In")
         tabs.addTab(self.twigs_tab, "Data")
         tabs.addTab(self.settings_tab, "Settings")
 

@@ -4,22 +4,23 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from ..twigs import TwigView
 
 
-class TwigsTab(QtWidgets.QWidget):
+class OptInTab(QtWidgets.QWidget):
     """
-    List of twigs that have been decided on
+    Prompt the user to opt-in to undecided twigs
     """
     def __init__(self, common):
-        super(TwigsTab, self).__init__()
+        super(OptInTab, self).__init__()
         self.c = common
 
-        self.c.log('TwigsTab', '__init__')
+        self.c.log('OptInTab', '__init__')
 
         # Label
-        label = QtWidgets.QLabel("This is the data that we're collecting from your computer:")
+        label = QtWidgets.QLabel("There is new data we'd like to collect from your computer. We recommend that you consent to us collecting all of it.")
+        label.setWordWrap(True)
 
         # List of twigs
         twigs_layout = QtWidgets.QVBoxLayout()
-        for twig_id in self.c.settings.get_decided_twig_ids():
+        for twig_id in self.c.settings.get_undecided_twig_ids():
             twig_view = TwigView(self.c, twig_id)
             twigs_layout.addWidget(twig_view)
         twigs_layout.addStretch()
