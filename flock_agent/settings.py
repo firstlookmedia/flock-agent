@@ -46,6 +46,13 @@ class Settings(object):
         self.settings['twigs'][twig_id]['enabled'] = 'disabled'
         self.save()
 
+    def get_undecided_twig_ids(self):
+        twig_ids = []
+        for twig_id in self.settings['twigs']:
+            if self.settings['twigs'][twig_id]['enabled'] == 'undecided':
+                twig_ids.append(twig_id)
+        return twig_ids
+
     def load(self):
         self.c.log("Settings", "load")
         if os.path.isfile(self.settings_filename):
