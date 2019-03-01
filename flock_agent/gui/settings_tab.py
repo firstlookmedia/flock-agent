@@ -35,6 +35,7 @@ class SettingsTab(QtWidgets.QWidget):
         self.server_url_label = QtWidgets.QLabel()
         self.server_url_label.setStyleSheet(self.c.gui.css['SettingsTab server_url_label'])
         self.server_button = QtWidgets.QPushButton()
+        self.server_button.setDefault(True)
         self.server_button.clicked.connect(self.server_button_clicked)
 
         server_url_layout = QtWidgets.QHBoxLayout()
@@ -60,6 +61,7 @@ class SettingsTab(QtWidgets.QWidget):
         # Layout
         layout = QtWidgets.QVBoxLayout()
         layout.addLayout(server_layout)
+        layout.addStretch()
         layout.addLayout(buttons_layout)
         self.setLayout(layout)
 

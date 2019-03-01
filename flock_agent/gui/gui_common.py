@@ -26,6 +26,34 @@ class GuiCommon(object):
                 }
                 """,
 
+            'TwigView name_label': """
+                QLabel {
+                    font-weight: bold;
+                    font-size: 16px;
+                }
+                """,
+
+            'TwigView description_label': """
+                QLabel {
+                }
+                """,
+
+            'TwigView enabled_button': """
+                QPushButton {
+                    margin: 0;
+                    padding: 0;
+                }
+                """,
+
+            'TwigView details_button': """
+                QPushButton {
+                    color: #3461bc;
+                    text-decoration: underline;
+                    padding: 5px;
+                    font-size: 12px;
+                }
+                """,
+
             'SettingsTab server_url_label': """
                 QLabel {
                     font-family: monospace;
