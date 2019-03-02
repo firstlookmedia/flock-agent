@@ -72,12 +72,14 @@ class TwigsTab(QtWidgets.QWidget):
     def update_ui(self):
         self.c.log('TwigsTab ({})'.format(self.mode), 'update_ui')
 
-        # Remove all twigs
+        # Remove all twig views from the layout
         for twig_view in self.twig_views:
             # Remove the twig view from the layout
             self.twigs_layout.removeWidget(twig_view)
             twig_view.close()
 
+        # Remove all twig views from the internal list
+        for twig_view in self.twig_views:
             # Remove it from the list of twig views
             self.twig_views.remove(twig_view)
 
