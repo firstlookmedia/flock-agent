@@ -16,6 +16,9 @@ class TwigsTab(QtWidgets.QWidget):
 
         self.c.log('TwigsTab', '__init__')
 
+        # Keep track of the twig views
+        self.twig_views = []
+
         # Label
         label = QtWidgets.QLabel("This is the data that we're collecting from your computer:")
         label.setWordWrap(True)
@@ -36,6 +39,7 @@ class TwigsTab(QtWidgets.QWidget):
 
         # Buttons
         apply_button = QtWidgets.QPushButton("Apply Changes")
+        apply_button.clicked.connect(self.clicked_apply_button)
         buttons_layout = QtWidgets.QHBoxLayout()
         buttons_layout.addStretch()
         buttons_layout.addWidget(apply_button)
@@ -47,3 +51,25 @@ class TwigsTab(QtWidgets.QWidget):
         layout.addWidget(twigs_list, stretch=1)
         layout.addLayout(buttons_layout)
         self.setLayout(layout)
+
+    def update_ui(self):
+        self.c.log('TwigsTab', 'update_ui')
+
+        # Remove all twigs
+        for twig_view in self.twig_views:
+            # Remove the twig view from the layout
+            self.twigs_layout.removeWidget(twig_view)
+            twig_view.close()
+
+            # Remove it from the list of twig views
+            self.twig_views.remove(twig_view)
+
+        # Add decided twigs
+        decided_twig_ids = self.c.settings.get_decided_twig_ids()
+        for twig_id in decided_twig_ids:
+            twig_view = TwigView(self.c, twig_id)
+            self.twig_views.append(twig_view)
+            self.twigs_layout.addWidget(twig_view)
+
+    def clicked_apply_button(self):
+        self.c.log('TwigsTab', 'clicked_apply_button')

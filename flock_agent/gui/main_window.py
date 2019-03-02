@@ -16,11 +16,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle('Flock')
         self.setWindowIcon(self.c.gui.icon)
 
-        flags = QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | \
-            QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowCloseButtonHint | \
-            QtCore.Qt.WindowStaysOnTopHint
-        #self.setWindowFlags(flags)
-
         # Header
         logo = QtWidgets.QLabel()
         logo.setPixmap(QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/icon.png"))))
@@ -43,15 +38,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings_tab = SettingsTab(self.c)
         self.settings_tab.quit.connect(self.quit)
 
-        tabs = QtWidgets.QTabWidget()
-        tabs.addTab(self.opt_in_tab, "Opt-In")
-        tabs.addTab(self.twigs_tab, "Data")
-        tabs.addTab(self.settings_tab, "Settings")
+        self.tabs = QtWidgets.QTabWidget()
+        self.tabs.addTab(self.settings_tab, "Settings")
 
         # Layout
         layout = QtWidgets.QVBoxLayout()
         layout.addLayout(header_layout)
-        layout.addWidget(tabs, stretch=1)
+        layout.addWidget(self.tabs, stretch=1)
         central_widget = QtWidgets.QWidget()
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
@@ -72,15 +65,31 @@ class MainWindow(QtWidgets.QMainWindow):
         e.ignore()
 
     def update_ui(self):
-        if len(self.c.settings.get_undecided_twig_ids()) > 0:
-            self.opt_in_tab.show()
-        else:
-            self.opt_in_tab.hide()
+        self.c.log("MainWindow", "update_ui")
+        
+        # Update the twig data in the tabs
+        self.opt_in_tab.update_ui()
+        self.twigs_tab.update_ui()
 
-        if len(self.c.settings.get_decided_twig_ids()) > 0:
-            self.twigs_tab.show()
+        # Should the twigs tab be displayed?
+        twigs_tab_index = self.tabs.indexOf(self.twigs_tab)
+        if len(self.c.settings.get_decided_twig_ids()) == 0:
+            if twigs_tab_index != -1:
+                self.tabs.removeTab(twigs_tab_index)
         else:
-            self.twigs_tab.hide()
+            if twigs_tab_index == -1:
+                self.tabs.insertTab(0, self.twigs_tab, "Data")
+
+        # Should the opt-in tab be displayed?
+        opt_in_tab_index = self.tabs.indexOf(self.opt_in_tab)
+        if len(self.c.settings.get_undecided_twig_ids()) == 0:
+            if opt_in_tab_index != -1:
+                self.tabs.removeTab(opt_in_tab_index)
+        else:
+            if opt_in_tab_index == -1:
+                self.tabs.insertTab(0, self.opt_in_tab, "Opt-In")
+
+        self.tabs.setCurrentIndex(0)
 
     def toggle_window(self):
         self.c.log("MainWindow", "toggle_window")
