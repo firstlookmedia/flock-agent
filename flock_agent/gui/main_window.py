@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-from .tabs import OptInTab, TwigsTab, SettingsTab
+from .tabs import TwigsTab, SettingsTab
 from .systray import SysTray
 
 
@@ -29,11 +29,11 @@ class MainWindow(QtWidgets.QMainWindow):
         header_layout.addStretch()
 
         # Tabs
-        self.opt_in_tab = OptInTab(self.c)
+        self.opt_in_tab = TwigsTab(self.c, is_opt_in=True)
         self.opt_in_tab.refresh.connect(self.update_ui)
 
-        self.twigs_tab = TwigsTab(self.c)
-        self.twigs_tab.refresh.connect(self.update_ui)
+        self.data_tab = TwigsTab(self.c, is_opt_in=False)
+        self.data_tab.refresh.connect(self.update_ui)
 
         self.settings_tab = SettingsTab(self.c)
         self.settings_tab.quit.connect(self.quit)
@@ -69,20 +69,20 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Update the twig data in the tabs
         self.opt_in_tab.update_ui()
-        self.twigs_tab.update_ui()
+        self.data_tab.update_ui()
 
         # Remove tabs
         opt_in_tab_index = self.tabs.indexOf(self.opt_in_tab)
         if opt_in_tab_index != -1:
             self.tabs.removeTab(opt_in_tab_index)
-        twigs_tab_index = self.tabs.indexOf(self.twigs_tab)
+        twigs_tab_index = self.tabs.indexOf(self.data_tab)
         if twigs_tab_index != -1:
             self.tabs.removeTab(twigs_tab_index)
 
         # Add tabs that should be shown
         twigs_tab_should_show = len(self.c.settings.get_decided_twig_ids()) > 0
         if twigs_tab_should_show:
-            self.tabs.insertTab(0, self.twigs_tab, "Data")
+            self.tabs.insertTab(0, self.data_tab, "Data")
         opt_in_tab_should_show = len(self.c.settings.get_undecided_twig_ids()) > 0
         if opt_in_tab_should_show:
             self.tabs.insertTab(0, self.opt_in_tab, "Opt-In")
@@ -93,8 +93,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.tabs.setCurrentIndex(index)
             else:
                 active_tab = None
-        elif active_tab == 'twigs':
-            index = self.tabs.indexOf(self.twigs_tab)
+        elif active_tab == 'data':
+            index = self.tabs.indexOf(self.data_tab)
             if index != -1:
                 self.tabs.setCurrentIndex(index)
             else:
