@@ -64,32 +64,43 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hide()
         e.ignore()
 
-    def update_ui(self):
+    def update_ui(self, active_tab=None):
         self.c.log("MainWindow", "update_ui")
-        
+
         # Update the twig data in the tabs
         self.opt_in_tab.update_ui()
         self.twigs_tab.update_ui()
 
-        # Should the twigs tab be displayed?
-        twigs_tab_index = self.tabs.indexOf(self.twigs_tab)
-        if len(self.c.settings.get_decided_twig_ids()) == 0:
-            if twigs_tab_index != -1:
-                self.tabs.removeTab(twigs_tab_index)
-        else:
-            if twigs_tab_index == -1:
-                self.tabs.insertTab(0, self.twigs_tab, "Data")
-
-        # Should the opt-in tab be displayed?
+        # Remove tabs
         opt_in_tab_index = self.tabs.indexOf(self.opt_in_tab)
-        if len(self.c.settings.get_undecided_twig_ids()) == 0:
-            if opt_in_tab_index != -1:
-                self.tabs.removeTab(opt_in_tab_index)
-        else:
-            if opt_in_tab_index == -1:
-                self.tabs.insertTab(0, self.opt_in_tab, "Opt-In")
+        if opt_in_tab_index != -1:
+            self.tabs.removeTab(opt_in_tab_index)
+        twigs_tab_index = self.tabs.indexOf(self.twigs_tab)
+        if twigs_tab_index != -1:
+            self.tabs.removeTab(twigs_tab_index)
 
-        self.tabs.setCurrentIndex(0)
+        # Add tabs that should be shown
+        twigs_tab_should_show = len(self.c.settings.get_decided_twig_ids()) > 0
+        if twigs_tab_should_show:
+            self.tabs.insertTab(0, self.twigs_tab, "Data")
+        opt_in_tab_should_show = len(self.c.settings.get_undecided_twig_ids()) > 0
+        if opt_in_tab_should_show:
+            self.tabs.insertTab(0, self.opt_in_tab, "Opt-In")
+
+        if active_tab == 'opt-in':
+            index = self.tabs.indexOf(self.opt_in_tab)
+            if index != -1:
+                self.tabs.setCurrentIndex(index)
+            else:
+                active_tab = None
+        elif active_tab == 'twigs':
+            index = self.tabs.indexOf(self.twigs_tab)
+            if index != -1:
+                self.tabs.setCurrentIndex(index)
+            else:
+                active_tab = None
+        if active_tab == None:
+            self.tabs.setCurrentIndex(0)
 
     def toggle_window(self):
         self.c.log("MainWindow", "toggle_window")

@@ -8,7 +8,7 @@ class OptInTab(QtWidgets.QWidget):
     """
     Prompt the user to opt-in to undecided twigs
     """
-    refresh = QtCore.pyqtSignal()
+    refresh = QtCore.pyqtSignal(str)
 
     def __init__(self, common):
         super(OptInTab, self).__init__()
@@ -69,13 +69,28 @@ class OptInTab(QtWidgets.QWidget):
 
         # Add undecided twigs
         undecided_twig_ids = self.c.settings.get_undecided_twig_ids()
-        for twig_id in undecided_twig_ids:
+        for twig_id in reversed(undecided_twig_ids):
             twig_view = TwigView(self.c, twig_id)
             self.twig_views.append(twig_view)
-            self.twigs_layout.addWidget(twig_view)
+            self.twigs_layout.insertWidget(0, twig_view)
 
     def clicked_enable_all_button(self):
         self.c.log('OptInTab', 'clicked_enable_all_button')
 
+        for twig_id in self.c.settings.get_undecided_twig_ids():
+            self.c.settings.enable_twig(twig_id)
+        self.c.settings.save()
+
+        self.refresh.emit('twigs')
+
     def clicked_apply_button(self):
         self.c.log('OptInTab', 'clicked_apply_button')
+
+        for twig_view in self.twig_views:
+            if twig_view.enabled_status == 'enabled':
+                self.c.settings.enable_twig(twig_view.twig_id)
+            elif twig_view.enabled_status == 'disabled':
+                self.c.settings.disable_twig(twig_view.twig_id)
+        self.c.settings.save()
+
+        self.refresh.emit('opt-in')

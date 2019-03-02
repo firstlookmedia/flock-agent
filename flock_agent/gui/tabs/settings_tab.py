@@ -102,6 +102,7 @@ class SettingsTab(QtWidgets.QWidget):
 
             # Save the server URL in settings
             self.c.settings.set('gateway_url', server_url)
+            self.c.settings.save()
 
             # Try to register
             self.c.log('SettingsTab', 'server_button_clicked', 'registering with server')

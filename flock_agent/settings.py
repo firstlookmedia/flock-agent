@@ -33,18 +33,15 @@ class Settings(object):
     def set(self, key, val):
         self.c.log("Settings", "set", "{} = {}".format(key, val))
         self.settings[key] = val
-        self.save()
 
     def get_twig(self, twig_id):
         return self.settings['twigs'][twig_id]
 
     def enable_twig(self, twig_id):
         self.settings['twigs'][twig_id]['enabled'] = 'enabled'
-        self.save()
 
     def disable_twig(self, twig_id):
         self.settings['twigs'][twig_id]['enabled'] = 'disabled'
-        self.save()
 
     def get_decided_twig_ids(self):
         twig_ids = []

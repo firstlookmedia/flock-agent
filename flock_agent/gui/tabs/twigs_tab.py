@@ -8,7 +8,7 @@ class TwigsTab(QtWidgets.QWidget):
     """
     List of twigs that have been decided on
     """
-    refresh = QtCore.pyqtSignal()
+    refresh = QtCore.pyqtSignal(str)
 
     def __init__(self, common):
         super(TwigsTab, self).__init__()
@@ -24,14 +24,11 @@ class TwigsTab(QtWidgets.QWidget):
         label.setWordWrap(True)
 
         # List of twigs
-        twigs_layout = QtWidgets.QVBoxLayout()
-        for twig_id in self.c.settings.get_decided_twig_ids():
-            twig_view = TwigView(self.c, twig_id)
-            twigs_layout.addWidget(twig_view)
-        twigs_layout.addStretch()
+        self.twigs_layout = QtWidgets.QVBoxLayout()
+        self.twigs_layout.addStretch()
 
         twigs_widget = QtWidgets.QWidget()
-        twigs_widget.setLayout(twigs_layout)
+        twigs_widget.setLayout(self.twigs_layout)
 
         twigs_list = QtWidgets.QScrollArea()
         twigs_list.setWidgetResizable(True)
@@ -66,10 +63,19 @@ class TwigsTab(QtWidgets.QWidget):
 
         # Add decided twigs
         decided_twig_ids = self.c.settings.get_decided_twig_ids()
-        for twig_id in decided_twig_ids:
+        for twig_id in reversed(decided_twig_ids):
             twig_view = TwigView(self.c, twig_id)
             self.twig_views.append(twig_view)
-            self.twigs_layout.addWidget(twig_view)
+            self.twigs_layout.insertWidget(0, twig_view)
 
     def clicked_apply_button(self):
         self.c.log('TwigsTab', 'clicked_apply_button')
+
+        for twig_view in self.twig_views:
+            if twig_view.enabled_status == 'enabled':
+                self.c.settings.enable_twig(twig_view.twig_id)
+            elif twig_view.enabled_status == 'disabled':
+                self.c.settings.disable_twig(twig_view.twig_id)
+        self.c.settings.save()
+
+        self.refresh.emit('twigs')
