@@ -52,7 +52,13 @@ class GuiCommon(object):
             'TwigDialog name_label': """
                 QLabel {
                     font-weight: bold;
-                    font-size: 16px;
+                    font-size: 20px;
+                }
+                """,
+
+            'TwigDialog description_label': """
+                QLabel {
+                    margin-bottom: 20px;
                 }
                 """,
 
@@ -60,6 +66,12 @@ class GuiCommon(object):
                 QLabel {
                     font-style: italic;
                     color: #666666;
+                }
+                """,
+
+            'TwigDialog osquery_label': """
+                QLabel {
+                    font-family: monospace;
                 }
                 """,
 

@@ -88,6 +88,8 @@ class TwigDialog(QtWidgets.QDialog):
         self.c = common
         self.twig_id = twig_id
 
+        self.c.log('TwigDialog', '__init__', twig_id)
+
         self.setWindowTitle('Details of: {}'.format(twigs[self.twig_id]['name']))
         self.setWindowIcon(self.c.gui.icon)
         self.setModal(True)
@@ -95,11 +97,20 @@ class TwigDialog(QtWidgets.QDialog):
         name_label = QtWidgets.QLabel(twigs[twig_id]['name'])
         name_label.setStyleSheet(self.c.gui.css['TwigDialog name_label'])
 
-        description_label = QtWidgets.QLabel(twigs[twig_id]['description'])
-        description_label.setWordWrap(True)
-
         interval_label = QtWidgets.QLabel(self.get_interval_string())
         interval_label.setStyleSheet(self.c.gui.css['TwigDialog interval_label'])
+
+        description_label = QtWidgets.QLabel(twigs[twig_id]['description'])
+        description_label.setWordWrap(True)
+        description_label.setStyleSheet(self.c.gui.css['TwigDialog description_label'])
+
+        osquery_label = QtWidgets.QLabel(twigs[twig_id]['query'])
+        osquery_label.setStyleSheet(self.c.gui.css['TwigDialog osquery_label'])
+        osquery_label.setWordWrap(True)
+        osquery_layout = QtWidgets.QHBoxLayout()
+        osquery_layout.addWidget(osquery_label)
+        osquery_groupbox = QtWidgets.QGroupBox("Osquery SQL command")
+        osquery_groupbox.setLayout(osquery_layout)
 
         ok_button = QtWidgets.QPushButton('Ok')
         ok_button.clicked.connect(self.accept)
@@ -110,8 +121,10 @@ class TwigDialog(QtWidgets.QDialog):
 
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(name_label)
-        layout.addWidget(description_label)
         layout.addWidget(interval_label)
+        layout.addWidget(description_label)
+        layout.addWidget(osquery_groupbox)
+        layout.addStretch()
         layout.addLayout(buttons_layout)
         self.setLayout(layout)
 
@@ -138,6 +151,3 @@ class TwigDialog(QtWidgets.QDialog):
             parts.append("{} seconds".format(seconds))
         text += ", ".join(parts)
         return text
-
-    def get_twig(self):
-        return self.c.settings.get_twig(self.twig_id)
