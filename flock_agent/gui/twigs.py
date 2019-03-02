@@ -94,6 +94,8 @@ class TwigDialog(QtWidgets.QDialog):
         self.setWindowIcon(self.c.gui.icon)
         self.setModal(True)
 
+        self.setMinimumWidth(500)
+
         name_label = QtWidgets.QLabel(twigs[twig_id]['name'])
         name_label.setStyleSheet(self.c.gui.css['TwigDialog name_label'])
 
@@ -112,6 +114,16 @@ class TwigDialog(QtWidgets.QDialog):
         osquery_groupbox = QtWidgets.QGroupBox("Osquery SQL command")
         osquery_groupbox.setLayout(osquery_layout)
 
+        self.table_loading_label = QtWidgets.QLabel('Loading data...')
+        self.table_loading_label.show()
+
+        self.table = QtWidgets.QTableWidget()
+        table_layout = QtWidgets.QHBoxLayout()
+        table_layout.addWidget(self.table)
+        self.table_groupbox = QtWidgets.QGroupBox('Current data')
+        self.table_groupbox.setLayout(table_layout)
+        self.table_groupbox.hide()
+
         ok_button = QtWidgets.QPushButton('Ok')
         ok_button.clicked.connect(self.accept)
 
@@ -124,9 +136,15 @@ class TwigDialog(QtWidgets.QDialog):
         layout.addWidget(interval_label)
         layout.addWidget(description_label)
         layout.addWidget(osquery_groupbox)
-        layout.addStretch()
+        layout.addWidget(self.table_loading_label, stretch=1)
+        layout.addWidget(self.table_groupbox, stretch=1)
         layout.addLayout(buttons_layout)
         self.setLayout(layout)
+
+        # Run the osquery command in a separate thread
+        self.t = TwigOsqueryThread(self.c, twig_id)
+        self.t.query_finished.connect(self.query_finished)
+        self.t.start()
 
         self.exec_()
 
@@ -151,3 +169,54 @@ class TwigDialog(QtWidgets.QDialog):
             parts.append("{} seconds".format(seconds))
         text += ", ".join(parts)
         return text
+
+    def query_finished(self, data):
+        self.c.log('TwigDialog', 'query_finished')
+
+        # Count rows and columns
+        row_count = len(data)
+        if row_count > 0:
+            column_count = len(data[0])
+        else:
+            column_count = 0
+
+        self.table.setRowCount(row_count)
+        self.table.setColumnCount(column_count)
+
+        # Add headers
+        header_labels = []
+        if row_count > 0:
+            for header_label in list(data[0]):
+                header_labels.append(header_label)
+        self.table.setHorizontalHeaderLabels(header_labels)
+
+        # Add data
+        for row in range(row_count):
+            for column, key in enumerate(list(data[row])):
+                val = data[row][key]
+                item = QtWidgets.QTableWidgetItem(val, QtWidgets.QTableWidgetItem.Type)
+                self.table.setItem(row, column, item)
+
+        # Hide the label and show the table
+        self.table_loading_label.hide()
+        self.table_groupbox.show()
+
+        self.adjustSize()
+
+
+class TwigOsqueryThread(QtCore.QThread):
+    """
+    Run the osquery command
+    """
+    query_finished = QtCore.pyqtSignal(list)
+
+    def __init__(self, common, twig_id):
+        super(TwigOsqueryThread, self).__init__()
+        self.c = common
+        self.twig_id = twig_id
+        self.c.log('TwigOsqueryThread', '__init__', twig_id)
+
+    def run(self):
+        self.c.log('TwigOsqueryThread', 'run', twigs[self.twig_id]['query'])
+        data = self.c.osquery(twigs[self.twig_id]['query'])
+        self.query_finished.emit(data)

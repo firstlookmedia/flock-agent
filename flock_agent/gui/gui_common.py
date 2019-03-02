@@ -75,6 +75,13 @@ class GuiCommon(object):
                 }
                 """,
 
+            'TwigDialog table_item_header': """
+                QLabel {
+                    font-family: monospace;
+                    font-weight: bold;
+                }
+                """,
+
             'OptInTab enable_all_button': """
                 QPushButton {
                     color: #ffffff;
