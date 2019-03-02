@@ -32,12 +32,12 @@ class TwigView(QtWidgets.QWidget):
         self.enabled_button.clicked.connect(self.clicked_enabled_button)
 
         description_label = QtWidgets.QLabel(twigs[twig_id]['description'])
-        description_label.setStyleSheet(self.c.gui.css['TwigView description_label'])
         description_label.setWordWrap(True)
 
         details_button = QtWidgets.QPushButton('Details')
         details_button.setFlat(True)
         details_button.setStyleSheet(self.c.gui.css['TwigView details_button'])
+        details_button.clicked.connect(self.clicked_details_button)
 
         # Layout
         top_layout = QtWidgets.QHBoxLayout()
@@ -71,6 +71,73 @@ class TwigView(QtWidgets.QWidget):
         elif self.enabled_status == 'disabled':
             self.enabled_status = 'enabled'
         self.update_ui()
+
+    def clicked_details_button(self):
+        TwigDialog(self.c, self.twig_id)
+
+    def get_twig(self):
+        return self.c.settings.get_twig(self.twig_id)
+
+
+class TwigDialog(QtWidgets.QDialog):
+    """
+    A dialog box showing details about a twig
+    """
+    def __init__(self, common, twig_id):
+        super(TwigDialog, self).__init__()
+        self.c = common
+        self.twig_id = twig_id
+
+        self.setWindowTitle('Details of: {}'.format(twigs[self.twig_id]['name']))
+        self.setWindowIcon(self.c.gui.icon)
+        self.setModal(True)
+
+        name_label = QtWidgets.QLabel(twigs[twig_id]['name'])
+        name_label.setStyleSheet(self.c.gui.css['TwigDialog name_label'])
+
+        description_label = QtWidgets.QLabel(twigs[twig_id]['description'])
+        description_label.setWordWrap(True)
+
+        interval_label = QtWidgets.QLabel(self.get_interval_string())
+        interval_label.setStyleSheet(self.c.gui.css['TwigDialog interval_label'])
+
+        ok_button = QtWidgets.QPushButton('Ok')
+        ok_button.clicked.connect(self.accept)
+
+        buttons_layout = QtWidgets.QHBoxLayout()
+        buttons_layout.addStretch()
+        buttons_layout.addWidget(ok_button)
+
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(name_label)
+        layout.addWidget(description_label)
+        layout.addWidget(interval_label)
+        layout.addLayout(buttons_layout)
+        self.setLayout(layout)
+
+        self.exec_()
+
+    def get_interval_string(self):
+        seconds = twigs[self.twig_id]['interval']
+        minutes = 0
+        hours = 0
+        if seconds > 60:
+            minutes = seconds // 60
+            seconds = seconds % 60
+        if minutes > 60:
+            hours = minutes // 60
+            minutes = minutes % 60
+
+        text = "Runs every "
+        parts = []
+        if hours > 0:
+            parts.append("{} hours".format(hours))
+        if minutes > 0:
+            parts.append("{} minutes".format(minutes))
+        if seconds > 0:
+            parts.append("{} seconds".format(seconds))
+        text += ", ".join(parts)
+        return text
 
     def get_twig(self):
         return self.c.settings.get_twig(self.twig_id)

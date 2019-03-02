@@ -33,11 +33,6 @@ class GuiCommon(object):
                 }
                 """,
 
-            'TwigView description_label': """
-                QLabel {
-                }
-                """,
-
             'TwigView enabled_button': """
                 QPushButton {
                     margin: 0;
@@ -51,6 +46,20 @@ class GuiCommon(object):
                     text-decoration: underline;
                     padding: 5px;
                     font-size: 12px;
+                }
+                """,
+
+            'TwigDialog name_label': """
+                QLabel {
+                    font-weight: bold;
+                    font-size: 16px;
+                }
+                """,
+
+            'TwigDialog interval_label': """
+                QLabel {
+                    font-style: italic;
+                    color: #666666;
                 }
                 """,
 
