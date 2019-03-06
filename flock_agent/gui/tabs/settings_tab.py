@@ -47,6 +47,14 @@ class SettingsTab(QtWidgets.QWidget):
         server_layout.addWidget(self.server_label)
         server_layout.addLayout(server_url_layout)
 
+        # Automatically enable checkbox
+        self.automatically_enable_twigs_checkbox = QtWidgets.QCheckBox("Automatically enable new data collection (don't ask me to opt-in each time)")
+        self.automatically_enable_twigs_checkbox.stateChanged.connect(self.automatically_enable_twigs_toggled)
+        if self.c.settings.get('automatically_enable_twigs'):
+            self.automatically_enable_twigs_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
+        else:
+            self.automatically_enable_twigs_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
+
         # Buttons
         quit_button = QtWidgets.QPushButton('Quit Flock Agent')
         quit_button.clicked.connect(self.quit_clicked)
@@ -61,6 +69,7 @@ class SettingsTab(QtWidgets.QWidget):
         # Layout
         layout = QtWidgets.QVBoxLayout()
         layout.addLayout(server_layout)
+        layout.addWidget(self.automatically_enable_twigs_checkbox)
         layout.addStretch()
         layout.addLayout(buttons_layout)
         self.setLayout(layout)
@@ -131,6 +140,11 @@ class SettingsTab(QtWidgets.QWidget):
             self.status = self.STATUS_NOT_REGISTERED
 
         self.update_ui()
+
+    def automatically_enable_twigs_toggled(self):
+        is_checked = self.automatically_enable_twigs_checkbox.checkState() == QtCore.Qt.CheckState.Checked
+        self.c.settings.set('automatically_enable_twigs', is_checked)
+        self.c.settings.save()
 
     def quit_clicked(self):
         self.c.log('SettingsTab', 'quit_clicked')

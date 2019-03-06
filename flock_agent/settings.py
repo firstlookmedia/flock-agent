@@ -18,6 +18,7 @@ class Settings(object):
             'gateway_url': None,
             'gateway_token': None,
             'gateway_username': None,
+            'automatically_enable_twigs': False,
             'twigs': {}
         }
 
