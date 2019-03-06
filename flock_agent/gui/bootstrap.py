@@ -58,6 +58,9 @@ class Bootstrap(object):
             if not self.exec([self.homebrew_path, 'install', 'osquery']):
                 return False
 
+        self.c.log('Bootstrap', 'go', 'Configuring osquery')
+        
+
         self.c.log('Bootstrap', 'go', 'Bootstrap complete')
         return True
 

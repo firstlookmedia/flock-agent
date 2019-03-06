@@ -9,10 +9,9 @@ class Settings(object):
     def __init__(self, common):
         self.c = common
 
-        self.appdata_path = os.path.expanduser("~/Library/Application Support/Flock Agent")
-        self.settings_filename = os.path.join(self.appdata_path, 'settings.json')
+        self.settings_filename = os.path.join(self.c.appdata_path, 'settings.json')
 
-        self.c.log("Settings", "__init__", "appdata_path: {}".format(self.appdata_path))
+        self.c.log("Settings", "__init__", "settings_filename: {}".format(self.settings_filename))
 
         self.default_settings = {
             'gateway_url': None,
@@ -58,6 +57,13 @@ class Settings(object):
                 twig_ids.append(twig_id)
         return twig_ids
 
+    def get_enabled_twig_ids(self):
+        twig_ids = []
+        for twig_id in self.settings['twigs']:
+            if self.settings['twigs'][twig_id]['enabled'] == 'enabled':
+                twig_ids.append(twig_id)
+        return twig_ids
+
     def load(self):
         self.c.log("Settings", "load")
         if os.path.isfile(self.settings_filename):
@@ -82,7 +88,7 @@ class Settings(object):
             self.settings = self.default_settings
 
             # Figure out the default gateway username
-            res = self.c.osquery('SELECT uuid AS host_uuid FROM system_info;')
+            res = self.c.osquery.exec('SELECT uuid AS host_uuid FROM system_info;')
             if res:
                 self.set('gateway_username', res[0]['host_uuid'])
 
@@ -120,6 +126,6 @@ class Settings(object):
 
     def save(self):
         self.c.log("Settings", "save")
-        os.makedirs(self.appdata_path, exist_ok=True)
+        os.makedirs(self.c.appdata_path, exist_ok=True)
         with open(self.settings_filename, 'w') as settings_file:
             json.dump(self.settings, settings_file, indent=4)
