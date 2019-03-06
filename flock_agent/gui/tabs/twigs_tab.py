@@ -28,7 +28,7 @@ class TwigsTab(QtWidgets.QWidget):
 
         # Label
         if self.mode == 'opt-in':
-            label_text = "There is new data we'd like to collect from your computer. We recommend that enable all of it."
+            label_text = "There is new data we'd like to collect from your computer. The more data you share with us, the more we're able to detect security issues."
         else:
             label_text = "This is the data that we're collecting from your computer:"
         label = QtWidgets.QLabel(label_text)
@@ -47,20 +47,25 @@ class TwigsTab(QtWidgets.QWidget):
 
         # Buttons
         if self.mode == 'opt-in':
-            enable_all_button = QtWidgets.QPushButton("Enable All")
+            self.automatically_enable_twigs_checkbox = QtWidgets.QCheckBox("Always share new data")
+
+            enable_all_button = QtWidgets.QPushButton("Share New Data")
             enable_all_button.setStyleSheet(self.c.gui.css['OptInTab enable_all_button'])
             enable_all_button.setFlat(True)
             enable_all_button.clicked.connect(self.clicked_enable_all_button)
+
+            enable_all_layout = QtWidgets.QVBoxLayout()
+            enable_all_layout.addWidget(self.automatically_enable_twigs_checkbox)
+            enable_all_layout.addWidget(enable_all_button)
 
         apply_button = QtWidgets.QPushButton("Apply Changes")
         apply_button.clicked.connect(self.clicked_apply_button)
 
         buttons_layout = QtWidgets.QHBoxLayout()
-        buttons_layout.addStretch()
         if self.mode == 'opt-in':
-            buttons_layout.addWidget(enable_all_button)
-        buttons_layout.addWidget(apply_button)
+            buttons_layout.addLayout(enable_all_layout)
         buttons_layout.addStretch()
+        buttons_layout.addWidget(apply_button)
 
         # Layout
         layout = QtWidgets.QVBoxLayout()
@@ -98,6 +103,11 @@ class TwigsTab(QtWidgets.QWidget):
     def clicked_enable_all_button(self):
         if self.mode == 'opt-in':
             self.c.log('TwigsTab ({})'.format(self.mode), 'clicked_enable_all_button')
+
+            if self.automatically_enable_twigs_checkbox.checkState() == QtCore.Qt.CheckState.Checked:
+                self.c.log('TwigsTab ({})'.format(self.mode), 'clicked_enable_all_button', 'automatically_enable_twigs=True')
+                self.c.settings.set('automatically_enable_twigs', True)
+                self.c.settings.save()
 
             for twig_id in self.c.settings.get_undecided_twig_ids():
                 self.c.settings.enable_twig(twig_id)

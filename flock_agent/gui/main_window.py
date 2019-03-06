@@ -67,9 +67,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def update_ui(self, active_tab=None):
         self.c.log("MainWindow", "update_ui")
 
-        # Update the twig data in the tabs
+        # Update the tabs
         self.opt_in_tab.update_ui()
         self.data_tab.update_ui()
+        self.settings_tab.update_ui()
 
         # Remove tabs
         opt_in_tab_index = self.tabs.indexOf(self.opt_in_tab)

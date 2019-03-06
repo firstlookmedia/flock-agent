@@ -100,9 +100,14 @@ class Settings(object):
 
             # Add or update the twig
             if add:
+                if self.settings['automatically_enable_twigs']:
+                    enabled_state = 'enabled'
+                else:
+                    enabled_state = 'undecided'
+
                 self.settings['twigs'][twig_id] = {
                     'query': twigs[twig_id]['query'],
-                    'enabled': 'undecided'
+                    'enabled': enabled_state
                 }
 
         # Delete obsolete twigs
