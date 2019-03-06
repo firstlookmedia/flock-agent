@@ -46,11 +46,5 @@ twigs = {
         "description": "What apps and services automatically run on your computer",
         "query": "SELECT path, label, keep_alive, username, program_arguments FROM launchd WHERE label NOT LIKE 'com.apple.%' AND disabled != 1;",
         "interval": 600
-    },
-    "new_twig": {
-        "name": "Some new twig",
-        "description": "What apps and services automatically run on your computer",
-        "query": "SELECT path, label, keep_alive, username, program_arguments FROM launchd WHERE label NOT LIKE 'com.apple.%' AND disabled != 1;",
-        "interval": 600
-    },
+    }
 }
