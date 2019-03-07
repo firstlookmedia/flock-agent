@@ -54,7 +54,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.systray.activated.connect(self.toggle_window)
 
         self.update_ui()
-        self.show()
+
+        # Show or hide?
+        if len(self.c.settings.get_undecided_twig_ids()) == 0:
+            self.hide()
+        else:
+            self.show()
 
     def closeEvent(self, e):
         """
@@ -109,6 +114,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.hide()
         else:
             self.show()
+            self.activateWindow()
+            self.raise_()
 
     def quit(self):
         self.c.log("MainWindow", "quit")
