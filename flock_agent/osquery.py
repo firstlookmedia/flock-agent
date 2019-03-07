@@ -19,13 +19,20 @@ class Osquery(object):
         self.osquery_dir = '/usr/local/var/osquery'
         self.osquery_log_dir = '/usr/local/var/osquery/logs'
         self.osquery_config_filename = os.path.join(self.osquery_dir, 'osquery.conf')
+        self.osquery_results_filename = os.path.join(self.osquery_log_dir, 'osqueryd.results.log')
         self.osquery_plist_filename = os.path.expanduser('~/Library/LaunchAgents/com.facebook.osqueryd.plist')
 
+        # Make sure directories exist
+        os.makedirs(self.osquery_dir, exist_ok=True)
+        os.makedirs(self.osquery_log_dir, exist_ok=True)
+
+        # Define the skeleton osquery config file, without any twigs
         self.config_skeleton = {
           "options": {
             "config_plugin": "filesystem",
             "logger_plugin": "filesystem",
             "logger_path": self.osquery_log_dir,
+            "logger_min_status": 1, # don't log INFO
             "schedule_splay_percent": "10",
             "utc": "true",
             "host_identifier": "uuid"
@@ -46,16 +53,13 @@ class Osquery(object):
         """
         self.c.log('Osquery', 'refresh_osqueryd', 'enabling twigs: {}'.format(', '.join(self.c.settings.get_enabled_twig_ids())))
 
-        # Make sure directories exist
-        os.makedirs(self.osquery_dir, exist_ok=True)
-        os.makedirs(self.osquery_log_dir, exist_ok=True)
-
         # Rebuild osquery config
         config = self.config_skeleton.copy()
         for twig_id in self.c.settings.get_enabled_twig_ids():
             config['schedule'][twig_id] = {
                 'query': twigs[twig_id]['query'],
-                'interval': twigs[twig_id]['interval']
+                'interval': twigs[twig_id]['interval'],
+                'description': twigs[twig_id]['description']
             }
 
         # Stop osqueryd
