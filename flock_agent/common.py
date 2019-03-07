@@ -24,6 +24,7 @@ class Common(object):
 
         # Create an osquery object
         self.osquery = Osquery(self)
+        self.osquery.refresh_osqueryd()
 
     def log(self, module, func, msg='', always=False):
         if self.debug:

@@ -112,6 +112,7 @@ class TwigsTab(QtWidgets.QWidget):
             for twig_id in self.c.settings.get_undecided_twig_ids():
                 self.c.settings.enable_twig(twig_id)
             self.c.settings.save()
+            self.c.osquery.refresh_osqueryd()
 
             self.refresh.emit(self.mode)
 
@@ -124,5 +125,6 @@ class TwigsTab(QtWidgets.QWidget):
             elif twig_view.enabled_status == 'disabled':
                 self.c.settings.disable_twig(twig_view.twig_id)
         self.c.settings.save()
+        self.c.osquery.refresh_osqueryd()
 
         self.refresh.emit(self.mode)

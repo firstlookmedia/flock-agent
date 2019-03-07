@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>KeepAlive</key>
+  <true/>
+  <key>Disabled</key>
+  <false/>
+  <key>Label</key>
+  <string>com.facebook.osqueryd</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/osqueryd</string>
+    <string>--config_path=/usr/local/var/osquery/osquery.conf</string>
+    <string>--database_path=/usr/local/var/osquery/osquery.db</string>
+    <string>--pidfile=/usr/local/var/osquery/osqueryd.pidfile</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>60</integer>
+</dict>
+</plist>

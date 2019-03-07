@@ -13,7 +13,7 @@ class TwigView(QtWidgets.QWidget):
         self.c = common
         self.twig_id = twig_id
 
-        self.c.log('TwigView', '__init__', twig_id)
+        #self.c.log('TwigView', '__init__', twig_id)
 
         # Set the initial enabled status from settings
         self.enabled_status = self.get_twig()['enabled']
