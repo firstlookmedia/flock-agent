@@ -41,7 +41,6 @@ class Osquery(object):
           "schedule": {},
           "decorators": {
             "load": [
-              "SELECT uuid AS host_uuid FROM system_info;",
               "SELECT user AS username FROM logged_in_users ORDER BY time DESC LIMIT 1;"
             ]
           }
@@ -110,8 +109,11 @@ class Osquery(object):
         # Keep track of the biggest timestamp we see
         biggest_timestamp = self.c.settings.get('last_osquery_result_timestamp')
 
-        # Load the log file
         try:
+            # What's the results file's modified timestamp, before we start the import
+            mtime = os.path.getmtime(self.results_filename)
+
+            # Load the log file
             with open(self.results_filename, 'r') as results_file:
                 for line in results_file.readlines():
                     line = line.strip()
@@ -150,6 +152,12 @@ class Osquery(object):
                 self.c.settings.set('last_osquery_result_timestamp', biggest_timestamp)
                 self.c.settings.save()
 
+            # If the results file hasn't been modified since we started the import, truncate it
+            # (If it has been modified, this means more logs have been added, and we should wait
+            # until the next this function gets called to truncate)
+            if mtime == os.path.getmtime(self.results_filename):
+                with open(self.results_filename, 'w') as results_file:
+                    results_file.truncate()
 
         except FileNotFoundError:
             self.c.log('Osquery', 'submit_logs', 'warning: file not found: {}'.format(self.results_filename))
