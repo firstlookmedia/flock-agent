@@ -86,8 +86,9 @@ class SettingsTab(QtWidgets.QWidget):
             self.server_url_edit.hide()
             self.server_url_label.setText(self.c.settings.get('gateway_url'))
             self.server_url_label.show()
-            self.server_button.setEnabled(True)
-            self.server_button.setText('Change Server')
+            self.server_button.hide()
+            #self.server_button.setEnabled(True)
+            #self.server_button.setText('Change Server')
 
         # Automatically enabled checkbox
         if self.c.settings.get('automatically_enable_twigs'):
@@ -135,11 +136,11 @@ class SettingsTab(QtWidgets.QWidget):
             except ConnectionError:
                 Alert(self.c, 'Error connecting to server').launch()
 
-        elif self.status == self.STATUS_REGISTERED:
-            self.c.settings.set('gateway_url', None)
-            self.c.settings.set('gateway_token', None)
-            self.c.settings.save()
-            self.status = self.STATUS_NOT_REGISTERED
+        #elif self.status == self.STATUS_REGISTERED:
+        #    self.c.settings.set('gateway_url', None)
+        #    self.c.settings.set('gateway_token', None)
+        #    self.c.settings.save()
+        #    self.status = self.STATUS_NOT_REGISTERED
 
         self.update_ui()
 
