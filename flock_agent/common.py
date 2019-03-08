@@ -20,11 +20,13 @@ class Common(object):
         self.version = version
         self.appdata_path = os.path.expanduser("~/Library/Application Support/Flock Agent")
 
+        # Create an osquery object
+        self.osquery = Osquery(self)
+
         # Load settings
         self.settings = Settings(self)
 
-        # Create an osquery object
-        self.osquery = Osquery(self)
+        # Refresh osquery daemon
         self.osquery.refresh_osqueryd()
 
     def log(self, module, func, msg='', always=False):
@@ -63,7 +65,7 @@ class Common(object):
         try:
             api_client.ping()
         except:
-            self.log('Common', 'check_osquery_logs', 'API is not configured properly')
+            self.log('Common', 'check_osquery_logs', 'API is not configured properly', always=True)
             return
 
         # Keep track of the biggest timestamp we see
