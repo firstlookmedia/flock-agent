@@ -4,6 +4,7 @@ import subprocess
 import json
 import shutil
 
+from .api_client import FlockApiClient
 from .twigs import twigs
 
 
@@ -90,3 +91,65 @@ class Osquery(object):
         except:
             # Error running query
             return None
+
+    def submit_logs(self):
+        """
+        If there are new osquery result logs, forward them to the Flock server and
+        truncate the result file.
+        """
+        self.c.log('Osquery', 'submit_logs')
+
+        # Start an API client
+        api_client = FlockApiClient(self.c)
+        try:
+            api_client.ping()
+        except:
+            self.c.log('Osquery', 'submit_logs', 'API is not configured properly', always=True)
+            return
+
+        # Keep track of the biggest timestamp we see
+        biggest_timestamp = self.c.settings.get('last_osquery_result_timestamp')
+
+        # Load the log file
+        try:
+            with open(self.results_filename, 'r') as results_file:
+                for line in results_file.readlines():
+                    line = line.strip()
+
+                    try:
+                        obj = json.loads(line)
+
+                        if 'name' in obj:
+                            name = obj['name']
+                        else:
+                            name = 'unknown'
+
+                        if 'unixTime' in obj:
+                            # If we haven't submitted this yet
+                            if obj['unixTime'] > self.c.settings.get('last_osquery_result_timestamp'):
+                                # Submit it
+                                api_client.submit(line)
+                                self.c.log('Osquery', 'submit_logs', 'submitted "{}" result'.format(name))
+
+                            else:
+                                # Already submitted
+                                self.c.log('Osquery', 'submit_logs', 'skipping "{}" result, already submitted'.format(name))
+
+                            # Update the biggest timestamp, if needed
+                            if obj['unixTime'] > biggest_timestamp:
+                                biggest_timestamp = obj['unixTime']
+
+                        else:
+                            self.c.log('Osquery', 'submit_logs', 'warning: unixTime not in line: {}'.format(line))
+
+                    except json.decoder.JSONDecodeError:
+                        self.c.log('Osquery', 'submit_logs', 'warning: line is not valid JSON: {}'.format(line))
+
+            # Update timestamp in settings
+            if self.c.settings.get('last_osquery_result_timestamp') < biggest_timestamp:
+                self.c.settings.set('last_osquery_result_timestamp', biggest_timestamp)
+                self.c.settings.save()
+
+
+        except FileNotFoundError:
+            self.c.log('Osquery', 'submit_logs', 'warning: file not found: {}'.format(self.results_filename))

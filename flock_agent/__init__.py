@@ -29,7 +29,7 @@ def main():
 
     if submit:
         # Submit logs
-        common.check_osquery_logs()
+        common.osquery.submit_logs()
 
     else:
         # Launch the GUI
