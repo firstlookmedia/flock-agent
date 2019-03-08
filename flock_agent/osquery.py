@@ -16,22 +16,22 @@ class Osquery(object):
         self.c = common
         self.c.log('Osquery', '__init__')
 
-        self.osquery_dir = '/usr/local/var/osquery'
-        self.osquery_log_dir = '/usr/local/var/osquery/logs'
-        self.osquery_config_filename = os.path.join(self.osquery_dir, 'osquery.conf')
-        self.osquery_results_filename = os.path.join(self.osquery_log_dir, 'osqueryd.results.log')
-        self.osquery_plist_filename = os.path.expanduser('~/Library/LaunchAgents/com.facebook.osqueryd.plist')
+        self.dir = '/usr/local/var/osquery'
+        self.log_dir = '/usr/local/var/osquery/logs'
+        self.config_filename = os.path.join(self.dir, 'osquery.conf')
+        self.results_filename = os.path.join(self.log_dir, 'osqueryd.results.log')
+        self.plist_filename = os.path.expanduser('~/Library/LaunchAgents/com.facebook.osqueryd.plist')
 
         # Make sure directories exist
-        os.makedirs(self.osquery_dir, exist_ok=True)
-        os.makedirs(self.osquery_log_dir, exist_ok=True)
+        os.makedirs(self.dir, exist_ok=True)
+        os.makedirs(self.log_dir, exist_ok=True)
 
         # Define the skeleton osquery config file, without any twigs
         self.config_skeleton = {
           "options": {
             "config_plugin": "filesystem",
             "logger_plugin": "filesystem",
-            "logger_path": self.osquery_log_dir,
+            "logger_path": self.log_dir,
             "logger_min_status": 1, # don't log INFO
             "schedule_splay_percent": "10",
             "utc": "true",
@@ -63,20 +63,20 @@ class Osquery(object):
             }
 
         # Stop osqueryd
-        subprocess.run(['/bin/launchctl', 'unload', self.osquery_plist_filename])
+        subprocess.run(['/bin/launchctl', 'unload', self.plist_filename])
 
         # Write the config file
-        with open(self.osquery_config_filename, 'w') as config_file:
+        with open(self.config_filename, 'w') as config_file:
             json.dump(config, config_file, indent=4)
 
         # Copy the launchd plist into the correct place
         shutil.copyfile(
             self.c.get_resource_path('com.facebook.osqueryd.plist'),
-            self.osquery_plist_filename
+            self.plist_filename
         )
 
         # Start osqueryd
-        subprocess.run(['/bin/launchctl', 'load', self.osquery_plist_filename])
+        subprocess.run(['/bin/launchctl', 'load', self.plist_filename])
 
     def exec(self, query):
         """
