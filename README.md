@@ -8,44 +8,10 @@ See also the [Flock server](https://github.com/firstlookmedia/flock).
 
 ## About Flock Agent
 
-Flock Agent only support macOS, at the moment. It is responsible for installing and configuring osquery, and pushing osquery logs to the Flock gateway. You configure it by providing the gateway URL. If the agent is not already registered, it registers itself with the gateway and stores the authentication token locally.
+Flock Agent is a GUI app that lives in your system tray, monitors your computer, and submits data to a Flock server. **It allows the user to see exactly what information they're sharing, and gives them a choice to opt-in before sharing any data.**
 
-Flock Agent includes a background daemon which reads the log file created by osqueryd and forwards the data onto the gateway.
+Flock Agent only support macOS, at the moment. It's powered by osquery. After launching Flock Agent for the first time, you need to register it with a Flock server, which just requires knowing the gateway URL of the server.
 
-Exactly what data gets collected is defined is defined in `osquery.conf`, which is included within the Flock Agent package. We update this config by releasing updates to Flock Agent. **When the user is prompted to install the update, it will explain to them what new information is being collected from their computer.**
+## Building from source
 
-To see what information is getting collected, check the [osquery.conf file](/flock_agent/config/osquery.conf). In the future we will expand this to include more complicated queries, like [detecting reverse shells](https://clo.ng/blog/osquery_reverse_shell/).
-
-## Getting started
-
-Flock Agent isn't packaged yet. To install from the source tree, first install Python 3.7 (from python.org, or probably `brew install python@3`). Then install pipenv:
-
-```sh
-pip3 install pipenv
-```
-
-Install the pip environment:
-
-```sh
-pipenv install
-```
-
-Run the agent software like this:
-
-```sh
-pipenv run ./flock-agent
-```
-
-Without any commands, it will check the status of the software managed by Flock Agent.
-
-To automatically install and configure Flock software, use `--install`:
-
-```sh
-pipenv run sudo ./flock-agent --install
-```
-
-To uninstall all of the Flock software, use `--purge`:
-
-```sh
-pipenv run sudo ./flock-agent --purge
-```
+Follow the [instructions here](/BUILD.md) run Flock Agent from the source tree.

@@ -15,7 +15,7 @@ pip3 install -r install/requirements.txt
 Here's how you run Flock Agent, without having to build an app bundle:
 
 ```sh
-./flock-agent
+./flock-agent --debug
 ```
 
 Here's how you build an app bundle:
