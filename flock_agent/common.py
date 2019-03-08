@@ -59,7 +59,7 @@ class Common(object):
         self.log('Common', 'check_osquery_logs')
 
         # Start an API client
-        api_client = FlockApiClient(self.c)
+        api_client = FlockApiClient(self)
         try:
             api_client.ping()
         except:
@@ -76,9 +76,9 @@ class Common(object):
                     try:
                         obj = json.loads(line)
                         if 'unixTime' in obj:
-                            # If we haven't imported this yet
+                            # If we haven't submitted this yet
                             if obj['unixTime'] > self.settings.get('last_osquery_result_timestamp'):
-                                pass
+                                self.log('Common', 'check_osquery_logs', 'TODO: submit osquery result: {}'.format(line.strip()))
 
                             # Update the biggest timestamp, if needed
                             if obj['unixTime'] > biggest_timestamp:
