@@ -45,7 +45,7 @@ class Common(object):
 
         # Otherwise assume the app is "frozen" in an app bundle
         else:
-            prefix = os.path.join(os.path.dirname(sys.executable), 'share')
+            prefix = os.path.join(os.path.dirname(os.path.dirname(sys.executable)), 'Resources/share')
 
         resource_path = os.path.join(prefix, filename)
 
