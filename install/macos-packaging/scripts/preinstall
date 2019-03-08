@@ -1,0 +1,3 @@
+#!/bin/sh
+osascript -e 'quit app "Flock"'
+exit 0
