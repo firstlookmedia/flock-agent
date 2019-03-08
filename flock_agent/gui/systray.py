@@ -2,6 +2,8 @@
 import subprocess
 from PyQt5 import QtCore, QtWidgets
 
+from .gui_common import Alert
+
 
 class SysTray(QtWidgets.QSystemTrayIcon):
     def __init__(self, common):
@@ -46,6 +48,15 @@ class SysTray(QtWidgets.QSystemTrayIcon):
 
     def homebrew_cask_updates_available(self, package_list):
         self.c.log('SysTray', 'homebrew_cask_updates_available', package_list)
+
+        # We can't automatically install cask upgrades, because some of them require root
+        message = """
+            Updates are available for the following apps:<br><br><b>{}</b><br><br>
+            Click "Install Updates" to open a Terminal and install updates using Homebrew. You may have to type your macOS password if asked.
+            """.format("<br>".join(package_list))
+        if Alert(self.c, message, has_cancel_button=True, ok_text='Install Updates').launch():
+            self.c.log('SysTray', 'homebrew_cask_updates_available', 'Installing Homebrew updates in Terminal with: brew cask upgrade')
+            subprocess.run('osascript -e \'tell application "Terminal" to do script "brew cask upgrade && exit"\'', shell=True)
 
 
 class SubmitThread(QtCore.QThread):

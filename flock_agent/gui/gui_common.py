@@ -116,7 +116,7 @@ class Alert(QtWidgets.QDialog):
     """
     A custom alert dialog
     """
-    def __init__(self, common, message, contains_links=False, has_cancel_button=False):
+    def __init__(self, common, message, contains_links=False, has_cancel_button=False, ok_text='Ok'):
         super(Alert, self).__init__()
         self.c = common
 
@@ -134,6 +134,7 @@ class Alert(QtWidgets.QDialog):
         logo.setPixmap(QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/icon.png"))))
 
         message_label = QtWidgets.QLabel(message)
+        message_label.setWordWrap(True)
         if contains_links:
             message_label.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
             message_label.setOpenExternalLinks(True)
@@ -142,7 +143,7 @@ class Alert(QtWidgets.QDialog):
         message_layout.addWidget(logo)
         message_layout.addWidget(message_label)
 
-        ok_button = QtWidgets.QPushButton('Ok')
+        ok_button = QtWidgets.QPushButton(ok_text)
         ok_button.clicked.connect(self.accept)
 
         if has_cancel_button:
