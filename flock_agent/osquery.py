@@ -98,14 +98,6 @@ class Osquery(object):
         """
         self.c.log('Osquery', 'submit_logs')
 
-        # Start an API client
-        api_client = FlockApiClient(self.c)
-        try:
-            api_client.ping()
-        except:
-            self.c.log('Osquery', 'submit_logs', 'API is not configured properly', always=True)
-            return
-
         # Keep track of the biggest timestamp we see
         biggest_timestamp = self.c.settings.get('last_osquery_result_timestamp')
 
@@ -115,37 +107,47 @@ class Osquery(object):
 
             # Load the log file
             with open(self.results_filename, 'r') as results_file:
-                for line in results_file.readlines():
-                    line = line.strip()
-
+                lines = results_file.readlines()
+                if len(lines) > 0:
+                    # Start an API client
+                    api_client = FlockApiClient(self.c)
                     try:
-                        obj = json.loads(line)
+                        api_client.ping()
+                    except:
+                        self.c.log('Osquery', 'submit_logs', 'API is not configured properly', always=True)
+                        return
 
-                        if 'name' in obj:
-                            name = obj['name']
-                        else:
-                            name = 'unknown'
+                    for line in lines:
+                        line = line.strip()
 
-                        if 'unixTime' in obj:
-                            # If we haven't submitted this yet
-                            if obj['unixTime'] > self.c.settings.get('last_osquery_result_timestamp'):
-                                # Submit it
-                                api_client.submit(line)
-                                self.c.log('Osquery', 'submit_logs', 'submitted "{}" result'.format(name))
+                        try:
+                            obj = json.loads(line)
+
+                            if 'name' in obj:
+                                name = obj['name']
+                            else:
+                                name = 'unknown'
+
+                            if 'unixTime' in obj:
+                                # If we haven't submitted this yet
+                                if obj['unixTime'] > self.c.settings.get('last_osquery_result_timestamp'):
+                                    # Submit it
+                                    api_client.submit(line)
+                                    self.c.log('Osquery', 'submit_logs', 'submitted "{}" result'.format(name))
+
+                                else:
+                                    # Already submitted
+                                    self.c.log('Osquery', 'submit_logs', 'skipping "{}" result, already submitted'.format(name))
+
+                                # Update the biggest timestamp, if needed
+                                if obj['unixTime'] > biggest_timestamp:
+                                    biggest_timestamp = obj['unixTime']
 
                             else:
-                                # Already submitted
-                                self.c.log('Osquery', 'submit_logs', 'skipping "{}" result, already submitted'.format(name))
+                                self.c.log('Osquery', 'submit_logs', 'warning: unixTime not in line: {}'.format(line))
 
-                            # Update the biggest timestamp, if needed
-                            if obj['unixTime'] > biggest_timestamp:
-                                biggest_timestamp = obj['unixTime']
-
-                        else:
-                            self.c.log('Osquery', 'submit_logs', 'warning: unixTime not in line: {}'.format(line))
-
-                    except json.decoder.JSONDecodeError:
-                        self.c.log('Osquery', 'submit_logs', 'warning: line is not valid JSON: {}'.format(line))
+                        except json.decoder.JSONDecodeError:
+                            self.c.log('Osquery', 'submit_logs', 'warning: line is not valid JSON: {}'.format(line))
 
             # Update timestamp in settings
             if self.c.settings.get('last_osquery_result_timestamp') < biggest_timestamp:
