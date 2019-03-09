@@ -29,6 +29,7 @@ def main():
 
     print('○ Building app bundle')
     run(['pyinstaller', 'install/pyinstaller.spec', '--clean'])
+    shutil.rmtree(os.path.join(dist_path, 'flock-agent'))
 
     if not is_release:
         print('○ Finished: {}'.format(app_path))
