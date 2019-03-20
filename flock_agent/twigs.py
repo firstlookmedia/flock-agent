@@ -5,33 +5,47 @@
 # and users have the option to opt-out of individual twigs.
 
 twigs = {
+    # Relevant twigs from the vuln-management query pack
+    # https://github.com/facebook/osquery/blob/experimental/packs/vuln-management.conf
+
     "os_version": {
         "name": "macOS version",
-        "description": "The version of macOS that you're running",
-        "query": "SELECT name, version, build FROM os_version;",
-        "interval": 3600
-    },
-    "chrome_extensions": {
-        "name": "Chrome extensions",
-        "description": "Extensions installed in the Chrome browser",
-        "query": "SELECT name, identifier, version FROM chrome_extensions;",
-        "interval": 3600
-    },
-    "firefox_addons": {
-        "name": "Firefox add-ons",
-        "description": "Add-ons installed in the Firefox web browser",
-        "query": "SELECT name, identifier, version, active, disabled FROM firefox_addons;",
-        "interval": 3600
+        "query": "select * from os_version;",
+        "interval": 86400,
+        "description": "The current version of macOS that's on your computer'"
     },
     "browser_plugins": {
         "name": "Browser plugins",
-        "description": "Browser plugins installed on your computer",
-        "query": "SELECT name, identifier, version, path FROM browser_plugins;",
-        "interval": 3600
+        "query": "select browser_plugins.* from users join browser_plugins using (uid);",
+        "interval": 86400,
+        "description": "List of browser plugins, which can allow us to detect if you have malicious ones installed"
+    },
+    "safari_extensions": {
+        "name": "Safari extensions",
+        "query": "select safari_extensions.* from users join safari_extensions using (uid);",
+        "interval": 86400,
+        "description": "List of Safari extensions, which can allow us to detect if you have malicious ones installed"
+    },
+    "opera_extensions": {
+        "name": "Opera extensions",
+        "query": "select opera_extensions.* from users join opera_extensions using (uid);",
+        "interval": 86400,
+        "description": "List of Opera extensions, which can allow us to detect if you have malicious ones installed"
+    },
+    "chrome_extensions": {
+        "name": "Chrome extensions",
+        "query": "select chrome_extensions.* from users join chrome_extensions using (uid);",
+        "interval": 86400,
+        "description": "List of Chrome extensions, which can allow us to detect if you have malicious ones installed"
+    },
+    "firefox_addons": {
+        "name": "Firefox add-ons",
+        "query": "select firefox_addons.* from users join firefox_addons using (uid);",
+        "interval": 86400,
+        "description": "List of Safari extensions, which can allow us to detect if you have malicious ones installed"
     },
 
-
-    # From the incident-response query pack
+    # Relevant twigs from the incident-response query pack
     # https://github.com/facebook/osquery/blob/experimental/packs/incident-response.conf
 
     "launchd": {
@@ -80,7 +94,7 @@ twigs = {
         "name": "Application firewall configuration",
         "query": "select * from alf;",
         "interval": 3600,
-        "description": "How the Application Layer Firewall is configured"
+        "description": "How the application firewall is configured"
     },
     "alf_exceptions": {
         "name": "Application firewall exceptions",
