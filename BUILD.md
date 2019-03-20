@@ -25,3 +25,17 @@ Here's how you build an app bundle:
 ```
 
 Now you should have `dist/Flock.app`.
+
+Here's how you make a `.pkg` installer:
+
+```sh
+./install/build_pkg.py --release
+```
+
+Here's how you make a `.pkg` installer that isn't codesigned (to test it in development):
+
+```sh
+./install/build_pkg.py --release --no-codesign
+```
+
+After making a release, you should have `dist/FlockAgent-[version].pkg`.
