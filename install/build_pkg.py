@@ -5,6 +5,7 @@ import sys
 import inspect
 import subprocess
 import shutil
+import argparse
 
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))
@@ -15,7 +16,11 @@ def run(cmd):
 
 
 def main():
-    is_release = '--release' in sys.argv
+    # Parse arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--release', action='store_true', dest='is_release', help="Make a .pkg release")
+    parser.add_argument('--no-codesign', action='store_true', dest='no_codesign', help="If making a release, skip codesigning")
+    args = parser.parse_args()
 
     build_path = os.path.join(root, 'build')
     dist_path = os.path.join(root, 'dist')
@@ -31,7 +36,7 @@ def main():
     run(['pyinstaller', 'install/pyinstaller.spec', '--clean'])
     shutil.rmtree(os.path.join(dist_path, 'flock-agent'))
 
-    if not is_release:
+    if not args.is_release:
         print('○ Finished: {}'.format(app_path))
 
     else:
@@ -43,23 +48,62 @@ def main():
         component_plist_path = os.path.join(root, 'install/macos-packaging/component.plist')
         scripts_path = os.path.join(root, 'install/macos-packaging/scripts')
         component_path = os.path.join(dist_path, 'FlockAgentComponent.pkg')
-        product_path = os.path.join(dist_path, 'FlockAgent-{}.pkg'.format(version))
+        pkg_path = os.path.join(dist_path, 'FlockAgent-{}.pkg'.format(version))
 
         identity_name_application = "Developer ID Application: FIRST LOOK PRODUCTIONS, INC."
         identity_name_installer = "Developer ID Installer: FIRST LOOK PRODUCTIONS, INC."
 
-        print('○ Codesigning app bundle')
-        run(['codesign', '--deep', '-s', identity_name_application, app_path])
+        # Make dist/root/Applications
+        dist_path_root = os.path.join(dist_path, 'root')
+        os.makedirs(os.path.join(dist_path_root, 'Applications'), exist_ok=True)
 
-        print('○ Creating an installer')
-        run(['pkgbuild', '--sign', identity_name_installer, '--root', dist_path, '--component-plist', component_plist_path, '--scripts', scripts_path, component_path])
-        run(['productbuild', '--sign', identity_name_installer, '--package', component_path, product_path])
+        # Move Flock.app there
+        old_app_path = app_path
+        app_path = os.path.join(dist_path_root, 'Applications/Flock.app')
+        shutil.move(old_app_path, app_path)
+
+        if args.no_codesign:
+            # Skip codesigning
+            print('○ Creating an installer')
+            run([
+                'pkgbuild',
+                '--root', dist_path_root,
+                '--component-plist', component_plist_path,
+                '--scripts', scripts_path,
+                component_path
+            ])
+            run([
+                'productbuild',
+                '--package', component_path,
+                pkg_path
+            ])
+
+        else:
+            # Package with codesigning
+            print('○ Codesigning app bundle')
+            run(['codesign', '--deep', '-s', identity_name_application, app_path])
+
+            print('○ Creating an installer')
+            run([
+                'pkgbuild',
+                '--sign', identity_name_installer,
+                '--root', dist_path_root,
+                '--component-plist', component_plist_path,
+                '--scripts', scripts_path,
+                component_path
+            ])
+            run([
+                'productbuild',
+                '--sign', identity_name_installer,
+                '--package', component_path,
+                pkg_path
+            ])
 
         print('○ Cleaning up')
-        shutil.rmtree(app_path)
+        shutil.rmtree(dist_path_root)
         os.remove(component_path)
 
-        print('○ Finished: {}'.format(product_path))
+        print('○ Finished: {}'.format(pkg_path))
 
 if __name__ == '__main__':
     main()
