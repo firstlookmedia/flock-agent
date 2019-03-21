@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import subprocess
+import shutil
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from .gui_common import Alert
@@ -21,6 +22,14 @@ class Bootstrap(object):
         Go through all the bootstrap steps
         """
         self.c.log('Bootstrap', 'go', 'Bootstrapping Flock Agent', always=True)
+
+        self.c.log('Bootstrap', 'go', 'Making sure Flock Agent starts automatically')
+        autorun_filename = 'media.firstlook.flock_agent.plist'
+        autorun_dir = os.path.expanduser("~/Library/LaunchAgents")
+        shutil.copy(
+            self.c.get_resource_path(autorun_filename),
+            os.path.join(autorun_dir, autorun_filename)
+        )
 
         self.c.log('Bootstrap', 'go', 'Making sure Homebrew is installed')
         if not os.path.exists(self.homebrew_path):
@@ -59,7 +68,7 @@ class Bootstrap(object):
                 return False
 
         self.c.log('Bootstrap', 'go', 'Configuring osquery')
-        
+
 
         self.c.log('Bootstrap', 'go', 'Bootstrap complete')
         return True
