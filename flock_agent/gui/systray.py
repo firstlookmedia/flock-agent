@@ -31,10 +31,15 @@ class SysTray(QtWidgets.QSystemTrayIcon):
 
         self.submit_t = SubmitThread(self.c)
         self.submit_t.submit_finished.connect(self.submit_finished)
+        self.submit_t.submit_error.connect(self.submit_error)
         self.submit_t.start()
 
     def submit_finished(self):
         self.currently_submitting = False
+
+    def submit_error(self, exception_type):
+        # TODO: make the exception handling more robust
+        self.showMessage("Error Submitting Data", "Exception type: {}".format(exception_type))
 
     def run_homebrew(self):
         self.homebrew_t = HomebrewThread(self.c)
@@ -64,6 +69,7 @@ class SubmitThread(QtCore.QThread):
     Submit osquery records to the Flock server
     """
     submit_finished = QtCore.pyqtSignal()
+    submit_error = QtCore.pyqtSignal(str)
 
     def __init__(self, common):
         super(SubmitThread, self).__init__()
@@ -71,7 +77,12 @@ class SubmitThread(QtCore.QThread):
 
     def run(self):
         self.c.log('SubmitThread', 'run')
-        self.c.osquery.submit_logs()
+        try:
+            self.c.osquery.submit_logs()
+        except Exception as e:
+            exception_type = type(e).__name__
+            self.c.log('SubmitThread', 'run', 'Exception submitting logs: {}'.format(exception_type))
+            self.submit_error.emit(exception_type)
         self.submit_finished.emit()
 
 
