@@ -12,8 +12,8 @@ class Common(object):
     """
     The Common class is a singleton of shared functionality throughout the app
     """
-    def __init__(self, debug, version):
-        self.debug = debug
+    def __init__(self, verbose, version):
+        self.verbose = verbose
         self.log('Common', '__init__')
 
         self.version = version
@@ -29,7 +29,7 @@ class Common(object):
         self.osquery.refresh_osqueryd()
 
     def log(self, module, func, msg='', always=False):
-        if self.debug:
+        if self.verbose:
             final_msg = "○ {}.{}".format(module, func)
             if msg:
                 final_msg = "{}: {}".format(final_msg, msg)
