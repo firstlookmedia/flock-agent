@@ -8,9 +8,9 @@ See also the [Flock server](https://github.com/firstlookmedia/flock).
 
 ## About Flock Agent
 
-Flock Agent is a GUI app that lives in your system tray, monitors your computer, and submits data to a Flock server. **It allows the user to see exactly what information they're sharing, and gives them a choice to opt-in before sharing any data.**
+Flock Agent is a GUI app that lives in your system tray, monitors your computer, and submits data to a Flock server. **It allows the user to see exactly what information they're sharing, and gives them a choice to opt-in before sharing any data.** It also automatically installs Homebrew upgrades, and prompts you for installing Homebrew Cask upgrades.
 
-Flock Agent only support macOS, at the moment. It's powered by osquery. After launching Flock Agent for the first time, you need to register it with a Flock server, which just requires knowing the gateway URL of the server.
+Flock Agent only support macOS at the moment. It's powered by osquery. After launching Flock Agent for the first time, you need to register it with a Flock server, which just requires knowing the gateway URL of the server.
 
 ## Building from source
 
