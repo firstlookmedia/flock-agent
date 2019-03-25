@@ -52,7 +52,7 @@ twigs = {
         "name": "Launch daemons",
         "query": "select * from launchd;",
         "interval": 3600,
-        "description": "What daemons (background services) automatically start of your computer, which malware could use for persistence"
+        "description": "What daemons (background services) automatically start on your computer, which malware could use for persistence"
     },
     "startup_items": {
         "name": "Startup items",
