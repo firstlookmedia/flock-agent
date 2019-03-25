@@ -10,6 +10,7 @@ from .main_window import MainWindow
 def main(common):
     # Create the Qt app
     app = QtWidgets.QApplication(sys.argv)
+    app.setQuitOnLastWindowClosed(False)
 
     # Attach the GuiCommon object to Common
     common.gui = GuiCommon(common)
