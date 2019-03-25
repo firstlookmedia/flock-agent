@@ -8,6 +8,18 @@ The goal of Flock is to gain visibility into a fleet of laptops while protecting
 
 ![Screenshot](./assets/screenshot.png)
 
+## Installing Flock Agent
+
+First [install Homebrew](https://brew.sh/), if you don't already have it. Then open the Terminal app and run this:
+
+```sh
+# Add the First Look Media tap
+brew tap firstlookmedia/homebrew-firstlookmedia
+
+# Install Flock Agent
+brew cask install flock-agent
+```
+
 ## About Flock Agent
 
 Flock Agent is GUI app for macOS that lives in your system tray, monitors your computer, and submits data to a Flock server. Here are some features:
