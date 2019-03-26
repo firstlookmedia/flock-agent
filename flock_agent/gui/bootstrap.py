@@ -57,7 +57,7 @@ class Bootstrap(object):
 
             if not java_installed:
                 # We can't automatically install the java cask because it needs root
-                message = '<b>Java is not installed.</b><br>Click ok to install java using Homebrew. You will have to type your macOS password.<br>After it\'s installed, run Flock again.'
+                message = '<b>Java is not installed.</b><br><br>Click ok to install java using Homebrew. You will have to type your macOS password.<br>After it\'s installed, run Flock again.'
                 if Alert(self.c, message, has_cancel_button=True).launch():
                     self.c.log('Bootstrap', 'go', 'Installing java in Terminal with: brew cask install java')
                     self.exec('osascript -e \'tell application "Terminal" to do script "brew cask install java && exit"\'')
@@ -68,7 +68,19 @@ class Bootstrap(object):
             if not self.exec([self.homebrew_path, 'install', 'osquery']):
                 return False
 
-        self.c.log('Bootstrap', 'go', 'Refresh osquery daemon')
+        self.c.log('Bootstrap', 'go', 'Ensuring osquery data directory exists')
+        try:
+            os.makedirs(self.c.osquery.dir, exist_ok=True)
+            os.makedirs(self.c.osquery.log_dir, exist_ok=True)
+        except:
+            message = '<b>Error creating directory:<br>{}</b><br><br>Maybe your permissions are wrong. Click ok to fix your permissions. You will have to type your macOS password. After it\'s fixed, run Flock again.'.format(self.c.osquery.dir)
+            if Alert(self.c, message, has_cancel_button=True).launch():
+                self.c.log('Bootstrap', 'go', 'Fixing permissions: sudo chown -R "$USER":admin /usr/local/var')
+                self.exec('osascript -e \'tell application "Terminal" to do script "sudo chown -R \\"$USER\\":admin /usr/local/var && exit"\'')
+
+            return False
+
+        self.c.log('Bootstrap', 'go', 'Refreshing osquery daemon')
         self.c.osquery.refresh_osqueryd()
 
         self.c.log('Bootstrap', 'go', 'Bootstrap complete')
