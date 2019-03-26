@@ -37,6 +37,16 @@ Flock Agent is GUI app for macOS that lives in your system tray, monitors your c
 
 After launching Flock Agent for the first time, you need to register it with a Flock server, which just requires knowing the gateway URL of the server.
 
+## Advanced usage
+
+If you'd like to see what Flock Agent is doing as it's doing it, you can open it in verbose mode. First, click the Flock icon in the system tray, switch to the Settings tab, and click "Quit Flock Agent". Then open the Terminal app and run:
+
+```sh
+/Applications/Flock.app/Contents/MacOS/flock-agent -v
+```
+
+This will output verbose information in the Terminal about what Flock Agent is doing.
+
 ## Building from source
 
 Follow the [instructions here](/BUILD.md) run Flock Agent from the source tree.
