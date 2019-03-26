@@ -10,15 +10,21 @@ The goal of Flock is to gain visibility into a fleet of laptops while protecting
 
 ## Installing Flock Agent
 
-First [install Homebrew](https://brew.sh/), if you don't already have it. Then open the Terminal app and run this:
+First [install Homebrew](https://brew.sh/), if you don't already have it. Then open the Terminal app and run:
 
 ```sh
+# Install dependencies
+brew cask install java
+brew install osquery
+
 # Add the First Look Media tap
 brew tap firstlookmedia/homebrew-firstlookmedia
 
 # Install Flock Agent
 brew cask install flock-agent
 ```
+
+Then launch Flock from `/Applications`.
 
 ## About Flock Agent
 
