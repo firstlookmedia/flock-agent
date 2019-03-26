@@ -117,37 +117,35 @@ class Osquery(object):
                         self.c.log('Osquery', 'submit_logs', 'API is not configured properly', always=True)
                         return
 
+                    # Make a list of logs
+                    logs = []
                     for line in lines:
                         line = line.strip()
-
                         try:
                             obj = json.loads(line)
-
-                            if 'name' in obj:
-                                name = obj['name']
-                            else:
-                                name = 'unknown'
+                            if 'name' not in obj:
+                                obj['name'] = 'unknown'
 
                             if 'unixTime' in obj:
                                 # If we haven't submitted this yet
                                 if obj['unixTime'] > self.c.settings.get('last_osquery_result_timestamp'):
-                                    # Submit it
-                                    api_client.submit(line)
-                                    self.c.log('Osquery', 'submit_logs', 'submitted "{}" result'.format(name))
-
+                                    logs.append(obj)
                                 else:
                                     # Already submitted
-                                    self.c.log('Osquery', 'submit_logs', 'skipping "{}" result, already submitted'.format(name))
-
-                                # Update the biggest timestamp, if needed
-                                if obj['unixTime'] > biggest_timestamp:
-                                    biggest_timestamp = obj['unixTime']
-
+                                    self.c.log('Osquery', 'submit_logs', 'skipping "{}" result, already submitted'.format(obj['name']))
                             else:
                                 self.c.log('Osquery', 'submit_logs', 'warning: unixTime not in line: {}'.format(line))
 
                         except json.decoder.JSONDecodeError:
                             self.c.log('Osquery', 'submit_logs', 'warning: line is not valid JSON: {}'.format(line))
+
+                    # Submit them
+                    api_client.submit(json.dumps(logs))
+                    self.c.log('Osquery', 'submit_logs', 'submitted logs: {}'.format(', '.join([obj['name'] for obj in logs])))
+
+                    # Update the biggest timestamp, if needed
+                    if logs[-1]['unixTime'] > biggest_timestamp:
+                        biggest_timestamp = logs[-1]['unixTime']
 
             # Update timestamp in settings
             if self.c.settings.get('last_osquery_result_timestamp') < biggest_timestamp:
