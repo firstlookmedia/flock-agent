@@ -26,6 +26,7 @@ class Bootstrap(object):
         self.c.log('Bootstrap', 'go', 'Making sure Flock Agent starts automatically')
         autorun_filename = 'media.firstlook.flock_agent.plist'
         autorun_dir = os.path.expanduser("~/Library/LaunchAgents")
+        os.makedirs(autorun_dir, exist_ok=True)
         shutil.copy(
             self.c.get_resource_path(autorun_filename),
             os.path.join(autorun_dir, autorun_filename)
@@ -67,8 +68,8 @@ class Bootstrap(object):
             if not self.exec([self.homebrew_path, 'install', 'osquery']):
                 return False
 
-        self.c.log('Bootstrap', 'go', 'Configuring osquery')
-
+        self.c.log('Bootstrap', 'go', 'Refresh osquery daemon')
+        self.c.osquery.refresh_osqueryd()
 
         self.c.log('Bootstrap', 'go', 'Bootstrap complete')
         return True
