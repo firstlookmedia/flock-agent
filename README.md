@@ -32,7 +32,7 @@ Flock Agent is GUI app for macOS that lives in your system tray, monitors your c
 
 - Users install Flock Agent using [Homebrew](https://brew.sh/).
 - Flock Agent installs its own dependencies (like [osquery](https://osquery.io/)) using Homebrew, and also automatically keeps your Homebrew packages up-to-date.
-- Flock Agent includes a number of "twigs", types of data that the agent collects and sends to the server, that focus on security-related information such as what versions of what software is installed, and what processes launch automatically. You can [see all included twigs here](./flock_agent/twigs.py).
+- Flock Agent includes "twigs", osquery SQL queries that get run at regular intervals and send the results to the server. (You know, because birds collect twigs and bring them back to their server.) The twigs focus on security-related information, such as what versions of what software is installed, and what processes launch automatically. You can [see all included twigs here](./flock_agent/twigs.py).
 - Before Flock Agent shares any data with the server, users must opt-in. Or, they can choose to always automatically opt-in to sending data, but the choice is with the user. Users can view exactly what data is collected for each twig before deciding to opt-in.
 
 After launching Flock Agent for the first time, you need to register it with a Flock server, which just requires knowing the gateway URL of the server.
