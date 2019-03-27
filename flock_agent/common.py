@@ -25,9 +25,6 @@ class Common(object):
         # Load settings
         self.settings = Settings(self)
 
-        # Refresh osquery daemon
-        self.osquery.refresh_osqueryd()
-
     def log(self, module, func, msg='', always=False):
         if self.verbose:
             final_msg = "○ {}.{}".format(module, func)
