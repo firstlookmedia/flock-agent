@@ -23,10 +23,6 @@ class Osquery(object):
         self.results_filename = os.path.join(self.log_dir, 'osqueryd.results.log')
         self.plist_filename = os.path.expanduser('~/Library/LaunchAgents/com.facebook.osqueryd.plist')
 
-        # Make sure directories exist
-        os.makedirs(self.dir, exist_ok=True)
-        os.makedirs(self.log_dir, exist_ok=True)
-
         # Define the skeleton osquery config file, without any twigs
         self.config_skeleton = {
           "options": {
