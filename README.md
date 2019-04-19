@@ -2,9 +2,9 @@
 
 _**⚠️ This software is under development. It's not ready to be used in production.**_
 
-Flock is a privacy-preserving fleet management system powered by osquery and the Elastic Stack.
+Flock is a privacy-preserving fleet management system. The goal of Flock is to gain visibility into a fleet of laptops while protecting the privacy of the laptop users. It achieves this by only collecting information needed to inform security decisions, and by not allowing the IT team to access arbitrary files or execute arbitrary code on the laptops they are monitoring.
 
-The goal of Flock is to gain visibility into a fleet of laptops while protecting the privacy of the laptop users. It achieves this by only collecting information needed to inform security decisions, and by not allow the IT team to access arbitrary files, or execute arbitrary code, on the laptops they are monitoring.
+This is the macOS agent that runs on endpoints, collects data, and shares it with the [Flock server](https://github.com/firstlookmedia/flock).
 
 ![Screenshot](./assets/screenshot.png)
 
