@@ -51,6 +51,7 @@ class Osquery(object):
 
         # Rebuild osquery config
         config = self.config_skeleton.copy()
+        config['schedule'] = {} # clear the existing schedule
         for twig_id in self.c.settings.get_enabled_twig_ids():
             config['schedule'][twig_id] = {
                 'query': twigs[twig_id]['query'],
