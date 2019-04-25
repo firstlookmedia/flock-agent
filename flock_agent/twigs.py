@@ -103,7 +103,7 @@ twigs = {
     },
     "disk_encryption": {
         "name": "Disk encryption",
-        "query": "select * from disk_encryption;",
+        "query": "select disk_encryption.* from mounts join disk_encryption on mounts.device_alias = disk_encryption.name where mounts.path = '/'",
         "interval": 86400,
         "description": "Whether FileVault disk encryption is enabled"
     },
