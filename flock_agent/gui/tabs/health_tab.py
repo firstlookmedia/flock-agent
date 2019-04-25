@@ -17,25 +17,23 @@ class HealthTab(QtWidgets.QWidget):
 
         self.c.log('HealthTab', '__init__')
 
-        # Load images
-        good_pixmap = QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/health_good.png")))
-        bad_pixmap = QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/health_bad.png")))
-
         # Health items
         self.health_items = [
-            HealthItemFileVault(self.c, good_pixmap, bad_pixmap),
-            HealthItemGatekeeper(self.c, good_pixmap, bad_pixmap),
-            HealthItemFirewall(self.c, good_pixmap, bad_pixmap),
-            HealthItemRemoteSharing(self.c, good_pixmap, bad_pixmap),
-            HealthItemAutoUpdates(self.c, good_pixmap, bad_pixmap),
-            HealthItemGuestUser(self.c, good_pixmap, bad_pixmap),
-            HealthItemSIP(self.c, good_pixmap, bad_pixmap)
+            HealthItemFileVault(self.c),
+            HealthItemGatekeeper(self.c),
+            HealthItemFirewall(self.c),
+            HealthItemRemoteSharing(self.c),
+            HealthItemAutoUpdates(self.c),
+            HealthItemGuestUser(self.c),
+            HealthItemSIP(self.c)
         ]
+        health_item_layout = QtWidgets.QVBoxLayout()
+        for health_item in self.health_items:
+            health_item_layout.addWidget(health_item)
 
         # Layout
         layout = QtWidgets.QVBoxLayout()
-        for health_item in self.health_items:
-            layout.addWidget(health_item)
+        layout.addLayout(health_item_layout)
         layout.addStretch()
         self.setLayout(layout)
 

@@ -3,12 +3,9 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 
 
 class HealthItemBase(QtWidgets.QWidget):
-    def __init__(self, common, good_pixmap, bad_pixmap, name, good_string, bad_string, query, help_url):
+    def __init__(self, common, name, good_string, bad_string, query, help_url):
         super(HealthItemBase, self).__init__()
         self.c = common
-
-        self.good_pixmap = good_pixmap
-        self.bad_pixmap = bad_pixmap
 
         self.name = name
         self.good_string = good_string
@@ -17,8 +14,13 @@ class HealthItemBase(QtWidgets.QWidget):
         self.help_url = help_url
 
         # Widgets
-        self.compliant_image = QtWidgets.QLabel()
-        self.label = QtWidgets.QLabel("{} ...".format(self.name))
+        self.good_image = QtWidgets.QLabel()
+        self.good_image.setPixmap(QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/health-good.png"))))
+        self.good_image.hide()
+        self.bad_image = QtWidgets.QLabel()
+        self.bad_image.setPixmap(QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/health-bad.png"))))
+        self.bad_image.hide()
+        self.label = QtWidgets.QLabel("Loading: {} ...".format(self.name))
         self.help_button = QtWidgets.QPushButton('Help')
         self.help_button.setFlat(True)
         self.help_button.setStyleSheet(self.c.gui.css['link_button'])
@@ -27,7 +29,9 @@ class HealthItemBase(QtWidgets.QWidget):
 
         # Layout
         layout = QtWidgets.QHBoxLayout()
-        layout.addWidget(self.compliant_image)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.good_image)
+        layout.addWidget(self.bad_image)
         layout.addWidget(self.label)
         layout.addStretch()
         layout.addWidget(self.help_button)
@@ -47,12 +51,14 @@ class HealthItemBase(QtWidgets.QWidget):
         pass
 
     def is_good(self):
-        self.compliant_image.setPixmap(self.good_pixmap)
+        self.good_image.show()
+        self.bad_image.hide()
         self.label.setText(self.good_string)
         self.help_button.hide()
 
     def is_bad(self):
-        self.compliant_image.setPixmap(self.bad_pixmap)
+        self.good_image.hide()
+        self.bad_image.show()
         self.label.setText(self.bad_string)
         self.help_button.show()
 
@@ -82,9 +88,9 @@ class HealthOsqueryThread(QtCore.QThread):
 
 
 class HealthItemFileVault(HealthItemBase):
-    def __init__(self, common, good_pixmap, bad_pixmap):
+    def __init__(self, common):
         super(HealthItemFileVault, self).__init__(
-            common, good_pixmap, bad_pixmap,
+            common,
             "FileVault", "FileVault is enabled", "FileVault should be enabled",
             "select disk_encryption.encrypted from mounts join disk_encryption on mounts.device_alias = disk_encryption.name where mounts.path = '/'",
             "https://github.com/firstlookmedia/flock-agent/wiki/Health-Check:-FileVault"
@@ -106,9 +112,9 @@ class HealthItemFileVault(HealthItemBase):
 
 
 class HealthItemGatekeeper(HealthItemBase):
-    def __init__(self, common, good_pixmap, bad_pixmap):
+    def __init__(self, common):
         super(HealthItemGatekeeper, self).__init__(
-            common, good_pixmap, bad_pixmap,
+            common,
             "Gatekeeper", "Gatekeeper is enabled", "Gatekeeper should be enabled",
             "select assessments_enabled from gatekeeper",
             "https://github.com/firstlookmedia/flock-agent/wiki/Health-Check:-Gatekeeper"
@@ -130,9 +136,9 @@ class HealthItemGatekeeper(HealthItemBase):
 
 
 class HealthItemFirewall(HealthItemBase):
-    def __init__(self, common, good_pixmap, bad_pixmap):
+    def __init__(self, common):
         super(HealthItemFirewall, self).__init__(
-            common, good_pixmap, bad_pixmap,
+            common,
             "Firewall", "Firewall is enabled", "Firewall should be enabled",
             "select global_state from alf",
             "https://github.com/firstlookmedia/flock-agent/wiki/Health-Check:-Firewall"
@@ -154,9 +160,9 @@ class HealthItemFirewall(HealthItemBase):
 
 
 class HealthItemRemoteSharing(HealthItemBase):
-    def __init__(self, common, good_pixmap, bad_pixmap):
+    def __init__(self, common):
         super(HealthItemRemoteSharing, self).__init__(
-            common, good_pixmap, bad_pixmap,
+            common,
             "Remote sharing", "Remote sharing is disabled", "Remote sharing should be disabled",
             "select * from sharing_preferences",
             "https://github.com/firstlookmedia/flock-agent/wiki/Health-Check:-Remote-Sharing"
@@ -187,9 +193,9 @@ class HealthItemRemoteSharing(HealthItemBase):
 
 
 class HealthItemAutoUpdates(HealthItemBase):
-    def __init__(self, common, good_pixmap, bad_pixmap):
+    def __init__(self, common):
         super(HealthItemAutoUpdates, self).__init__(
-            common, good_pixmap, bad_pixmap,
+            common,
             "macOS automatic updates", "macOS automatic updates are enabled", "macOS automatic updates should be enabled",
             "select value from plist where path = '/Library/Preferences/com.apple.commerce.plist' and key = 'AutoUpdate'",
             "https://github.com/firstlookmedia/flock-agent/wiki/Health-Check:-macOS-Automatic-Updates"
@@ -211,9 +217,9 @@ class HealthItemAutoUpdates(HealthItemBase):
 
 
 class HealthItemGuestUser(HealthItemBase):
-    def __init__(self, common, good_pixmap, bad_pixmap):
+    def __init__(self, common):
         super(HealthItemGuestUser, self).__init__(
-            common, good_pixmap, bad_pixmap,
+            common,
             "Guest user", "Guest user is disabled", "Guest user should be disabled",
             "select value from plist where path='/Library/Preferences/com.apple.loginwindow.plist' and key='GuestEnabled'",
             "https://github.com/firstlookmedia/flock-agent/wiki/Health-Check:-Guest-User"
@@ -235,9 +241,9 @@ class HealthItemGuestUser(HealthItemBase):
 
 
 class HealthItemSIP(HealthItemBase):
-    def __init__(self, common, good_pixmap, bad_pixmap):
+    def __init__(self, common):
         super(HealthItemSIP, self).__init__(
-            common, good_pixmap, bad_pixmap,
+            common,
             "System Integrity Protection", "System Integrity Protection is enabled", "System Integrity Protection should be enabled",
             "select enabled from sip_config where config_flag='sip'",
             "https://github.com/firstlookmedia/flock-agent/wiki/Health-Check:-System-Integrity-Protection"
