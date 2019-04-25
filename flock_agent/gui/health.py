@@ -155,7 +155,7 @@ class HealthItemFirewall(HealthItemBase):
         # [{"global_state":"2"}]
         self.c.log('HealthItemFirewall', 'query_finished')
         try:
-            if data[0]['assessments_enabled'] == '1' or data[0]['assessments_enabled'] == '2':
+            if data[0]['global_state'] == '1' or data[0]['global_state'] == '2':
                 self.is_good()
             else:
                 self.is_bad()
