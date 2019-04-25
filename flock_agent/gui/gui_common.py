@@ -40,15 +40,6 @@ class GuiCommon(object):
                 }
                 """,
 
-            'TwigView details_button': """
-                QPushButton {
-                    color: #3461bc;
-                    text-decoration: underline;
-                    padding: 5px;
-                    font-size: 12px;
-                }
-                """,
-
             'TwigDialog name_label': """
                 QLabel {
                     font-weight: bold;
@@ -108,7 +99,16 @@ class GuiCommon(object):
                     border-radius: 5px;
                     padding: 5px 10px 5px 10px;
                 }
-                """
+                """,
+
+            'link_button': """
+                QPushButton {
+                    color: #3461bc;
+                    text-decoration: underline;
+                    padding: 5px;
+                    font-size: 12px;
+                }
+                """,
         }
 
 

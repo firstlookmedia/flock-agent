@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-from .tabs import TwigsTab, SettingsTab
+from .tabs import HealthTab, TwigsTab, SettingsTab
 from .systray import SysTray
 
 
@@ -29,6 +29,8 @@ class MainWindow(QtWidgets.QMainWindow):
         header_layout.addStretch()
 
         # Tabs
+        self.health_tab = HealthTab(self.c)
+
         self.opt_in_tab = TwigsTab(self.c, is_opt_in=True)
         self.opt_in_tab.refresh.connect(self.update_ui)
 
@@ -39,6 +41,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings_tab.quit.connect(self.quit)
 
         self.tabs = QtWidgets.QTabWidget()
+        self.tabs.addTab(self.health_tab, "Health")
         self.tabs.addTab(self.settings_tab, "Settings")
 
         # Layout
@@ -73,6 +76,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.c.log("MainWindow", "update_ui")
 
         # Update the tabs
+        self.health_tab.update_ui()
         self.opt_in_tab.update_ui()
         self.data_tab.update_ui()
         self.settings_tab.update_ui()
@@ -88,7 +92,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Add tabs that should be shown
         twigs_tab_should_show = len(self.c.settings.get_decided_twig_ids()) > 0
         if twigs_tab_should_show:
-            self.tabs.insertTab(0, self.data_tab, "Data")
+            self.tabs.insertTab(1, self.data_tab, "Data")
         opt_in_tab_should_show = len(self.c.settings.get_undecided_twig_ids()) > 0
         if opt_in_tab_should_show:
             self.tabs.insertTab(0, self.opt_in_tab, "Opt-In")
