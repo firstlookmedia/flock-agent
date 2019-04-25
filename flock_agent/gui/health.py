@@ -20,7 +20,7 @@ class HealthItemBase(QtWidgets.QWidget):
         self.bad_image = QtWidgets.QLabel()
         self.bad_image.setPixmap(QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/health-bad.png"))))
         self.bad_image.hide()
-        self.label = QtWidgets.QLabel("Loading: {} ...".format(self.name))
+        self.label = QtWidgets.QLabel()
         self.help_button = QtWidgets.QPushButton('Help')
         self.help_button.setFlat(True)
         self.help_button.setStyleSheet(self.c.gui.css['link_button'])
@@ -41,6 +41,10 @@ class HealthItemBase(QtWidgets.QWidget):
         self.t = None
 
     def refresh(self):
+        self.good_image.hide()
+        self.bad_image.hide()
+        self.label.setText("Loading: {} ...".format(self.name))
+
         # Run the osquery command in a separate thread
         self.t = HealthOsqueryThread(self.c, self.name, self.query)
         self.t.query_finished.connect(self.query_finished)
