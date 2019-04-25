@@ -36,7 +36,7 @@ class TwigView(QtWidgets.QWidget):
 
         details_button = QtWidgets.QPushButton('Details')
         details_button.setFlat(True)
-        details_button.setStyleSheet(self.c.gui.css['TwigView details_button'])
+        details_button.setStyleSheet(self.c.gui.css['link_button'])
         details_button.clicked.connect(self.clicked_details_button)
 
         # Layout
