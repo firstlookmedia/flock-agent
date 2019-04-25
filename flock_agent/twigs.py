@@ -5,9 +5,6 @@
 # and users have the option to opt-out of individual twigs.
 
 twigs = {
-    # Relevant twigs from the vuln-management query pack
-    # https://github.com/facebook/osquery/blob/experimental/packs/vuln-management.conf
-
     "os_version": {
         "name": "macOS version",
         "query": "select * from os_version;",
@@ -44,10 +41,6 @@ twigs = {
         "interval": 86400,
         "description": "List of Safari extensions, which can allow us to detect if you have malicious ones installed"
     },
-
-    # Relevant twigs from the incident-response query pack
-    # https://github.com/facebook/osquery/blob/experimental/packs/incident-response.conf
-
     "launchd": {
         "name": "Launch daemons",
         "query": "select * from launchd;",
@@ -72,6 +65,77 @@ twigs = {
         "interval": 86400,
         "description": "What loginwindow values are set, including if the guest user is enabled, and which malware could use for persistence on system boot"
     },
+    "alf": {
+        "name": "Application firewall configuration",
+        "query": "select * from alf;",
+        "interval": 3600,
+        "description": "How the application firewall is configured"
+    },
+    "alf_services": {
+        "name": "Application firewall services",
+        "query": "select * from alf_services;",
+        "interval": 3600,
+        "description": "Which network services are allowed through the firewall, allowing us to identify unwanted firewall holes made by malware or humans"
+    },
+    "etc_hosts": {
+        "name": "Local hostnames",
+        "query": "select * from etc_hosts;",
+        "interval": 86400,
+        "description": "Values from the /etc/hosts file, which could be used to redirect or block network communications"
+    },
+    "kextstat": {
+        "name": "Kernel extensions",
+        "query": "select * from kernel_extensions;",
+        "interval": 3600,
+        "description": "What current kernel extensions are loaded; some malware has a kernel expension component and this could help us catch it"
+    },
+    "installed_applications": {
+        "name": "Installed applications",
+        "query": "select * from apps;",
+        "interval": 3600,
+        "description": "List of applications that are currently installed, to help identify malware, adware, or vulnerable applications that are installed"
+    },
+    "suid_bin": {
+        "name": "Setuid binaries",
+        "query": "select * from suid_bin;",
+        "interval": 3600,
+        "description": "List of binary files on your computer with setuid enabled, which could be used for privilege escelation, including privilege escelation backdoors"
+    },
+    "disk_encryption": {
+        "name": "Disk encryption",
+        "query": "select * from disk_encryption;",
+        "interval": 86400,
+        "description": "Whether FileVault disk encryption is enabled"
+    },
+    "sharing_preferences": {
+        "name": "Remote sharing preferences",
+        "query": "select * from sharing_preferences",
+        "interval": 86400,
+        "description": "Whether people can remotely login to your computer to access your screen, files, printers, or other services"
+    },
+    "gatekeeper": {
+        "name": "Gatekeeper",
+        "query": "select * from gatekeeper",
+        "interval": 86400,
+        "description": "Whether Gatekeeper is enabled, which protects your computer from running malicious apps"
+    },
+    "sip": {
+        "name": "System Integrity Protection",
+        "query": "select * from sip_config where config_flag='sip'",
+        "interval": 86400,
+        "description": "Whether System Integrity Protection is enabled, which protects your macOS system files from getting modified by malware"
+    },
+    # Detect reverse shells, from https://clo.ng/blog/osquery_reverse_shell/
+    "reverse_shell": {
+        "name": "Reverse shells",
+        "query": "SELECT DISTINCT(processes.pid), processes.parent, processes.name, processes.path, processes.cmdline, processes.cwd, processes.root, processes.uid, processes.gid, processes.start_time, process_open_sockets.remote_address, process_open_sockets.remote_port, (SELECT cmdline FROM processes AS parent_cmdline WHERE pid=processes.parent) AS parent_cmdline FROM processes JOIN process_open_sockets USING (pid) LEFT OUTER JOIN process_open_files ON processes.pid = process_open_files.pid WHERE ( name='sh' OR name='bash' ) AND process_open_files.pid IS NULL;",
+        "interval": 600,
+        "description": "Detect reverse shells, which is the first step attackers often take after an initial compromise in order to more easily run commands on your computer"
+    }
+
+    # These twigs are commented out because, while they may be useful at some point,
+    # provide more data than we currently want to collect and alert on
+
     # "loginwindow2": {
     #     "name": "Login window values (2)",
     #     "query": "select key, subkey, value from plist where path = '/Library/Preferences/loginwindow.plist';",
@@ -90,54 +154,24 @@ twigs = {
     #     "interval": 86400,
     #     "description": "What loginwindow values are set, which malware could use for persistence on system boot"
     # },
-    "alf": {
-        "name": "Application firewall configuration",
-        "query": "select * from alf;",
-        "interval": 3600,
-        "description": "How the application firewall is configured"
-    },
     # "alf_exceptions": {
     #     "name": "Application firewall exceptions",
     #     "query": "select * from alf_exceptions;",
     #     "interval": 3600,
     #     "description": "Exceptions to the application firewall, allowing us to identify unwanted firewall holes made by malware or humans"
     # },
-    "alf_services": {
-        "name": "Application firewall services",
-        "query": "select * from alf_services;",
-        "interval": 3600,
-        "description": "Which network services are allowed through the firewall, allowing us to identify unwanted firewall holes made by malware or humans"
-    },
     # "alf_explicit_auths": {
     #     "name": "Application firewall explicit authorizations",
     #     "query": "select * from alf_explicit_auths;",
     #     "interval": 3600,
     #     "description": "Processes with explicit authorization for the application firewall, allowing us to identify unwanted firewall holes made by malware or humans"
     # },
-    "etc_hosts": {
-        "name": "Local hostnames",
-        "query": "select * from etc_hosts;",
-        "interval": 86400,
-        "description": "Values from the /etc/hosts file, which could be used to redirect or block network communications"
-    },
-    "kextstat": {
-        "name": "Kernel extensions",
-        "query": "select * from kernel_extensions;",
-        "interval": 3600,
-        "description": "What current kernel extensions are loaded; some malware has a kernel expension component and this could help us catch it"
-    },
     # "last": {
     #     "name": "Most recent logins",
     #     "query": "select * from last;",
     #     "interval": 3600,
     #     "description": "A list of the most recent time which users have logged into your computer, which will help use verify assumptions of what accounts should be accessing what computers, and identify computers accessed during a compromise"
     # },
-    "installed_applications": {
-        "name": "Installed applications",
-        "query": "select * from apps;",
-        "interval": 3600,
-        "description": "List of applications that are currently installed, to help identify malware, adware, or vulnerable applications that are installed"
-    },
     # "open_sockets": {
     #     "name": "Open network connections",
     #     "query": "select distinct pid, family, protocol, local_address, local_port, remote_address, remote_port, path from process_open_sockets where path <> '' or remote_address <> '';",
@@ -170,32 +204,10 @@ twigs = {
     #     "interval": 3600,
     #     "description": "List of network ports that are listening for incoming connections, which malware could use for remote access"
     # },
-    "suid_bin": {
-        "name": "Setuid binaries",
-        "query": "select * from suid_bin;",
-        "interval": 3600,
-        "description": "List of binary files on your computer with setuid enabled, which could be used for privilege escelation, including privilege escelation backdoors"
-    },
     # "arp_cache": {
     #     "name": "ARP cache",
     #     "query": "select * from arp_cache;",
     #     "interval": 3600,
     #     "description": "A copy of the ARP cache values, which could detect if a local man-in-the-middle attack is in progress"
     # },
-    "disk_encryption": {
-        "name": "Disk encryption",
-        "query": "select disk_encryption.* from mounts join disk_encryption on mounts.device_alias = disk_encryption.name where mounts.path = '/'",
-        "interval": 86400,
-        "description": "Whether disk encryption is enabled"
-    },
-
-    # Detect reverse shells
-    # https://clo.ng/blog/osquery_reverse_shell/
-
-    "reverse_shell": {
-        "name": "Reverse shells",
-        "query": "SELECT DISTINCT(processes.pid), processes.parent, processes.name, processes.path, processes.cmdline, processes.cwd, processes.root, processes.uid, processes.gid, processes.start_time, process_open_sockets.remote_address, process_open_sockets.remote_port, (SELECT cmdline FROM processes AS parent_cmdline WHERE pid=processes.parent) AS parent_cmdline FROM processes JOIN process_open_sockets USING (pid) LEFT OUTER JOIN process_open_files ON processes.pid = process_open_files.pid WHERE ( name='sh' OR name='bash' ) AND process_open_files.pid IS NULL;",
-        "interval": 600,
-        "description": "Detect reverse shells, which is the first step attackers often take after an initial compromise in order to more easily run commands on your computer"
-    }
 }
