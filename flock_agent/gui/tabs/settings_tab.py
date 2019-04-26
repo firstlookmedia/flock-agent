@@ -51,6 +51,13 @@ class SettingsTab(QtWidgets.QWidget):
         self.automatically_enable_twigs_checkbox = QtWidgets.QCheckBox("Automatically opt-in to new data collection without asking me")
         self.automatically_enable_twigs_checkbox.stateChanged.connect(self.automatically_enable_twigs_toggled)
 
+        # Flock server group
+        server_settings_layout = QtWidgets.QVBoxLayout()
+        server_settings_layout.addLayout(server_layout)
+        server_settings_layout.addWidget(self.automatically_enable_twigs_checkbox)
+        server_settings_group = QtWidgets.QGroupBox("Flock server settings")
+        server_settings_group.setLayout(server_settings_layout)
+
         # Autoupdate homebrew checkbox
         self.autoupdate_homebrew_checkbox = QtWidgets.QCheckBox("Automatically install Homebrew updates (recommended)")
         self.autoupdate_homebrew_checkbox.stateChanged.connect(self.autoupdate_homebrew_toggled)
@@ -58,6 +65,13 @@ class SettingsTab(QtWidgets.QWidget):
         # Autoupdate homebrew cask checkbox
         self.autoupdate_homebrew_cask_checkbox = QtWidgets.QCheckBox("Automatically update macOS GUI apps through Homebrew cask (recommended)")
         self.autoupdate_homebrew_cask_checkbox.stateChanged.connect(self.autoupdate_homebrew_cask_toggled)
+
+        # Homebrew group
+        homebrew_settings_layout = QtWidgets.QVBoxLayout()
+        homebrew_settings_layout.addWidget(self.autoupdate_homebrew_checkbox)
+        homebrew_settings_layout.addWidget(self.autoupdate_homebrew_cask_checkbox)
+        homebrew_settings_group = QtWidgets.QGroupBox("Homebrew upgrade settings")
+        homebrew_settings_group.setLayout(homebrew_settings_layout)
 
         # Buttons
         quit_button = QtWidgets.QPushButton('Quit Flock Agent')
@@ -72,10 +86,8 @@ class SettingsTab(QtWidgets.QWidget):
 
         # Layout
         layout = QtWidgets.QVBoxLayout()
-        layout.addLayout(server_layout)
-        layout.addWidget(self.automatically_enable_twigs_checkbox)
-        layout.addWidget(self.autoupdate_homebrew_checkbox)
-        layout.addWidget(self.autoupdate_homebrew_cask_checkbox)
+        layout.addWidget(server_settings_group)
+        layout.addWidget(homebrew_settings_group)
         layout.addStretch()
         layout.addLayout(buttons_layout)
         self.setLayout(layout)
