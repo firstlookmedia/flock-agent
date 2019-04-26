@@ -59,17 +59,17 @@ class SettingsTab(QtWidgets.QWidget):
         server_settings_group.setLayout(server_settings_layout)
 
         # Autoupdate homebrew checkbox
-        self.autoupdate_homebrew_checkbox = QtWidgets.QCheckBox("Automatically install Homebrew updates (recommended)")
-        self.autoupdate_homebrew_checkbox.stateChanged.connect(self.autoupdate_homebrew_toggled)
+        self.homebrew_update_prompt_checkbox = QtWidgets.QCheckBox("Prompt when Homebrew updates are available")
+        self.homebrew_update_prompt_checkbox.stateChanged.connect(self.homebrew_update_prompt_toggled)
 
         # Autoupdate homebrew cask checkbox
-        self.autoupdate_homebrew_cask_checkbox = QtWidgets.QCheckBox("Automatically update macOS GUI apps through Homebrew cask (recommended)")
-        self.autoupdate_homebrew_cask_checkbox.stateChanged.connect(self.autoupdate_homebrew_cask_toggled)
+        self.homebrew_autoupdate_checkbox = QtWidgets.QCheckBox("Automatically install Homebrew updates in the background (if they don't require typing a password)")
+        self.homebrew_autoupdate_checkbox.stateChanged.connect(self.homebrew_autoupdate_toggled)
 
         # Homebrew group
         homebrew_settings_layout = QtWidgets.QVBoxLayout()
-        homebrew_settings_layout.addWidget(self.autoupdate_homebrew_checkbox)
-        homebrew_settings_layout.addWidget(self.autoupdate_homebrew_cask_checkbox)
+        homebrew_settings_layout.addWidget(self.homebrew_update_prompt_checkbox)
+        homebrew_settings_layout.addWidget(self.homebrew_autoupdate_checkbox)
         homebrew_settings_group = QtWidgets.QGroupBox("Homebrew upgrade settings")
         homebrew_settings_group.setLayout(homebrew_settings_layout)
 
@@ -116,17 +116,17 @@ class SettingsTab(QtWidgets.QWidget):
         else:
             self.automatically_enable_twigs_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
-        # Autoupdate homebrew checkbox
-        if self.c.settings.get('autoupdate_homebrew'):
-            self.autoupdate_homebrew_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
+        # Homebrew update prompt checkbox
+        if self.c.settings.get('homebrew_update_prompt'):
+            self.homebrew_update_prompt_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
         else:
-            self.autoupdate_homebrew_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
+            self.homebrew_update_prompt_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
-        # Autoupdate homebrew cask checkbox
-        if self.c.settings.get('autoupdate_homebrew_cask'):
-            self.autoupdate_homebrew_cask_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
+        # Homebrew autoupdate checkbox
+        if self.c.settings.get('homebrew_autoupdate'):
+            self.homebrew_autoupdate_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
         else:
-            self.autoupdate_homebrew_cask_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
+            self.homebrew_autoupdate_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
     def server_button_clicked(self):
         self.c.log('SettingsTab', 'server_button_clicked')
@@ -176,16 +176,16 @@ class SettingsTab(QtWidgets.QWidget):
         self.c.settings.set('automatically_enable_twigs', is_checked)
         self.c.settings.save()
 
-    def autoupdate_homebrew_toggled(self):
-        self.c.log('SettingsTab', 'autoupdate_homebrew_toggled')
-        is_checked = self.autoupdate_homebrew_checkbox.checkState() == QtCore.Qt.CheckState.Checked
-        self.c.settings.set('autoupdate_homebrew', is_checked)
+    def homebrew_update_prompt_toggled(self):
+        self.c.log('SettingsTab', 'homebrew_update_prompt_toggled')
+        is_checked = self.homebrew_update_prompt_checkbox.checkState() == QtCore.Qt.CheckState.Checked
+        self.c.settings.set('homebrew_update_prompt', is_checked)
         self.c.settings.save()
 
-    def autoupdate_homebrew_cask_toggled(self):
-        self.c.log('SettingsTab', 'autoupdate_homebrew_cask_toggled')
-        is_checked = self.autoupdate_homebrew_cask_checkbox.checkState() == QtCore.Qt.CheckState.Checked
-        self.c.settings.set('autoupdate_homebrew_cask', is_checked)
+    def homebrew_autoupdate_toggled(self):
+        self.c.log('SettingsTab', 'homebrew_autoupdate_toggled')
+        is_checked = self.homebrew_autoupdate_checkbox.checkState() == QtCore.Qt.CheckState.Checked
+        self.c.settings.set('homebrew_autoupdate', is_checked)
         self.c.settings.save()
 
     def quit_clicked(self):

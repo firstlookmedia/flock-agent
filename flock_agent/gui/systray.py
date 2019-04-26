@@ -43,25 +43,27 @@ class SysTray(QtWidgets.QSystemTrayIcon):
 
     def run_homebrew(self):
         self.homebrew_t = HomebrewThread(self.c)
+        self.homebrew_t.homebrew_updates_available.connect(self.homebrew_updates_available)
         self.homebrew_t.homebrew_installing_updates.connect(self.homebrew_installing_updates)
-        self.homebrew_t.homebrew_cask_updates_available.connect(self.homebrew_cask_updates_available)
         self.homebrew_t.start()
+
+    def homebrew_updates_available(self, outdated_formulae, outdated_casks):
+        self.c.log('SysTray', 'homebrew_updates_available', 'outdated_formulae: {}, outdated_casks: {}'.format(outdated_formulae, outdated_casks))
+
+        # TODO: pass data to homebrew
+
+        # # We can't automatically install cask upgrades, because some of them require root
+        # message = """
+        #     Updates are available for the following apps:<br><br><b>{}</b><br><br>
+        #     Click "Install Updates" to open a Terminal and install updates using Homebrew. You may have to type your macOS password if asked.
+        #     """.format("<br>".join(package_list))
+        # if Alert(self.c, message, has_cancel_button=True, ok_text='Install Updates').launch():
+        #     self.c.log('SysTray', 'homebrew_updates_available', 'Installing Homebrew updates in Terminal with: brew cask upgrade')
+        #     subprocess.run('osascript -e \'tell application "Terminal" to do script "brew cask upgrade && exit"\'', shell=True)
 
     def homebrew_installing_updates(self, package_list):
         self.c.log('SysTray', 'homebrew_installing_updates', package_list)
         self.showMessage("Installing Homebrew Updates", '\n'.join(package_list))
-
-    def homebrew_cask_updates_available(self, package_list):
-        self.c.log('SysTray', 'homebrew_cask_updates_available', package_list)
-
-        # We can't automatically install cask upgrades, because some of them require root
-        message = """
-            Updates are available for the following apps:<br><br><b>{}</b><br><br>
-            Click "Install Updates" to open a Terminal and install updates using Homebrew. You may have to type your macOS password if asked.
-            """.format("<br>".join(package_list))
-        if Alert(self.c, message, has_cancel_button=True, ok_text='Install Updates').launch():
-            self.c.log('SysTray', 'homebrew_cask_updates_available', 'Installing Homebrew updates in Terminal with: brew cask upgrade')
-            subprocess.run('osascript -e \'tell application "Terminal" to do script "brew cask upgrade && exit"\'', shell=True)
 
 
 class SubmitThread(QtCore.QThread):
@@ -90,8 +92,8 @@ class HomebrewThread(QtCore.QThread):
     """
     Check for Homebrew updates
     """
+    homebrew_updates_available = QtCore.pyqtSignal(list, list)
     homebrew_installing_updates = QtCore.pyqtSignal(list)
-    homebrew_cask_updates_available = QtCore.pyqtSignal(list)
 
     def __init__(self, common):
         super(HomebrewThread, self).__init__()
@@ -100,33 +102,44 @@ class HomebrewThread(QtCore.QThread):
     def run(self):
         self.c.log('HomebrewThread', 'run')
 
-        autoupdate_homebrew = self.c.settings.get('autoupdate_homebrew')
-        autoupdate_homebrew_cask = self.c.settings.get('autoupdate_homebrew_cask')
+        homebrew_update_prompt = self.c.settings.get('homebrew_update_prompt')
+        homebrew_autoupdate = self.c.settings.get('homebrew_autoupdate')
 
-        if autoupdate_homebrew or autoupdate_homebrew_cask:
-            # Update homebrew
+        if homebrew_update_prompt or homebrew_autoupdate:
+            # Update homebrew taps
             self.exec(['/usr/local/bin/brew', 'update'])
 
-        if autoupdate_homebrew:
+        outdated_formulae = []
+        outdated_casks = []
+
+        # If we want to prompt for updates, check for outdated formulae
+        # Also, we need to check for these if we will autoupdate
+        if homebrew_update_prompt or homebrew_autoupdate:
             # See if there are any outdated formulae
             p = self.exec(['/usr/local/bin/brew', 'outdated'])
             if p:
                 stdout = p.stdout.decode().strip()
                 if stdout != '':
-                    package_list = [package.split(' ')[0] for package in stdout.split('\n')]
-                    self.homebrew_installing_updates.emit(package_list)
+                    outdated_formulae = [package.split(' ')[0] for package in stdout.split('\n')]
 
-                    # Upgrade those formulae
-                    self.exec(['/usr/local/bin/brew', 'upgrade'])
+            if homebrew_autoupdate:
+                # Upgrade those formulae
+                self.homebrew_installing_updates.emit(outdated_formulae)
+                self.exec(['/usr/local/bin/brew', 'upgrade'])
+                outdated_formulae = []
 
-        if autoupdate_homebrew_cask:
-            # See if there are outdated casks
+        # If we want to prompt for updates, check for outdated casks
+        if homebrew_update_prompt:
+            # See if there are any outdated casks
             p = self.exec(['/usr/local/bin/brew', 'cask', 'outdated'])
             if p:
                 stdout = p.stdout.decode().strip()
                 if stdout != '':
-                    package_list = [package.split(' ')[0] for package in stdout.split('\n')]
-                    self.homebrew_cask_updates_available.emit(package_list)
+                    outdated_casks = [package.split(' ')[0] for package in stdout.split('\n')]
+
+            # Trigger the update prompt
+            # Note that if autodates are enabled, outdated_formulae should be a blank list
+            self.homebrew_updates_available.emit(outdated_formulae, outdated_casks)
 
     def exec(self, command):
         try:

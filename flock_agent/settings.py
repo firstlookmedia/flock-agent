@@ -19,8 +19,8 @@ class Settings(object):
             'gateway_username': None,
             'automatically_enable_twigs': False,
             'last_osquery_result_timestamp': 0, # Timestamp of the last osquery result sent to the server
-            'autoupdate_homebrew': True,
-            'autoupdate_homebrew_cask': True,
+            'homebrew_update_prompt': True,
+            'homebrew_autoupdate': True,
             'twigs': {}
         }
 
