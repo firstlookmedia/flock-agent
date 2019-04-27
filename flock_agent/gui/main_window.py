@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-from .tabs import HealthTab, TwigsTab, SettingsTab
+from .tabs import HomebrewTab, HealthTab, TwigsTab, SettingsTab
 from .systray import SysTray
 
 
@@ -29,6 +29,8 @@ class MainWindow(QtWidgets.QMainWindow):
         header_layout.addStretch()
 
         # Tabs
+        self.homebrew_tab = HomebrewTab(self.c)
+
         self.health_tab = HealthTab(self.c)
 
         self.opt_in_tab = TwigsTab(self.c, is_opt_in=True)
@@ -55,6 +57,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # System tray
         self.systray = SysTray(self.c)
         self.systray.activated.connect(self.toggle_window)
+        self.systray.homebrew_updates_available.connect(self.homebrew_updates_available)
 
         self.update_ui()
 
@@ -76,7 +79,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.c.log("MainWindow", "update_ui")
 
         # Update the tabs
-        self.health_tab.update_ui()
         self.opt_in_tab.update_ui()
         self.data_tab.update_ui()
         self.settings_tab.update_ui()
@@ -88,6 +90,9 @@ class MainWindow(QtWidgets.QMainWindow):
         twigs_tab_index = self.tabs.indexOf(self.data_tab)
         if twigs_tab_index != -1:
             self.tabs.removeTab(twigs_tab_index)
+        homebrew_tab_index = self.tabs.indexOf(self.homebrew_tab)
+        if homebrew_tab_index != -1:
+            self.tabs.removeTab(homebrew_tab_index)
 
         # Add tabs that should be shown
         twigs_tab_should_show = len(self.c.settings.get_decided_twig_ids()) > 0
@@ -96,21 +101,33 @@ class MainWindow(QtWidgets.QMainWindow):
         opt_in_tab_should_show = len(self.c.settings.get_undecided_twig_ids()) > 0
         if opt_in_tab_should_show:
             self.tabs.insertTab(0, self.opt_in_tab, "Opt-In")
+        if self.homebrew_tab.should_show:
+            self.tabs.insertTab(0, self.homebrew_tab, "Homebrew")
 
-        if active_tab == 'opt-in':
-            index = self.tabs.indexOf(self.opt_in_tab)
-            if index != -1:
-                self.tabs.setCurrentIndex(index)
-            else:
-                active_tab = None
-        elif active_tab == 'data':
-            index = self.tabs.indexOf(self.data_tab)
-            if index != -1:
-                self.tabs.setCurrentIndex(index)
-            else:
-                active_tab = None
         if active_tab == None:
             self.tabs.setCurrentIndex(0)
+        else:
+            if active_tab == 'opt-in':
+                index = self.tabs.indexOf(self.opt_in_tab)
+            elif active_tab == 'data':
+                index = self.tabs.indexOf(self.data_tab)
+            elif active_tab == 'homebrew':
+                index = self.tabs.indexOf(self.homebrew_tab)
+            else:
+                index = -1
+
+            if index != -1:
+                self.tabs.setCurrentIndex(index)
+            else:
+                self.tabs.setCurrentIndex(0)
+
+    def homebrew_updates_available(self, outdated_formulae, outdated_casks):
+        self.homebrew_tab.homebrew_updates_available(outdated_formulae, outdated_casks)
+        self.update_ui('homebrew')
+        if not self.isVisible():
+            self.show()
+            self.activateWindow()
+            self.raise_()
 
     def toggle_window(self):
         self.c.log("MainWindow", "toggle_window")

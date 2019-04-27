@@ -26,6 +26,14 @@ class GuiCommon(object):
                 }
                 """,
 
+            'HomebrewView package_names': """
+                QLabel {
+                    font-weight: bold;
+                    padding-top: 10px;
+                    padding-bottom: 10px;
+                }
+                """,
+
             'TwigView name_label': """
                 QLabel {
                     font-weight: bold;

@@ -46,11 +46,6 @@ class HealthTab(QtWidgets.QWidget):
         layout.addLayout(buttons_layout)
         self.setLayout(layout)
 
-        self.update_ui()
-
-    def update_ui(self):
-        pass
-
     def clicked_refresh_button(self):
         self.c.log('HealthTab', 'clicked_refresh_button')
         for health_item in self.health_items:
