@@ -16,6 +16,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle('Flock')
         self.setWindowIcon(self.c.gui.icon)
 
+        # System tray
+        self.systray = SysTray(self.c)
+        self.systray.activated.connect(self.toggle_window)
+
         # Header
         logo = QtWidgets.QLabel()
         logo.setPixmap(QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/icon.png"))))
@@ -29,7 +33,8 @@ class MainWindow(QtWidgets.QMainWindow):
         header_layout.addStretch()
 
         # Tabs
-        self.homebrew_tab = HomebrewTab(self.c)
+        self.homebrew_tab = HomebrewTab(self.c, self.systray)
+        self.homebrew_tab.homebrew_updates_available.connect(self.homebrew_updates_available)
 
         self.health_tab = HealthTab(self.c)
 
@@ -53,11 +58,6 @@ class MainWindow(QtWidgets.QMainWindow):
         central_widget = QtWidgets.QWidget()
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
-
-        # System tray
-        self.systray = SysTray(self.c)
-        self.systray.activated.connect(self.toggle_window)
-        self.systray.homebrew_updates_available.connect(self.homebrew_updates_available)
 
         self.update_ui()
 
@@ -121,13 +121,13 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 self.tabs.setCurrentIndex(0)
 
-    def homebrew_updates_available(self, outdated_formulae, outdated_casks):
-        self.homebrew_tab.homebrew_updates_available(outdated_formulae, outdated_casks)
+    def homebrew_updates_available(self):
         self.update_ui('homebrew')
-        if not self.isVisible():
-            self.show()
-            self.activateWindow()
-            self.raise_()
+        if self.homebrew_tab.should_show:
+            if not self.isVisible():
+                self.show()
+                self.activateWindow()
+                self.raise_()
 
     def toggle_window(self):
         self.c.log("MainWindow", "toggle_window")
