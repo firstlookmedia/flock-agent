@@ -4,7 +4,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 
 
 class HomebrewTab(QtWidgets.QWidget):
-    homebrew_updates_available = QtCore.pyqtSignal()
+    update_homebrew_tab = QtCore.pyqtSignal()
 
     def __init__(self, common, systray):
         super(HomebrewTab, self).__init__()
@@ -14,16 +14,17 @@ class HomebrewTab(QtWidgets.QWidget):
         self.c.log('HomebrewTab', '__init__')
 
         self.should_show = False
-        self.outdated_formulae = []
         self.outdated_casks = []
+        self.outdated_formulae = []
 
         # Widgets
-        self.formulae_label = QtWidgets.QLabel("Updates are available for the following packages:")
-        self.formulae_list_label = QtWidgets.QLabel()
-        self.formulae_list_label.setStyleSheet(self.c.gui.css['HomebrewView package_names'])
-        self.casks_label = QtWidgets.QLabel("Updates are available for the following apps:")
+        self.casks_label = QtWidgets.QLabel("Updates are available for the following macOS apps:")
         self.casks_list_label = QtWidgets.QLabel()
         self.casks_list_label.setStyleSheet(self.c.gui.css['HomebrewView package_names'])
+        self.formulae_label = QtWidgets.QLabel("Updates are available for the following software packages:")
+        self.formulae_list_label = QtWidgets.QLabel()
+        self.formulae_list_label.setStyleSheet(self.c.gui.css['HomebrewView package_names'])
+
         instructions_label = QtWidgets.QLabel('Click "Install Updates" to open a Terminal and install updates using Homebrew.\nYou may have to type your macOS password if asked.')
 
         # Buttons
@@ -36,10 +37,10 @@ class HomebrewTab(QtWidgets.QWidget):
 
         # Layout
         layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(self.formulae_label)
-        layout.addWidget(self.formulae_list_label)
         layout.addWidget(self.casks_label)
         layout.addWidget(self.casks_list_label)
+        layout.addWidget(self.formulae_label)
+        layout.addWidget(self.formulae_list_label)
         layout.addWidget(instructions_label)
         layout.addLayout(buttons_layout)
         layout.addStretch()
@@ -59,19 +60,11 @@ class HomebrewTab(QtWidgets.QWidget):
     def updates_available(self, outdated_formulae, outdated_casks):
         self.c.log('HomebrewTab', 'updates_available', 'outdated_formulae: {}, outdated_casks: {}'.format(outdated_formulae, outdated_casks))
 
-        self.outdated_formulae = outdated_formulae
         self.outdated_casks = outdated_casks
+        self.outdated_formulae = outdated_formulae
 
         if len(outdated_formulae) > 0 or len(outdated_casks) > 0:
             self.should_show = True
-
-            if len(outdated_formulae) == 0:
-                self.formulae_label.hide()
-                self.formulae_list_label.hide()
-            else:
-                self.formulae_label.show()
-                self.formulae_list_label.show()
-                self.formulae_list_label.setText('\n'.join(outdated_formulae))
 
             if len(outdated_casks) == 0:
                 self.casks_label.hide()
@@ -80,10 +73,18 @@ class HomebrewTab(QtWidgets.QWidget):
                 self.casks_label.show()
                 self.casks_list_label.show()
                 self.casks_list_label.setText('\n'.join(outdated_casks))
+
+            if len(outdated_formulae) == 0:
+                self.formulae_label.hide()
+                self.formulae_list_label.hide()
+            else:
+                self.formulae_label.show()
+                self.formulae_list_label.show()
+                self.formulae_list_label.setText('\n'.join(outdated_formulae))
         else:
             self.should_show = False
 
-        self.homebrew_updates_available.emit()
+        self.update_homebrew_tab.emit()
 
     def installing_updates(self, package_list):
         self.c.log('HomebrewTab', 'homebrew_installing_updates', package_list)
@@ -91,7 +92,9 @@ class HomebrewTab(QtWidgets.QWidget):
 
     def clicked_install_updates_button(self):
         self.c.log('HomebrewTab', 'clicked_install_updates_button')
+
         self.should_show = False
+        self.update_homebrew_tab.emit()
 
         cmds = []
         if len(self.outdated_formulae) > 0:
@@ -116,7 +119,7 @@ class HomebrewUpdateCheckThread(QtCore.QThread):
         self.c = common
 
     def run(self):
-        self.c.log('HomebrewThread', 'run')
+        self.c.log('HomebrewUpdateCheckThread', 'run')
 
         homebrew_update_prompt = self.c.settings.get('homebrew_update_prompt')
         homebrew_autoupdate = self.c.settings.get('homebrew_autoupdate')
@@ -159,9 +162,9 @@ class HomebrewUpdateCheckThread(QtCore.QThread):
 
     def exec(self, command):
         try:
-            self.c.log('HomebrewThread', 'exec', 'Executing: {}'.format(' '.join(command)), always=True)
+            self.c.log('HomebrewUpdateCheckThread', 'exec', 'Executing: {}'.format(' '.join(command)), always=True)
             p = subprocess.run(command, capture_output=True, check=True)
             return p
         except subprocess.CalledProcessError:
-            self.c.log('HomebrewThread', 'exec', 'Error running command', always=True)
+            self.c.log('HomebrewUpdateCheckThread', 'exec', 'Error running command', always=True)
             return False

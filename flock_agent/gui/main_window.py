@@ -34,7 +34,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Tabs
         self.homebrew_tab = HomebrewTab(self.c, self.systray)
-        self.homebrew_tab.homebrew_updates_available.connect(self.homebrew_updates_available)
+        self.homebrew_tab.update_homebrew_tab.connect(self.update_homebrew_tab)
 
         self.health_tab = HealthTab(self.c)
 
@@ -121,13 +121,15 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 self.tabs.setCurrentIndex(0)
 
-    def homebrew_updates_available(self):
-        self.update_ui('homebrew')
+    def update_homebrew_tab(self):
         if self.homebrew_tab.should_show:
+            self.update_ui('homebrew')
             if not self.isVisible():
                 self.show()
                 self.activateWindow()
                 self.raise_()
+        else:
+            self.update_ui()
 
     def toggle_window(self):
         self.c.log("MainWindow", "toggle_window")
