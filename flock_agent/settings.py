@@ -20,7 +20,7 @@ class Settings(object):
             'automatically_enable_twigs': False,
             'last_osquery_result_timestamp': 0, # Timestamp of the last osquery result sent to the server
             'homebrew_update_prompt': True,
-            'homebrew_autoupdate': True,
+            'homebrew_autoupdate': False,
             'twigs': {}
         }
 
