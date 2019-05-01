@@ -179,7 +179,11 @@ class MainWindow(QtWidgets.QMainWindow):
             # Stop the submit timer
             self.submit_timer.stop()
 
+        # Either show or hide the opt-in and data tabs
         self.update_ui(active_tab)
+
+        # Either enable or disable osqueryd
+        self.c.osquery.refresh_osqueryd()
 
     def quit(self):
         self.c.log("MainWindow", "quit")

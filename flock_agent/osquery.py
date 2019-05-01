@@ -47,33 +47,43 @@ class Osquery(object):
         Rebuild the osquery config file based on the latest settings, and restart
         the osqueryd daemon
         """
-        self.c.log('Osquery', 'refresh_osqueryd', 'enabling twigs: {}'.format(', '.join(self.c.settings.get_enabled_twig_ids())))
+        if self.c.settings.get('use_server'):
+            self.c.log('Osquery', 'refresh_osqueryd', 'enabling twigs: {}'.format(', '.join(self.c.settings.get_enabled_twig_ids())))
 
-        # Rebuild osquery config
-        config = self.config_skeleton.copy()
-        config['schedule'] = {} # clear the existing schedule
-        for twig_id in self.c.settings.get_enabled_twig_ids():
-            config['schedule'][twig_id] = {
-                'query': twigs[twig_id]['query'],
-                'interval': twigs[twig_id]['interval'],
-                'description': twigs[twig_id]['description']
-            }
+            # Rebuild osquery config
+            config = self.config_skeleton.copy()
+            config['schedule'] = {} # clear the existing schedule
+            for twig_id in self.c.settings.get_enabled_twig_ids():
+                config['schedule'][twig_id] = {
+                    'query': twigs[twig_id]['query'],
+                    'interval': twigs[twig_id]['interval'],
+                    'description': twigs[twig_id]['description']
+                }
 
-        # Stop osqueryd
-        subprocess.run(['/bin/launchctl', 'unload', self.plist_filename])
+            # Stop osqueryd
+            if os.path.exists(self.plist_filename):
+                subprocess.run(['/bin/launchctl', 'unload', self.plist_filename])
 
-        # Write the config file
-        with open(self.config_filename, 'w') as config_file:
-            json.dump(config, config_file, indent=4)
+            # Write the config file
+            with open(self.config_filename, 'w') as config_file:
+                json.dump(config, config_file, indent=4)
 
-        # Copy the launchd plist into the correct place
-        shutil.copyfile(
-            self.c.get_resource_path('com.facebook.osqueryd.plist'),
-            self.plist_filename
-        )
+            # Copy the launchd plist into the correct place
+            shutil.copyfile(
+                self.c.get_resource_path('com.facebook.osqueryd.plist'),
+                self.plist_filename
+            )
 
-        # Start osqueryd
-        subprocess.run(['/bin/launchctl', 'load', self.plist_filename])
+            # Start osqueryd
+            subprocess.run(['/bin/launchctl', 'load', self.plist_filename])
+
+        else:
+            self.c.log('Osquery', 'refresh_osqueryd', 'use_server=False, so making sure osqueryd is disabled')
+
+            if os.path.exists(self.plist_filename):
+                # Stop osqueryd and delete the plist file
+                subprocess.run(['/bin/launchctl', 'unload', self.plist_filename])
+                os.remove(self.plist_filename)
 
     def exec(self, query):
         """
