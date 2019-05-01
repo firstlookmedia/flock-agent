@@ -92,6 +92,12 @@ class GuiCommon(object):
                 }
                 """,
 
+            'SettingsTab group_box': """
+                QGroupBox {
+                    font-size: 14px;
+                }
+            """,
+
             'SettingsTab server_url_label': """
                 QLabel {
                     font-family: monospace;
@@ -171,3 +177,13 @@ class Alert(QtWidgets.QDialog):
 
     def launch(self):
         return self.exec_() == QtWidgets.QDialog.Accepted
+
+
+class HidableSpacer(QtWidgets.QWidget):
+    """
+    A custom widget that's used as spacing in a layout which can be shown or hidden
+    """
+    def __init__(self, size=10):
+        super(HidableSpacer, self).__init__()
+        self.setMinimumSize(size, size)
+        self.setMaximumSize(size, size)

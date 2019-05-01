@@ -2,7 +2,7 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 from urllib.parse import urlparse
 
-from ..gui_common import Alert
+from ..gui_common import Alert, HidableSpacer
 from ...api_client import FlockApiClient, PermissionDenied, BadStatusCode, \
     ResponseIsNotJson, RespondedWithError, InvalidResponse, ConnectionError
 
@@ -28,6 +28,11 @@ class SettingsTab(QtWidgets.QWidget):
         else:
             self.status = self.STATUS_NOT_REGISTERED
 
+        # Use server checkbox
+        self.use_server_checkbox = QtWidgets.QCheckBox("Share data with a remote Flock server")
+        self.use_server_checkbox.stateChanged.connect(self.use_server_toggled)
+        use_server_checkbox_spacer = HidableSpacer()
+
         # Server
         self.server_label = QtWidgets.QLabel()
         self.server_url_edit = QtWidgets.QLineEdit()
@@ -51,27 +56,31 @@ class SettingsTab(QtWidgets.QWidget):
         self.automatically_enable_twigs_checkbox = QtWidgets.QCheckBox("Automatically opt-in to new data collection without asking me")
         self.automatically_enable_twigs_checkbox.stateChanged.connect(self.automatically_enable_twigs_toggled)
 
-        # Flock server group
+        # Server group
         server_settings_layout = QtWidgets.QVBoxLayout()
         server_settings_layout.addLayout(server_layout)
         server_settings_layout.addWidget(self.automatically_enable_twigs_checkbox)
-        server_settings_group = QtWidgets.QGroupBox("Flock server settings")
-        server_settings_group.setLayout(server_settings_layout)
+        self.server_settings_group = QtWidgets.QGroupBox("Server settings")
+        self.server_settings_group.setStyleSheet(self.c.gui.css['SettingsTab group_box'])
+        self.server_settings_group.setLayout(server_settings_layout)
+        self.server_settings_group_spacer = HidableSpacer()
 
         # Autoupdate homebrew checkbox
         self.homebrew_update_prompt_checkbox = QtWidgets.QCheckBox("Prompt when Homebrew updates are available")
         self.homebrew_update_prompt_checkbox.stateChanged.connect(self.homebrew_update_prompt_toggled)
 
         # Autoupdate homebrew cask checkbox
-        self.homebrew_autoupdate_checkbox = QtWidgets.QCheckBox("Automatically install Homebrew updates in the background (if they don't require typing a password)")
+        self.homebrew_autoupdate_checkbox = QtWidgets.QCheckBox("Automatically install Homebrew updates (if they don't require a password)")
         self.homebrew_autoupdate_checkbox.stateChanged.connect(self.homebrew_autoupdate_toggled)
 
         # Homebrew group
         homebrew_settings_layout = QtWidgets.QVBoxLayout()
         homebrew_settings_layout.addWidget(self.homebrew_update_prompt_checkbox)
         homebrew_settings_layout.addWidget(self.homebrew_autoupdate_checkbox)
-        homebrew_settings_group = QtWidgets.QGroupBox("Homebrew upgrade settings")
+        homebrew_settings_group = QtWidgets.QGroupBox("Homebrew settings")
+        homebrew_settings_group.setStyleSheet(self.c.gui.css['SettingsTab group_box'])
         homebrew_settings_group.setLayout(homebrew_settings_layout)
+        homebrew_settings_group_spacer = HidableSpacer()
 
         # Buttons
         quit_button = QtWidgets.QPushButton('Quit Flock Agent')
@@ -86,8 +95,12 @@ class SettingsTab(QtWidgets.QWidget):
 
         # Layout
         layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(server_settings_group)
+        layout.addWidget(self.use_server_checkbox)
+        layout.addWidget(use_server_checkbox_spacer)
+        layout.addWidget(self.server_settings_group)
+        layout.addWidget(self.server_settings_group_spacer) # custom spacing widget, so we can hide it
         layout.addWidget(homebrew_settings_group)
+        layout.addWidget(homebrew_settings_group_spacer)
         layout.addStretch()
         layout.addLayout(buttons_layout)
         self.setLayout(layout)
@@ -95,11 +108,25 @@ class SettingsTab(QtWidgets.QWidget):
         self.update_ui()
 
     def update_ui(self):
+        self.c.log('SettingsTab', 'update_ui')
+
+        # Use server checkbox
+        if self.c.settings.get('use_server'):
+            self.use_server_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
+            self.server_settings_group.show()
+            self.server_settings_group_spacer.show()
+        else:
+            self.use_server_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
+            self.server_settings_group.hide()
+            self.server_settings_group_spacer.hide()
+
         # Not registered yet
+        self.server_label.show()
         if self.status == self.STATUS_NOT_REGISTERED:
             self.server_label.setText('What\'s the address of the server you will send data to?')
             self.server_url_edit.show()
             self.server_url_label.hide()
+            self.server_button.show()
             self.server_button.setEnabled(True)
             self.server_button.setText('Connect')
 
@@ -111,6 +138,7 @@ class SettingsTab(QtWidgets.QWidget):
             self.server_button.hide()
 
         # Automatically opt-in checkbox
+        self.automatically_enable_twigs_checkbox.show()
         if self.c.settings.get('automatically_enable_twigs'):
             self.automatically_enable_twigs_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
         else:
@@ -167,6 +195,14 @@ class SettingsTab(QtWidgets.QWidget):
                 Alert(self.c, 'Server returned an invalid response').launch()
             except ConnectionError:
                 Alert(self.c, 'Error connecting to server').launch()
+
+        self.update_ui()
+
+    def use_server_toggled(self):
+        self.c.log('SettingsTab', 'use_server_toggled')
+        is_checked = self.use_server_checkbox.checkState() == QtCore.Qt.CheckState.Checked
+        self.c.settings.set('use_server', is_checked)
+        self.c.settings.save()
 
         self.update_ui()
 
