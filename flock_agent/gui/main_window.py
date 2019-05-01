@@ -45,6 +45,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.data_tab.refresh.connect(self.update_ui)
 
         self.settings_tab = SettingsTab(self.c)
+        self.settings_tab.update_use_server.connect(self.update_use_server)
         self.settings_tab.quit.connect(self.quit)
 
         self.tabs = QtWidgets.QTabWidget()
@@ -59,19 +60,17 @@ class MainWindow(QtWidgets.QMainWindow):
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
-        self.update_ui()
-
         # Show or hide?
         if len(self.c.settings.get_undecided_twig_ids()) == 0:
             self.hide()
         else:
             self.show()
 
-        # Submit osquery logs to the server each minute
+        # Submit osquery logs to the server on a timer
         self.currently_submitting = False
         self.submit_timer = QtCore.QTimer()
         self.submit_timer.timeout.connect(self.run_submit)
-        self.submit_timer.start(60000) # 1 minute
+        self.update_use_server(None) # this calls self.update_ui()
 
     def closeEvent(self, e):
         """
@@ -93,23 +92,27 @@ class MainWindow(QtWidgets.QMainWindow):
         opt_in_tab_index = self.tabs.indexOf(self.opt_in_tab)
         if opt_in_tab_index != -1:
             self.tabs.removeTab(opt_in_tab_index)
-        twigs_tab_index = self.tabs.indexOf(self.data_tab)
-        if twigs_tab_index != -1:
-            self.tabs.removeTab(twigs_tab_index)
+        data_tab_index = self.tabs.indexOf(self.data_tab)
+        if data_tab_index != -1:
+            self.tabs.removeTab(data_tab_index)
         homebrew_tab_index = self.tabs.indexOf(self.homebrew_tab)
         if homebrew_tab_index != -1:
             self.tabs.removeTab(homebrew_tab_index)
 
-        # Add tabs that should be shown
-        twigs_tab_should_show = len(self.c.settings.get_decided_twig_ids()) > 0
-        if twigs_tab_should_show:
-            self.tabs.insertTab(1, self.data_tab, "Data")
-        opt_in_tab_should_show = len(self.c.settings.get_undecided_twig_ids()) > 0
-        if opt_in_tab_should_show:
-            self.tabs.insertTab(0, self.opt_in_tab, "Opt-In")
+        # Only show data or opt-in tabs if using a server
+        if self.c.settings.get('use_server'):
+            data_tab_should_show = len(self.c.settings.get_decided_twig_ids()) > 0
+            if data_tab_should_show:
+                self.tabs.insertTab(1, self.data_tab, "Data")
+            opt_in_tab_should_show = len(self.c.settings.get_undecided_twig_ids()) > 0
+            if opt_in_tab_should_show:
+                self.tabs.insertTab(0, self.opt_in_tab, "Opt-In")
+
+        # Only show homebrew tab if there are homebrew updates available
         if self.homebrew_tab.should_show:
             self.tabs.insertTab(0, self.homebrew_tab, "Homebrew")
 
+        # Set the active tab
         if active_tab == None:
             self.tabs.setCurrentIndex(0)
         else:
@@ -119,6 +122,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 index = self.tabs.indexOf(self.data_tab)
             elif active_tab == 'homebrew':
                 index = self.tabs.indexOf(self.homebrew_tab)
+            elif active_tab == 'settings':
+                index = self.tabs.indexOf(self.settings_tab)
             else:
                 index = -1
 
@@ -151,10 +156,10 @@ class MainWindow(QtWidgets.QMainWindow):
             return
         self.currently_submitting = True
 
-        self.submit_t = SubmitThread(self.c)
-        self.submit_t.submit_finished.connect(self.submit_finished)
-        self.submit_t.submit_error.connect(self.submit_error)
-        self.submit_t.start()
+        self.submit_thread = SubmitThread(self.c)
+        self.submit_thread.submit_finished.connect(self.submit_finished)
+        self.submit_thread.submit_error.connect(self.submit_error)
+        self.submit_thread.start()
 
     def submit_finished(self):
         self.currently_submitting = False
@@ -162,6 +167,19 @@ class MainWindow(QtWidgets.QMainWindow):
     def submit_error(self, exception_type):
         # TODO: make the exception handling more robust
         self.systray.showMessage("Error Submitting Data", "Exception type: {}".format(exception_type))
+
+    def update_use_server(self, active_tab='settings'):
+        use_server = self.c.settings.get('use_server')
+
+        if use_server:
+            # Start the submit timer
+            self.submit_timer.start(60000) # 1 minute
+
+        else:
+            # Stop the submit timer
+            self.submit_timer.stop()
+
+        self.update_ui(active_tab)
 
     def quit(self):
         self.c.log("MainWindow", "quit")
