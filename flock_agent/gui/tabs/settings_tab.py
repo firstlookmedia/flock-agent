@@ -12,6 +12,8 @@ class SettingsTab(QtWidgets.QWidget):
     Settings
     """
     quit = QtCore.pyqtSignal()
+    disable_use_server = QtCore.pyqtSignal()
+    enable_use_server = QtCore.pyqtSignal()
 
     STATUS_NOT_REGISTERED = 0
     STATUS_REGISTERED = 1
@@ -203,6 +205,11 @@ class SettingsTab(QtWidgets.QWidget):
         is_checked = self.use_server_checkbox.checkState() == QtCore.Qt.CheckState.Checked
         self.c.settings.set('use_server', is_checked)
         self.c.settings.save()
+
+        if is_checked:
+            self.enable_use_server.emit()
+        else:
+            self.disable_use_server.emit()
 
         self.update_ui()
 
