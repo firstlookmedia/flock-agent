@@ -14,13 +14,19 @@ class Settings(object):
         self.c.log("Settings", "__init__", "settings_filename: {}".format(self.settings_filename))
 
         self.default_settings = {
+            # Server settings
+            'use_server': True,
             'gateway_url': None,
             'gateway_token': None,
             'gateway_username': None,
             'automatically_enable_twigs': False,
             'last_osquery_result_timestamp': 0, # Timestamp of the last osquery result sent to the server
+
+            # Homebrew settings
             'homebrew_update_prompt': True,
             'homebrew_autoupdate': False,
+
+            # Twigs
             'twigs': {}
         }
 
