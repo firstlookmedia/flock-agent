@@ -6,23 +6,7 @@ Flock is a privacy-preserving fleet management system. The goal of Flock is to g
 
 This is the macOS agent that runs on endpoints, collects data, and shares it with the [Flock server](https://github.com/firstlookmedia/flock).
 
-### Health check
-
-The agent lets users quickly check on the security best practices of their Mac. If any best practice isn't being followed, the user can click "Help" to load a wiki page with instructions for hardening their system.
-
-![Health screenshot](./assets/screenshot1.png)
-
-### Data collection
-
-The agent collects specific pieces of data that are helpful for the organization to assess their security posture and detect attacks. Users can choose not to opt-in to any of these types of data if they wish.
-
-![Data screenshot](./assets/screenshot2.png)
-
-Users can click "Details" next to any type of data to see exactly what data is collected from their computer, how frequently, and what the osquery SQL query being run is.
-
-![Data screenshot](./assets/screenshot3.png)
-
-## Installing Flock Agent
+## Install Flock Agent
 
 First [install Homebrew](https://brew.sh/), if you don't already have it. Then open the Terminal app and run:
 
@@ -40,7 +24,31 @@ brew cask install flock-agent
 
 Then launch Flock from `/Applications`.
 
-## About Flock Agent
+## Why use Flock Agent?
+
+### Health check
+
+The agent lets users quickly check on the security best practices of their Mac. If any best practice isn't being followed, the user can click "Help" to load a wiki page with instructions for hardening their system.
+
+![Health screenshot](./assets/screenshot1.png)
+
+### Homebrew Updates
+
+The agent prompts users when software installed via Homebrew (both formulae and casks) is out-of-date, helping keep all of their software patched.
+
+![Homebrew screenshot](./assets/screenshot4.png)
+
+### Data collection
+
+Flock Agent is useful for both individuals and organizations. If you're deploying Flock as part of your organization, the agent will collects specific pieces of data that are helpful for you to assess your organization's security posture and detect attacks. Users can choose not to opt-in to any of these types of data if they wish.
+
+![Data screenshot](./assets/screenshot2.png)
+
+Users can click "Details" next to any type of data to see exactly what data is collected from their computer, how frequently, and what the osquery SQL query being run is.
+
+![Data screenshot](./assets/screenshot3.png)
+
+## How it works
 
 Flock Agent is GUI app for macOS that lives in your system tray, monitors your computer, and submits data to a Flock server. Here are some features:
 
