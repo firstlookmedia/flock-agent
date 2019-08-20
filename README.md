@@ -12,7 +12,7 @@ First [install Homebrew](https://brew.sh/), if you don't already have it. Then o
 
 ```sh
 # Install dependencies
-brew cask install java
+brew cask install adoptopenjdk
 brew install osquery
 
 # Add the First Look Media tap
