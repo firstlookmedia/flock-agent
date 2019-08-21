@@ -119,7 +119,7 @@ class GuiCommon(object):
                 QPushButton {
                     color: #3461bc;
                     text-decoration: underline;
-                    padding: 5px;
+                    padding: 0 5px;
                     font-size: 12px;
                 }
                 """,
