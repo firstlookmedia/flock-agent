@@ -34,17 +34,11 @@ class GuiCommon(object):
                 }
                 """,
 
-            'TwigView name_label': """
-                QLabel {
+            'TwigView enabled_checkbox': """
+                QCheckBox {
                     font-weight: bold;
-                    font-size: 16px;
-                }
-                """,
-
-            'TwigView enabled_button': """
-                QPushButton {
-                    margin: 0;
-                    padding: 0;
+                    font-size: 14px;
+                    margin-right: 20px;
                 }
                 """,
 
