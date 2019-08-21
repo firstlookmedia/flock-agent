@@ -33,8 +33,8 @@ class HealthItemBase(QtWidgets.QWidget):
         layout.addWidget(self.good_image)
         layout.addWidget(self.bad_image)
         layout.addWidget(self.label)
-        layout.addStretch()
         layout.addWidget(self.help_button)
+        layout.addStretch()
         self.setLayout(layout)
 
         # Thread starts out as None

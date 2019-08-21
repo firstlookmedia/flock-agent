@@ -9,7 +9,7 @@ twigs = {
         "name": "macOS version",
         "query": "select * from os_version;",
         "interval": 86400,
-        "description": "The current version of macOS that's on your computer'"
+        "description": "The current version of macOS that's on your computer"
     },
     "browser_plugins": {
         "name": "Browser plugins",
@@ -39,7 +39,7 @@ twigs = {
         "name": "Firefox add-ons",
         "query": "select firefox_addons.* from users join firefox_addons using (uid);",
         "interval": 86400,
-        "description": "List of Safari extensions, which can allow us to detect if you have malicious ones installed"
+        "description": "List of Firefox add-ons, which can allow us to detect if you have malicious ones installed"
     },
     "launchd": {
         "name": "Launch daemons",
@@ -87,7 +87,7 @@ twigs = {
         "name": "Kernel extensions",
         "query": "select * from kernel_extensions;",
         "interval": 3600,
-        "description": "What current kernel extensions are loaded; some malware has a kernel expension component and this could help us catch it"
+        "description": "What current kernel extensions are loaded; some malware has a kernel extension component and this could help us catch it"
     },
     "installed_applications": {
         "name": "Installed applications",
@@ -99,7 +99,7 @@ twigs = {
         "name": "Setuid binaries",
         "query": "select * from suid_bin;",
         "interval": 3600,
-        "description": "List of binary files on your computer with setuid enabled, which could be used for privilege escelation, including privilege escelation backdoors"
+        "description": "List of binary files on your computer with setuid enabled, which could be used for privilege escalation, including privilege escalation backdoors"
     },
     "disk_encryption": {
         "name": "Disk encryption",

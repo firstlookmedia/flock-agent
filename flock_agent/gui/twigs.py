@@ -13,23 +13,17 @@ class TwigView(QtWidgets.QWidget):
         self.c = common
         self.twig_id = twig_id
 
-        #self.c.log('TwigView', '__init__', twig_id)
-
         # Set the initial enabled status from settings
         self.enabled_status = self.get_twig()['enabled']
 
         # Widgets
-        name_label = QtWidgets.QLabel(twigs[twig_id]['name'])
-        name_label.setStyleSheet(self.c.gui.css['TwigView name_label'])
-
-        self.enabled_button = QtWidgets.QPushButton()
-        self.enabled_button.setDefault(False)
-        self.enabled_button.setFlat(True)
-        self.enabled_button.setFixedWidth(64)
-        self.enabled_button.setFixedHeight(32)
-        self.enabled_button.setIconSize(QtCore.QSize(64, 32))
-        self.enabled_button.setStyleSheet(self.c.gui.css['TwigView enabled_button'])
-        self.enabled_button.clicked.connect(self.clicked_enabled_button)
+        self.enabled_checkbox = QtWidgets.QCheckBox(twigs[twig_id]['name'])
+        if self.enabled_status == 'undecided':
+            self.enabled_checkbox.setTristate(True)
+        else:
+            self.enabled_checkbox.setTristate(False)
+        self.enabled_checkbox.setStyleSheet(self.c.gui.css['TwigView enabled_checkbox'])
+        self.enabled_checkbox.stateChanged.connect(self.toggle_enabled)
 
         description_label = QtWidgets.QLabel(twigs[twig_id]['description'])
         description_label.setWordWrap(True)
@@ -41,35 +35,40 @@ class TwigView(QtWidgets.QWidget):
 
         # Layout
         top_layout = QtWidgets.QHBoxLayout()
-        top_layout.addWidget(name_label, stretch=1)
-        top_layout.addWidget(self.enabled_button)
+        top_layout.addWidget(self.enabled_checkbox)
+        top_layout.addWidget(details_button)
+        top_layout.addStretch()
 
         bottom_layout = QtWidgets.QHBoxLayout()
         bottom_layout.addWidget(description_label, stretch=1)
-        bottom_layout.addWidget(details_button)
 
         layout = QtWidgets.QVBoxLayout()
         layout.addLayout(top_layout)
         layout.addLayout(bottom_layout)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 10)
         self.setLayout(layout)
 
         self.update_ui()
 
     def update_ui(self):
         if self.enabled_status == 'enabled':
-            self.enabled_button.setIcon( QtGui.QIcon(self.c.get_resource_path('images/switch-enabled.png')) )
+            self.enabled_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
         elif self.enabled_status == 'disabled':
-            self.enabled_button.setIcon( QtGui.QIcon(self.c.get_resource_path('images/switch-disabled.png')) )
+            self.enabled_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
         else:
-            self.enabled_button.setIcon( QtGui.QIcon(self.c.get_resource_path('images/switch-undecided.png')) )
+            self.enabled_checkbox.setCheckState(QtCore.Qt.CheckState.PartiallyChecked)
 
-    def clicked_enabled_button(self):
-        if self.enabled_status == 'undecided':
+    def toggle_enabled(self, state):
+        if state == QtCore.Qt.CheckState.Checked:
             self.enabled_status = 'enabled'
-        elif self.enabled_status == 'enabled':
+            self.enabled_checkbox.setTristate(False)
+        elif state == QtCore.Qt.CheckState.Unchecked:
             self.enabled_status = 'disabled'
-        elif self.enabled_status == 'disabled':
-            self.enabled_status = 'enabled'
+            self.enabled_checkbox.setTristate(False)
+        else:
+            self.enabled_status = 'undecided'
+            self.enabled_checkbox.setTristate(True)
         self.update_ui()
 
     def clicked_details_button(self):
