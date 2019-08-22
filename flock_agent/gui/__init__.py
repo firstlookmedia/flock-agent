@@ -4,6 +4,7 @@ from PyQt5 import QtCore, QtWidgets
 
 from .gui_common import GuiCommon
 from .bootstrap import Bootstrap
+from .onboarding import Onboarding
 from .main_window import MainWindow
 
 
@@ -20,8 +21,23 @@ def main(common):
     if not bootstrap.go():
         return
 
-    # Now create the main window
+    # Create the main window
     main_window = MainWindow(app, common)
+
+    # Onboarding wizard
+    if common.settings.first_run:
+        def show_main_window():
+            main_window.show()
+
+        onboarding = Onboarding(common)
+        onboarding.finished.connect(show_main_window)
+        onboarding.go()
+    else:
+        # Show or hide main window?
+        if len(common.settings.get_undecided_twig_ids()) == 0:
+            main_window.hide()
+        else:
+            main_window.show()
 
     # Clean up when app quits
     def shutdown():

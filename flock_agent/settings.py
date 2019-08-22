@@ -76,6 +76,8 @@ class Settings(object):
     def load(self):
         self.c.log("Settings", "load")
         if os.path.isfile(self.settings_filename):
+            self.first_run = False
+
             # If the settings file exists, load it
             try:
                 with open(self.settings_filename, 'r') as settings_file:
@@ -92,6 +94,8 @@ class Settings(object):
                 self.settings = self.default_settings
 
         else:
+            self.first_run = True
+
             # Save with default settings
             self.c.log("Settings", "load", "settings file doesn't exist, starting with default")
             self.settings = self.default_settings
