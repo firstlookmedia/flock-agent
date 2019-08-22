@@ -8,12 +8,10 @@ class WelcomePage(QtWidgets.QWizardPage):
         self.c = common
 
         self.setTitle("Welcome to Flock Agent")
-        self.setSubTitle("Flock Agent helps your organization keep your computer secure while preserving your privacy")
-
-        label = QtWidgets.QLabel("this is a label")
+        pixmap = QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/onboarding-page1.png")))
+        self.setPixmap(QtWidgets.QWizard.BackgroundPixmap, pixmap)
 
         layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(label)
         self.setLayout(layout)
 
 
