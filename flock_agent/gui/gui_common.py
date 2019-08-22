@@ -19,6 +19,24 @@ class GuiCommon(object):
 
         # Stylesheets
         self.css = {
+            'Onboarding label': """
+                QLabel {
+                    font-size: 16px;
+                }
+                """,
+
+            'Onboarding line_edit': """
+                QLabel {
+                    font-size: 16px;
+                }
+                """,
+
+            'Onboarding radio_button': """
+                QRadioButton {
+                    font-size: 16px;
+                }
+                """,
+
             'MainWindow header_label': """
                 QLabel {
                     font-size: 16px;
