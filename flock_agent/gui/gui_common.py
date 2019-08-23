@@ -29,6 +29,14 @@ class GuiCommon(object):
                 }
                 """,
 
+            'Onboarding url_label': """
+                QLabel {
+                    font-size: 16px;
+                    font-weight: bold;
+                    font-family: monospace;
+                }
+                """,
+
             'Onboarding line_edit': """
                 QLineEdit {
                     font-size: 16px;

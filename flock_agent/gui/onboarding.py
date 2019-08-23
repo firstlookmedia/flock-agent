@@ -2,6 +2,13 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 
+class Pages:
+    SERVER = 1
+    DATA = 2
+    HOMEBREW = 3
+    APPLET = 4
+
+
 class ServerPage(QtWidgets.QWizardPage):
     def __init__(self, common):
         super(ServerPage, self).__init__()
@@ -19,14 +26,11 @@ class ServerPage(QtWidgets.QWizardPage):
 
         # Use server
         self.use_server_no = QtWidgets.QRadioButton("I'm an individual")
+        self.use_server_no.toggled.connect(self.use_server_toggled)
         self.use_server_no.setStyleSheet(self.c.gui.css['Onboarding radio_button'])
         self.use_server_yes = QtWidgets.QRadioButton("I'm part of an organization and want to share data with my security team")
+        self.use_server_yes.toggled.connect(self.use_server_toggled)
         self.use_server_yes.setStyleSheet(self.c.gui.css['Onboarding radio_button'])
-
-        if self.c.settings.get('use_server'):
-            self.use_server_yes.setChecked(True)
-        else:
-            self.use_server_no.setChecked(True)
 
         # Layout
         layout = QtWidgets.QVBoxLayout()
@@ -37,11 +41,25 @@ class ServerPage(QtWidgets.QWizardPage):
         layout.addWidget(self.use_server_yes)
         self.setLayout(layout)
 
+    def nextId(self):
+        if self.use_server_yes.isChecked():
+            return Pages.DATA
+        else:
+            return Pages.HOMEBREW
+
+    def isComplete(self):
+        return self.use_server_yes.isChecked() or self.use_server_no.isChecked()
+
+    def use_server_toggled(self):
+        self.completeChanged.emit()
+
 
 class DataPage(QtWidgets.QWizardPage):
     def __init__(self, common):
         super(DataPage, self).__init__()
         self.c = common
+
+        self.is_registered = False
 
         self.setTitle("Sharing data with your security team")
 
@@ -60,7 +78,7 @@ class DataPage(QtWidgets.QWizardPage):
         self.server_url_edit.setPlaceholderText("https://")
         self.server_url_edit.setStyleSheet(self.c.gui.css['Onboarding line_edit'])
         self.server_url_label = QtWidgets.QLabel()
-        self.server_url_label.setStyleSheet(self.c.gui.css['Onboarding label'])
+        self.server_url_label.setStyleSheet(self.c.gui.css['Onboarding url_label'])
         self.server_url_label.hide()
         self.server_button = QtWidgets.QPushButton("Connect")
         self.server_button.setDefault(True)
@@ -98,6 +116,9 @@ class DataPage(QtWidgets.QWizardPage):
         layout.addWidget(automatically_enable_twigs_label)
         self.setLayout(layout)
 
+    def isComplete(self):
+        return self.is_registered
+
     def server_button_clicked(self):
         self.c.log('DataPage', 'server_button_clicked')
 
@@ -112,6 +133,9 @@ class DataPage(QtWidgets.QWizardPage):
             self.server_url_label.setText(server_url)
             self.server_url_label.show()
             self.server_button.hide()
+
+            self.is_registered = True
+            self.completeChanged.emit()
 
         else:
             self.server_button.setEnabled(True)
@@ -202,10 +226,10 @@ class Onboarding(QtWidgets.QWizard):
         self.homebrew_page = HomebrewPage(self.c)
         self.applet_page = AppletPage(self.c)
 
-        self.addPage(self.server_page)
-        self.addPage(self.data_page)
-        self.addPage(self.homebrew_page)
-        self.addPage(self.applet_page)
+        self.setPage(Pages.SERVER, self.server_page)
+        self.setPage(Pages.DATA, self.data_page)
+        self.setPage(Pages.HOMEBREW, self.homebrew_page)
+        self.setPage(Pages.APPLET, self.applet_page)
 
     def done(self, result):
         super(Onboarding, self).done(result)
