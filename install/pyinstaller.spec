@@ -4,7 +4,7 @@ import os
 import inspect
 
 # Get the version
-root = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+root = os.path.dirname(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))
 sys.path.insert(0, root)
 import flock_agent
 version = flock_agent.flock_agent_version
@@ -49,7 +49,7 @@ coll = COLLECT(
 app = BUNDLE(
   coll,
   name='Flock.app',
-  icon='install/flock-agent.icns',
+  icon='flock-agent.icns',
   bundle_identifier='media.firstlook.flock_agent',
   info_plist={
       'LSUIElement': True,
