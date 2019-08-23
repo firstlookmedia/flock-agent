@@ -54,15 +54,17 @@ class DataPage(QtWidgets.QWizardPage):
         instructions_label.setStyleSheet(self.c.gui.css['Onboarding label'])
 
         # Server
-        self.server_label = QtWidgets.QLabel()
+        self.server_label = QtWidgets.QLabel("What's the address of the server you will send data to?")
         self.server_label.setStyleSheet(self.c.gui.css['Onboarding label'])
         self.server_url_edit = QtWidgets.QLineEdit()
         self.server_url_edit.setPlaceholderText("https://")
         self.server_url_edit.setStyleSheet(self.c.gui.css['Onboarding line_edit'])
         self.server_url_label = QtWidgets.QLabel()
         self.server_url_label.setStyleSheet(self.c.gui.css['Onboarding label'])
-        self.server_button = QtWidgets.QPushButton()
+        self.server_url_label.hide()
+        self.server_button = QtWidgets.QPushButton("Connect")
         self.server_button.setDefault(True)
+        self.server_button.setEnabled(True)
         self.server_button.clicked.connect(self.server_button_clicked)
 
         server_url_layout = QtWidgets.QHBoxLayout()
@@ -75,8 +77,16 @@ class DataPage(QtWidgets.QWizardPage):
         server_layout.addLayout(server_url_layout)
 
         # Automatically opt-in checkbox
-        self.automatically_enable_twigs_checkbox = QtWidgets.QCheckBox("Automatically opt-in to new data collection without asking me (recommended)")
-        self.automatically_enable_twigs_checkbox.stateChanged.connect(self.automatically_enable_twigs_toggled)
+        self.automatically_enable_twigs_checkbox = QtWidgets.QCheckBox("Automatically opt-in to new data collection without asking me")
+        self.automatically_enable_twigs_checkbox.setStyleSheet(self.c.gui.css['Onboarding checkbox'])
+
+        if self.c.settings.get('automatically_enable_twigs'):
+            self.automatically_enable_twigs_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
+        else:
+            self.automatically_enable_twigs_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
+
+        automatically_enable_twigs_label = QtWidgets.QLabel("If you don't want to automatically opt-in, you must choose which types of data you want to share with your security team. If a Flock update contains new types of data, you will be asked if you want to opt-in to these as well. It's recommended that you opt-in to sharing everything.")
+        automatically_enable_twigs_label.setWordWrap(True)
 
         # Layout
         layout = QtWidgets.QVBoxLayout()
@@ -85,7 +95,27 @@ class DataPage(QtWidgets.QWizardPage):
         layout.addLayout(server_layout)
         layout.addSpacing(20)
         layout.addWidget(self.automatically_enable_twigs_checkbox)
+        layout.addWidget(automatically_enable_twigs_label)
         self.setLayout(layout)
+
+    def server_button_clicked(self):
+        self.c.log('DataPage', 'server_button_clicked')
+
+        self.server_button.setEnabled(False)
+        self.server_button.setText('Registering...')
+
+        # Try registering the URL
+        server_url = self.server_url_edit.text()
+        if self.c.gui.register_server(server_url):
+            self.server_label.setText("Success! Flock will share data with this server:")
+            self.server_url_edit.hide()
+            self.server_url_label.setText(server_url)
+            self.server_url_label.show()
+            self.server_button.hide()
+
+        else:
+            self.server_button.setEnabled(True)
+            self.server_button.setText('Connect')
 
 
 class Onboarding(QtWidgets.QWizard):

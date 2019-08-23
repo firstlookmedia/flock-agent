@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
 from Foundation import NSUserDefaults
+from urllib.parse import urlparse
+
+from ..api_client import FlockApiClient, PermissionDenied, BadStatusCode, \
+    ResponseIsNotJson, RespondedWithError, InvalidResponse, ConnectionError
 
 
 class GuiCommon(object):
@@ -26,13 +30,19 @@ class GuiCommon(object):
                 """,
 
             'Onboarding line_edit': """
-                QLabel {
+                QLineEdit {
                     font-size: 16px;
                 }
                 """,
 
             'Onboarding radio_button': """
                 QRadioButton {
+                    font-size: 16px;
+                }
+                """,
+
+            'Onboarding checkbox': """
+                QCheckBox {
                     font-size: 16px;
                 }
                 """,
@@ -136,6 +146,40 @@ class GuiCommon(object):
                 }
                 """,
         }
+
+    def register_server(self, server_url):
+         # Validate server URL
+        o = urlparse(server_url)
+        if (o.scheme != 'http' and o.scheme != 'https') or (o.path != '' and o.path != '/') or \
+            o.params != '' or o.query != '' or o.fragment != '':
+
+            Alert(self.c, 'Invalid server URL').launch()
+            return False
+
+        # Save the server URL in settings
+        self.c.settings.set('gateway_url', server_url)
+        self.c.settings.save()
+
+        # Try to register
+        self.c.log('SettingsTab', 'server_button_clicked', 'registering with server')
+        api_client = FlockApiClient(self.c)
+        try:
+            api_client.register()
+            api_client.ping()
+            return True
+        except PermissionDenied:
+            Alert(self.c, 'Permission denied').launch()
+        except BadStatusCode as e:
+            Alert(self.c, 'Bad status code: {}'.format(e)).launch()
+        except ResponseIsNotJson:
+            Alert(self.c, 'Server response is not JSON').launch()
+        except RespondedWithError as e:
+            Alert(self.c, 'Server error: {}'.format(e)).launch()
+        except InvalidResponse:
+            Alert(self.c, 'Server returned an invalid response').launch()
+        except ConnectionError:
+            Alert(self.c, 'Error connecting to server').launch()
+        return False
 
 
 class Alert(QtWidgets.QDialog):
