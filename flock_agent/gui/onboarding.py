@@ -159,6 +159,31 @@ class HomebrewPage(QtWidgets.QWizardPage):
         self.setLayout(layout)
 
 
+class AppletPage(QtWidgets.QWizardPage):
+    def __init__(self, common):
+        super(AppletPage, self).__init__()
+        self.c = common
+
+        self.setTitle("Accessing Flock")
+
+        pixmap = QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/onboarding-page4.png")))
+        self.setPixmap(QtWidgets.QWizard.BackgroundPixmap, pixmap)
+
+        label = QtWidgets.QLabel("If you want to check on the health of your computer or change any Flock settings, click the bird icon in your system tray.")
+        label.setWordWrap(True)
+        label.setStyleSheet(self.c.gui.css['Onboarding label'])
+
+        systray_image = QtWidgets.QLabel()
+        systray_image.setPixmap(QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/onboarding-systray.png"))))
+
+        # Layout
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(label)
+        layout.addSpacing(20)
+        layout.addWidget(systray_image)
+        self.setLayout(layout)
+
+
 class Onboarding(QtWidgets.QWizard):
     """
     The onboarding assistant, for the first run of Flock Agent
@@ -175,10 +200,12 @@ class Onboarding(QtWidgets.QWizard):
         self.server_page = ServerPage(self.c)
         self.data_page = DataPage(self.c)
         self.homebrew_page = HomebrewPage(self.c)
+        self.applet_page = AppletPage(self.c)
 
         self.addPage(self.server_page)
         self.addPage(self.data_page)
         self.addPage(self.homebrew_page)
+        self.addPage(self.applet_page)
 
     def done(self, result):
         super(Onboarding, self).done(result)
