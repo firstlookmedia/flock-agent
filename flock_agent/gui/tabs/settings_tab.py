@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
-from urllib.parse import urlparse
 
 from ..gui_common import Alert, HidableSpacer
-from ...api_client import FlockApiClient, PermissionDenied, BadStatusCode, \
-    ResponseIsNotJson, RespondedWithError, InvalidResponse, ConnectionError
 
 
 class SettingsTab(QtWidgets.QWidget):
@@ -22,12 +19,6 @@ class SettingsTab(QtWidgets.QWidget):
         self.c = common
 
         self.c.log('SettingsTab', '__init__')
-
-        # Determine server status
-        if self.c.settings.get('gateway_url') and self.c.settings.get('gateway_token'):
-            self.status = self.STATUS_REGISTERED
-        else:
-            self.status = self.STATUS_NOT_REGISTERED
 
         # Use server checkbox
         self.use_server_checkbox = QtWidgets.QCheckBox("Share data with a remote Flock server")
@@ -67,7 +58,7 @@ class SettingsTab(QtWidgets.QWidget):
         self.server_settings_group_spacer = HidableSpacer()
 
         # Autoupdate homebrew checkbox
-        self.homebrew_update_prompt_checkbox = QtWidgets.QCheckBox("Prompt when Homebrew updates are available")
+        self.homebrew_update_prompt_checkbox = QtWidgets.QCheckBox("Prompt me when Homebrew updates are available")
         self.homebrew_update_prompt_checkbox.stateChanged.connect(self.homebrew_update_prompt_toggled)
 
         # Autoupdate homebrew cask checkbox
@@ -110,6 +101,12 @@ class SettingsTab(QtWidgets.QWidget):
 
     def update_ui(self):
         self.c.log('SettingsTab', 'update_ui')
+
+        # Determine server status
+        if self.c.settings.get('gateway_url') and self.c.settings.get('gateway_token'):
+            self.status = self.STATUS_REGISTERED
+        else:
+            self.status = self.STATUS_NOT_REGISTERED
 
         # Use server checkbox
         if self.c.settings.get('use_server'):
@@ -164,38 +161,12 @@ class SettingsTab(QtWidgets.QWidget):
             self.server_button.setEnabled(False)
             self.server_button.setText('Registering...')
 
-            # Validate server URL
+            # Try registering the URL
             server_url = self.server_url_edit.text()
-            o = urlparse(server_url)
-            if (o.scheme != 'http' and o.scheme != 'https') or (o.path != '' and o.path != '/') or \
-                o.params != '' or o.query != '' or o.fragment != '':
-
-                Alert(self.c, 'Invalid server URL').launch()
-                return False
-
-            # Save the server URL in settings
-            self.c.settings.set('gateway_url', server_url)
-            self.c.settings.save()
-
-            # Try to register
-            self.c.log('SettingsTab', 'server_button_clicked', 'registering with server')
-            api_client = FlockApiClient(self.c)
-            try:
-                api_client.register()
-                api_client.ping()
-                self.status = self.STATUS_REGISTERED
-            except PermissionDenied:
-                Alert(self.c, 'Permission denied').launch()
-            except BadStatusCode as e:
-                Alert(self.c, 'Bad status code: {}'.format(e)).launch()
-            except ResponseIsNotJson:
-                Alert(self.c, 'Server response is not JSON').launch()
-            except RespondedWithError as e:
-                Alert(self.c, 'Server error: {}'.format(e)).launch()
-            except InvalidResponse:
-                Alert(self.c, 'Server returned an invalid response').launch()
-            except ConnectionError:
-                Alert(self.c, 'Error connecting to server').launch()
+            if self.c.gui.register_server(server_url):
+                # Save the server URL in settings
+                self.c.settings.set('gateway_url', server_url)
+                self.c.settings.save()
 
         self.update_ui()
 

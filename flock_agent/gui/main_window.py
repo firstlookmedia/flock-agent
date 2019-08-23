@@ -60,17 +60,13 @@ class MainWindow(QtWidgets.QMainWindow):
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
-        # Show or hide?
-        if len(self.c.settings.get_undecided_twig_ids()) == 0:
-            self.hide()
-        else:
-            self.show()
-
         # Submit osquery logs to the server on a timer
         self.currently_submitting = False
         self.submit_timer = QtCore.QTimer()
         self.submit_timer.timeout.connect(self.run_submit)
         self.update_use_server(None) # this calls self.update_ui()
+
+        self.hide()
 
     def closeEvent(self, e):
         """
