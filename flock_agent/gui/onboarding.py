@@ -7,7 +7,7 @@ class ServerPage(QtWidgets.QWizardPage):
         super(ServerPage, self).__init__()
         self.c = common
 
-        self.setTitle("Welcome to Flock Agent")
+        self.setTitle("Welcome to Flock")
 
         pixmap = QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/onboarding-page1.png")))
         self.setPixmap(QtWidgets.QWizard.BackgroundPixmap, pixmap)
@@ -118,6 +118,47 @@ class DataPage(QtWidgets.QWizardPage):
             self.server_button.setText('Connect')
 
 
+class HomebrewPage(QtWidgets.QWizardPage):
+    def __init__(self, common):
+        super(HomebrewPage, self).__init__()
+        self.c = common
+
+        self.setTitle("Keeping your software up-to-date")
+
+        pixmap = QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/onboarding-page3.png")))
+        self.setPixmap(QtWidgets.QWizard.BackgroundPixmap, pixmap)
+
+        # Instructions
+        instructions_label = QtWidgets.QLabel("Flock helps you keep macOS apps and command line programs that were installed through Homebrew up-to-date.")
+        instructions_label.setWordWrap(True)
+        instructions_label.setStyleSheet(self.c.gui.css['Onboarding label'])
+
+        # Autoupdate homebrew checkbox
+        self.homebrew_update_prompt_checkbox = QtWidgets.QCheckBox("Prompt me when Homebrew updates are available")
+        self.homebrew_update_prompt_checkbox.setStyleSheet(self.c.gui.css['Onboarding checkbox'])
+        if self.c.settings.get('homebrew_update_prompt'):
+            self.homebrew_update_prompt_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
+        else:
+            self.homebrew_update_prompt_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
+
+        # Autoupdate homebrew cask checkbox
+        self.homebrew_autoupdate_checkbox = QtWidgets.QCheckBox("Automatically install Homebrew updates (if they don't require a password)")
+        self.homebrew_autoupdate_checkbox.setStyleSheet(self.c.gui.css['Onboarding checkbox'])
+        if self.c.settings.get('homebrew_autoupdate'):
+            self.homebrew_autoupdate_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
+        else:
+            self.homebrew_autoupdate_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
+
+        # Layout
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(instructions_label)
+        layout.addSpacing(20)
+        layout.addWidget(self.homebrew_update_prompt_checkbox)
+        layout.addSpacing(20)
+        layout.addWidget(self.homebrew_autoupdate_checkbox)
+        self.setLayout(layout)
+
+
 class Onboarding(QtWidgets.QWizard):
     """
     The onboarding assistant, for the first run of Flock Agent
@@ -129,13 +170,15 @@ class Onboarding(QtWidgets.QWizard):
         self.c = common
         self.c.log('Onboarding', '__init__')
 
-        self.setWindowTitle("Configuring Flock Agent")
+        self.setWindowTitle("Configuring Flock")
 
         self.server_page = ServerPage(self.c)
         self.data_page = DataPage(self.c)
+        self.homebrew_page = HomebrewPage(self.c)
 
         self.addPage(self.server_page)
         self.addPage(self.data_page)
+        self.addPage(self.homebrew_page)
 
     def done(self, result):
         super(Onboarding, self).done(result)

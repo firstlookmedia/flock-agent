@@ -64,7 +64,7 @@ class SettingsTab(QtWidgets.QWidget):
         self.server_settings_group_spacer = HidableSpacer()
 
         # Autoupdate homebrew checkbox
-        self.homebrew_update_prompt_checkbox = QtWidgets.QCheckBox("Prompt when Homebrew updates are available")
+        self.homebrew_update_prompt_checkbox = QtWidgets.QCheckBox("Prompt me when Homebrew updates are available")
         self.homebrew_update_prompt_checkbox.stateChanged.connect(self.homebrew_update_prompt_toggled)
 
         # Autoupdate homebrew cask checkbox
