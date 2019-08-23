@@ -19,7 +19,7 @@ class Settings(object):
             'gateway_url': None,
             'gateway_token': None,
             'gateway_username': None,
-            'automatically_enable_twigs': True,
+            'automatically_enable_twigs': False,
             'last_osquery_result_timestamp': 0, # Timestamp of the last osquery result sent to the server
 
             # Homebrew settings

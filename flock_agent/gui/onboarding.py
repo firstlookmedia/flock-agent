@@ -98,10 +98,9 @@ class DataPage(QtWidgets.QWizardPage):
         self.automatically_enable_twigs_checkbox = QtWidgets.QCheckBox("Automatically opt-in to new data collection without asking me")
         self.automatically_enable_twigs_checkbox.setStyleSheet(self.c.gui.css['Onboarding checkbox'])
 
-        if self.c.settings.get('automatically_enable_twigs'):
-            self.automatically_enable_twigs_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
-        else:
-            self.automatically_enable_twigs_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
+        # Pre-check this box, to encourage the user to opt-in -- even though the setting itself defaults as False
+        # This way if they manually uncheck, they still have a chance to opt-in before sending any data
+        self.automatically_enable_twigs_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
 
         automatically_enable_twigs_label = QtWidgets.QLabel("If you don't want to automatically opt-in, you must choose which types of data you want to share with your security team. If a Flock update contains new types of data, you will be asked if you want to opt-in to these as well. It's recommended that you opt-in to sharing everything.")
         automatically_enable_twigs_label.setWordWrap(True)
@@ -233,6 +232,20 @@ class Onboarding(QtWidgets.QWizard):
 
     def done(self, result):
         super(Onboarding, self).done(result)
+
+        # Save settings
+        use_server = self.server_page.use_server_yes.isChecked()
+        self.c.settings.set('use_server', use_server)
+        if use_server:
+            # gateway_url and gateway_token were saved when registering
+            automatically_enable_twigs = self.data_page.automatically_enable_twigs_checkbox.checkState() == QtCore.Qt.CheckState.Checked
+            self.c.settings.set('automatically_enable_twigs', automatically_enable_twigs)
+        homebrew_update_prompt = self.homebrew_page.homebrew_update_prompt_checkbox.checkState() == QtCore.Qt.CheckState.Checked
+        self.c.settings.set('homebrew_update_prompt', homebrew_update_prompt)
+        homebrew_autoupdate = self.homebrew_page.homebrew_autoupdate_checkbox.checkState() == QtCore.Qt.CheckState.Checked
+        self.c.settings.set('homebrew_autoupdate', homebrew_autoupdate)
+        self.c.settings.save()
+
         self.finished.emit()
 
     def go(self):

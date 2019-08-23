@@ -20,12 +20,6 @@ class SettingsTab(QtWidgets.QWidget):
 
         self.c.log('SettingsTab', '__init__')
 
-        # Determine server status
-        if self.c.settings.get('gateway_url') and self.c.settings.get('gateway_token'):
-            self.status = self.STATUS_REGISTERED
-        else:
-            self.status = self.STATUS_NOT_REGISTERED
-
         # Use server checkbox
         self.use_server_checkbox = QtWidgets.QCheckBox("Share data with a remote Flock server")
         self.use_server_checkbox.stateChanged.connect(self.use_server_toggled)
@@ -107,6 +101,12 @@ class SettingsTab(QtWidgets.QWidget):
 
     def update_ui(self):
         self.c.log('SettingsTab', 'update_ui')
+
+        # Determine server status
+        if self.c.settings.get('gateway_url') and self.c.settings.get('gateway_token'):
+            self.status = self.STATUS_REGISTERED
+        else:
+            self.status = self.STATUS_NOT_REGISTERED
 
         # Use server checkbox
         if self.c.settings.get('use_server'):
