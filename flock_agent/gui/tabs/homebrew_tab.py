@@ -118,15 +118,22 @@ class HomebrewUpdateCheckThread(QtCore.QThread):
         super(HomebrewUpdateCheckThread, self).__init__()
         self.c = common
 
+        self.homebrew_path = '/usr/local/bin/brew'
+
     def run(self):
         self.c.log('HomebrewUpdateCheckThread', 'run')
+
+        # If homebrew is not installed, skip
+        if not os.path.exists(self.homebrew_path):
+            self.c.log('HomebrewUpdateCheckThread', 'run', 'Homebrew is not installed, returning early')
+            return
 
         homebrew_update_prompt = self.c.settings.get('homebrew_update_prompt')
         homebrew_autoupdate = self.c.settings.get('homebrew_autoupdate')
 
         if homebrew_update_prompt or homebrew_autoupdate:
             # Update homebrew taps
-            self.exec(['/usr/local/bin/brew', 'update'])
+            self.exec([self.homebrew_path, 'update'])
 
         outdated_formulae = []
         outdated_casks = []
@@ -135,7 +142,7 @@ class HomebrewUpdateCheckThread(QtCore.QThread):
         # Also, we need to check for these if we will autoupdate
         if homebrew_update_prompt or homebrew_autoupdate:
             # See if there are any outdated formulae
-            p = self.exec(['/usr/local/bin/brew', 'outdated'])
+            p = self.exec([self.homebrew_path, 'outdated'])
             if p:
                 stdout = p.stdout.decode().strip()
                 if stdout != '':
@@ -144,13 +151,13 @@ class HomebrewUpdateCheckThread(QtCore.QThread):
             if len(outdated_formulae) > 0 and homebrew_autoupdate:
                 # Upgrade those formulae
                 self.installing_updates.emit(outdated_formulae)
-                self.exec(['/usr/local/bin/brew', 'upgrade'])
+                self.exec([self.homebrew_path, 'upgrade'])
                 outdated_formulae = []
 
         # If we want to prompt for updates, check for outdated casks
         if homebrew_update_prompt:
             # See if there are any outdated casks
-            p = self.exec(['/usr/local/bin/brew', 'cask', 'outdated'])
+            p = self.exec([self.homebrew_path, 'cask', 'outdated'])
             if p:
                 stdout = p.stdout.decode().strip()
                 if stdout != '':

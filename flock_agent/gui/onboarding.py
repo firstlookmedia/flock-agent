@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 
@@ -156,6 +157,13 @@ class HomebrewPage(QtWidgets.QWizardPage):
         instructions_label.setWordWrap(True)
         instructions_label.setStyleSheet(self.c.gui.css['Onboarding label'])
 
+        # Homebrew not installed warning
+        brew_not_installed_label = QtWidgets.QLabel("You currently don't have Homebrew installed, so these settings won't affect you. If you'd like to use Homebrew, you can install it by following the instructions at <a href='https://brew.sh'>https://brew.sh</a>.")
+        brew_not_installed_label.setWordWrap(True)
+        brew_not_installed_label.setTextInteractionFlags(QtCore.Qt.TextBrowserInteraction)
+        brew_not_installed_label.setOpenExternalLinks(True)
+        brew_not_installed_label.setStyleSheet(self.c.gui.css['Onboarding brew_not_installed_label'])
+
         # Autoupdate homebrew checkbox
         self.homebrew_update_prompt_checkbox = QtWidgets.QCheckBox("Prompt me when Homebrew updates are available")
         self.homebrew_update_prompt_checkbox.setStyleSheet(self.c.gui.css['Onboarding checkbox'])
@@ -176,6 +184,9 @@ class HomebrewPage(QtWidgets.QWizardPage):
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(instructions_label)
         layout.addSpacing(20)
+        if not os.path.exists('/usr/local/bin/brew'):
+            layout.addWidget(brew_not_installed_label)
+            layout.addSpacing(20)
         layout.addWidget(self.homebrew_update_prompt_checkbox)
         layout.addSpacing(20)
         layout.addWidget(self.homebrew_autoupdate_checkbox)
