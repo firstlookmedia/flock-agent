@@ -75,7 +75,7 @@ def main():
     else:
         # Package with codesigning
         print('○ Codesigning app bundle')
-        run(['codesign', '--options', 'runtime', '--timestamp', '--deep', '-s', identity_name_application, app_path])
+        run(['codesign', '--deep', '-s', identity_name_application, app_path])
 
         print('○ Creating an installer')
         run([
