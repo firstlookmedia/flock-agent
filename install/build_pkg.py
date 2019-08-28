@@ -6,6 +6,8 @@ import inspect
 import subprocess
 import shutil
 import argparse
+import requests
+import hashlib
 
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))
@@ -29,6 +31,26 @@ def main():
     if not os.path.exists(app_path):
         print('○ App bundle doesn\'t exist yet, should be in: {}'.format(app_path))
         return
+
+    # Download osquery
+    osquery_url = 'https://pkg.osquery.io/darwin/osquery-3.3.2.pkg'
+    osquery_filename = os.path.join(root, 'build', 'osquery-3.3.2.pkg')
+    osquery_expected_sha256 = '6ac1baa9bd13fcf3bd4c1b20a020479d51e26a8ec81783be7a8692d2c4a9926a'
+
+    if not os.path.exists(osquery_filename):
+        print("Downloading {}".format(osquery_url))
+        r = requests.get(osquery_url)
+        open(osquery_filename, 'wb').write(r.content)
+        osquery_sha256 = hashlib.sha256(r.content).hexdigest()
+    else:
+        osquery_data = open(osquery_filename, 'rb').read()
+        osquery_sha256 = hashlib.sha256(osquery_data).hexdigest()
+
+    if osquery_sha256 != osquery_expected_sha256:
+        print("ERROR! The sha256 doesn't match:")
+        print("expected: {}".format(osquery_expected_sha256))
+        print("  actual: {}".format(osquery_sha256))
+        sys.exit(-1)
 
     # Import flock_agent to get the version
     sys.path.insert(0, root)
@@ -69,6 +91,7 @@ def main():
         run([
             'productbuild',
             '--package', component_path,
+            '--package', osquery_filename,
             pkg_path
         ])
 
@@ -90,6 +113,7 @@ def main():
             'productbuild',
             '--sign', identity_name_installer,
             '--package', component_path,
+            '--package', osquery_filename,
             pkg_path
         ])
 

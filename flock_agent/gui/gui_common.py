@@ -55,6 +55,13 @@ class GuiCommon(object):
                 }
                 """,
 
+            'Onboarding brew_not_installed_label': """
+                QLabel {
+                    font-size: 16px;
+                    color: #666666;
+                }
+                """,
+
             'MainWindow header_label': """
                 QLabel {
                     font-size: 16px;

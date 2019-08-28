@@ -15,8 +15,6 @@ class Bootstrap(object):
         self.c = common
         self.c.log('Bootstrap', '__init__')
 
-        self.homebrew_path = '/usr/local/bin/brew'
-
     def go(self):
         """
         Go through all the bootstrap steps
@@ -32,41 +30,11 @@ class Bootstrap(object):
             os.path.join(autorun_dir, autorun_filename)
         )
 
-        self.c.log('Bootstrap', 'go', 'Making sure Homebrew is installed')
-        if not os.path.exists(self.homebrew_path):
-            message = '<b>Homebrew is not installed.</b><br><br>Follow the instructions at <a href="https://brew.sh">https://brew.sh</a> to install Homebrew and then run Flock again.'
+        self.c.log('Bootstrap', 'go', 'Making sure osquery is installed')
+        if not os.path.exists('/usr/local/bin/osqueryd') or not os.path.exists('/usr/local/bin/osqueryi'):
+            message = '<b>Osquery is not installed (but it really should be).</b><br><br>You can either install it with Homebrew, or download it from <a href="https://osquery.io/downloads">https://osquery.io/downloads</a>. Install osquery and then run Flock again.'
             Alert(self.c, message, contains_links=True).launch()
             return False
-
-        self.c.log('Bootstrap', 'go', 'Checking if osquery is installed')
-        p = self.exec([self.homebrew_path, 'list'], capture_output=True)
-        if not p:
-            return False
-
-        installed_packages = p.stdout.decode().split()
-        osquery_installed = 'osquery' in installed_packages
-
-        if not osquery_installed:
-            self.c.log('Bootstrap', 'go', 'Checking if java is installed')
-            p = self.exec([self.homebrew_path, 'cask', 'list'], capture_output=True)
-            if not p:
-                return False
-
-            installed_casks = p.stdout.decode().split()
-            java_installed = 'java' in installed_casks
-
-            if not java_installed:
-                # We can't automatically install the java cask because it needs root
-                message = '<b>Java is not installed.</b><br><br>Click ok to install java using Homebrew. You will have to type your macOS password.<br><br>After it\'s installed, run Flock again.'
-                if Alert(self.c, message, has_cancel_button=True).launch():
-                    self.c.log('Bootstrap', 'go', 'Installing java in Terminal with: brew cask install java')
-                    self.exec('osascript -e \'tell application "Terminal" to do script "brew cask install java && exit"\'')
-
-                return False
-
-            self.c.log('Bootstrap', 'go', 'Installing osquery')
-            if not self.exec([self.homebrew_path, 'install', 'osquery']):
-                return False
 
         self.c.log('Bootstrap', 'go', 'Ensuring osquery data directory exists')
         try:

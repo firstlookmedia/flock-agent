@@ -4,23 +4,21 @@ _**⚠️ This software is under development. It's not ready to be used in produ
 
 Flock is a privacy-preserving fleet management system. The goal of Flock is to gain visibility into a fleet of laptops while protecting the privacy of the laptop users. It achieves this by only collecting information needed to inform security decisions, and by not allowing the IT team to access arbitrary files or execute arbitrary code on the laptops they are monitoring.
 
-This is the macOS agent that runs on endpoints, collects data, and shares it with the [Flock server](https://github.com/firstlookmedia/flock).
+This is the macOS agent (Linux version [coming soon](https://github.com/firstlookmedia/flock-agent/issues/35)) that runs on endpoints, collects data, and shares it with the [Flock server](https://github.com/firstlookmedia/flock).
 
 ## Install Flock Agent
 
-First [install Homebrew](https://brew.sh/), if you don't already have it. Then open the Terminal app and run:
+The simplest way to install Flock Agent, and to ensure you get automatic updates, is to use Homebrew. First [install Homebrew](https://brew.sh/) if you don't already have it. Then open the Terminal app and run:
 
 ```sh
-# Install dependencies
-brew cask install adoptopenjdk
-brew install osquery
-
 # Add the First Look Media tap
 brew tap firstlookmedia/homebrew-firstlookmedia
 
 # Install Flock Agent
 brew cask install flock-agent
 ```
+
+If you prefer to install Flock Agent without Homebrew, download and install the latest version from the [GitHub releases](https://github.com/firstlookmedia/flock-agent/releases).
 
 Then launch Flock from `/Applications`.
 
