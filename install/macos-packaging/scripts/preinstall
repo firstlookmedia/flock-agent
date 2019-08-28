@@ -1,3 +1,13 @@
-#!/bin/sh
+#!/bin/bash
+
+# osquery should be installed via the Flock Agent pkg, not homebrew
+# If it's installed via homebrew, uninstall it first
+if [ -f /usr/local/bin/brew ]; then
+    BREW_PACKAGES=$(brew list)
+    if grep -q osquery <<< $BREW_PACKAGES; then
+        brew uninstall osquery
+    fi
+fi
+
 osascript -e 'quit app "Flock"'
 exit 0
