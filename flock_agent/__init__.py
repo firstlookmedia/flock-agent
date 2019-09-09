@@ -8,7 +8,7 @@ from .common import Common
 from . import gui
 
 
-flock_agent_version = '0.0.6'
+flock_agent_version = '0.0.7'
 
 
 def main():
