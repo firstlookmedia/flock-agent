@@ -40,6 +40,7 @@ class GuiCommon(object):
             'Onboarding line_edit': """
                 QLineEdit {
                     font-size: 16px;
+                    padding: 5px;
                 }
                 """,
 

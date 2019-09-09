@@ -72,6 +72,13 @@ class DataPage(QtWidgets.QWizardPage):
         instructions_label.setWordWrap(True)
         instructions_label.setStyleSheet(self.c.gui.css['Onboarding label'])
 
+        # Name
+        name_label = QtWidgets.QLabel("What's your name?")
+        name_label.setStyleSheet(self.c.gui.css['Onboarding label'])
+        self.name_edit = QtWidgets.QLineEdit()
+        self.name_edit.setPlaceholderText("Type your name here")
+        self.name_edit.setStyleSheet(self.c.gui.css['Onboarding line_edit'])
+
         # Server
         self.server_label = QtWidgets.QLabel("What's the address of the server you will send data to?")
         self.server_label.setStyleSheet(self.c.gui.css['Onboarding label'])
@@ -110,10 +117,14 @@ class DataPage(QtWidgets.QWizardPage):
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(instructions_label)
         layout.addSpacing(20)
+        layout.addWidget(name_label)
+        layout.addWidget(self.name_edit)
+        layout.addSpacing(20)
         layout.addLayout(server_layout)
         layout.addSpacing(20)
         layout.addWidget(self.automatically_enable_twigs_checkbox)
         layout.addWidget(automatically_enable_twigs_label)
+        layout.addStretch()
         self.setLayout(layout)
 
     def isComplete(self):
@@ -230,6 +241,8 @@ class Onboarding(QtWidgets.QWizard):
         self.c.log('Onboarding', '__init__')
 
         self.setWindowTitle("Configuring Flock")
+        self.setMinimumWidth(790)
+        self.setMinimumHeight(540)
 
         self.server_page = ServerPage(self.c)
         self.data_page = DataPage(self.c)
