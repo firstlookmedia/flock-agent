@@ -251,6 +251,10 @@ class Onboarding(QtWidgets.QWizard):
             # gateway_url and gateway_token were saved when registering
             automatically_enable_twigs = self.data_page.automatically_enable_twigs_checkbox.checkState() == QtCore.Qt.CheckState.Checked
             self.c.settings.set('automatically_enable_twigs', automatically_enable_twigs)
+            # Automatically enable the twigs, if checkbox was checked
+            if automatically_enable_twigs:
+                for twig_id in self.c.settings.get_undecided_twig_ids():
+                    self.c.settings.enable_twig(twig_id)
         homebrew_update_prompt = self.homebrew_page.homebrew_update_prompt_checkbox.checkState() == QtCore.Qt.CheckState.Checked
         self.c.settings.set('homebrew_update_prompt', homebrew_update_prompt)
         homebrew_autoupdate = self.homebrew_page.homebrew_autoupdate_checkbox.checkState() == QtCore.Qt.CheckState.Checked
