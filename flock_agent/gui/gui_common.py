@@ -172,16 +172,15 @@ class GuiCommon(object):
             Alert(self.c, 'Invalid server URL').launch()
             return False
 
-        # Save fields in settings
+        # Save the server URL in settings
         self.c.settings.set('gateway_url', server_url)
-        self.c.settings.set('gateway_name', name)
         self.c.settings.save()
 
         # Try to register
         self.c.log('SettingsTab', 'server_button_clicked', 'registering with server')
         api_client = FlockApiClient(self.c)
         try:
-            api_client.register()
+            api_client.register(name)
             api_client.ping()
             return True
         except PermissionDenied:

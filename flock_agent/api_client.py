@@ -54,12 +54,12 @@ class FlockApiClient(object):
         self.c = common
         self.c.log("FlockApiClient", "__init__")
 
-    def register(self):
+    def register(self, name):
         self.c.log("FlockApiClient", "register")
 
         obj = self._make_request('/register', 'post', False, {
             'username': self.c.settings.get('gateway_username'),
-            'name': self.c.settings.get('gateway_name')
+            'name': name
         })
 
         if 'auth_token' not in obj:
