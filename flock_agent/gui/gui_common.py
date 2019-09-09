@@ -40,6 +40,7 @@ class GuiCommon(object):
             'Onboarding line_edit': """
                 QLineEdit {
                     font-size: 16px;
+                    padding: 5px;
                 }
                 """,
 
@@ -162,8 +163,8 @@ class GuiCommon(object):
                 """,
         }
 
-    def register_server(self, server_url):
-         # Validate server URL
+    def register_server(self, server_url, name):
+        # Validate server URL
         o = urlparse(server_url)
         if (o.scheme != 'http' and o.scheme != 'https') or (o.path != '' and o.path != '/') or \
             o.params != '' or o.query != '' or o.fragment != '':
@@ -179,7 +180,7 @@ class GuiCommon(object):
         self.c.log('SettingsTab', 'server_button_clicked', 'registering with server')
         api_client = FlockApiClient(self.c)
         try:
-            api_client.register()
+            api_client.register(name)
             api_client.ping()
             return True
         except PermissionDenied:

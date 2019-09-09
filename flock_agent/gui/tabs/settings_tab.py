@@ -25,6 +25,11 @@ class SettingsTab(QtWidgets.QWidget):
         self.use_server_checkbox.stateChanged.connect(self.use_server_toggled)
         use_server_checkbox_spacer = HidableSpacer()
 
+        # Name
+        self.server_name_label = QtWidgets.QLabel("What's your name?")
+        self.server_name_edit = QtWidgets.QLineEdit()
+        self.server_name_edit.setPlaceholderText("Type your name here")
+
         # Server
         self.server_label = QtWidgets.QLabel()
         self.server_url_edit = QtWidgets.QLineEdit()
@@ -50,6 +55,8 @@ class SettingsTab(QtWidgets.QWidget):
 
         # Server group
         server_settings_layout = QtWidgets.QVBoxLayout()
+        server_settings_layout.addWidget(self.server_name_label)
+        server_settings_layout.addWidget(self.server_name_edit)
         server_settings_layout.addLayout(server_layout)
         server_settings_layout.addWidget(self.automatically_enable_twigs_checkbox)
         self.server_settings_group = QtWidgets.QGroupBox("Server settings")
@@ -121,6 +128,8 @@ class SettingsTab(QtWidgets.QWidget):
         # Not registered yet
         self.server_label.show()
         if self.status == self.STATUS_NOT_REGISTERED:
+            self.server_name_label.show()
+            self.server_name_edit.show()
             self.server_label.setText('What\'s the address of the server you will send data to?')
             self.server_url_edit.show()
             self.server_url_label.hide()
@@ -129,6 +138,8 @@ class SettingsTab(QtWidgets.QWidget):
             self.server_button.setText('Connect')
 
         elif self.status == self.STATUS_REGISTERED:
+            self.server_name_label.hide()
+            self.server_name_edit.hide()
             self.server_label.setText('You\'re sending data to this server:')
             self.server_url_edit.hide()
             self.server_url_label.setText(self.c.settings.get('gateway_url'))
@@ -161,12 +172,10 @@ class SettingsTab(QtWidgets.QWidget):
             self.server_button.setEnabled(False)
             self.server_button.setText('Registering...')
 
-            # Try registering the URL
+            # Try registering
+            name = self.server_name_edit.text()
             server_url = self.server_url_edit.text()
-            if self.c.gui.register_server(server_url):
-                # Save the server URL in settings
-                self.c.settings.set('gateway_url', server_url)
-                self.c.settings.save()
+            self.c.gui.register_server(server_url, name)
 
         self.update_ui()
 
