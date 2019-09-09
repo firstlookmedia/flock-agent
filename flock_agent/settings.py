@@ -17,6 +17,7 @@ class Settings(object):
             # Server settings
             'use_server': True,
             'gateway_url': None,
+            'gateway_name': None,
             'gateway_token': None,
             'gateway_username': None,
             'automatically_enable_twigs': False,

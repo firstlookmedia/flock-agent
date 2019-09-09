@@ -163,8 +163,8 @@ class GuiCommon(object):
                 """,
         }
 
-    def register_server(self, server_url):
-         # Validate server URL
+    def register_server(self, server_url, name):
+        # Validate server URL
         o = urlparse(server_url)
         if (o.scheme != 'http' and o.scheme != 'https') or (o.path != '' and o.path != '/') or \
             o.params != '' or o.query != '' or o.fragment != '':
@@ -172,8 +172,9 @@ class GuiCommon(object):
             Alert(self.c, 'Invalid server URL').launch()
             return False
 
-        # Save the server URL in settings
+        # Save fields in settings
         self.c.settings.set('gateway_url', server_url)
+        self.c.settings.set('gateway_name', name)
         self.c.settings.save()
 
         # Try to register

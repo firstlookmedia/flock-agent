@@ -135,10 +135,12 @@ class DataPage(QtWidgets.QWizardPage):
 
         self.server_button.setEnabled(False)
         self.server_button.setText('Registering...')
+        self.name_edit.setEnabled(False)
 
         # Try registering the URL
+        name = self.name_edit.text()
         server_url = self.server_url_edit.text()
-        if self.c.gui.register_server(server_url):
+        if self.c.gui.register_server(server_url, name):
             self.server_label.setText("Success! Flock will share data with this server:")
             self.server_url_edit.hide()
             self.server_url_label.setText(server_url)
@@ -151,6 +153,7 @@ class DataPage(QtWidgets.QWizardPage):
         else:
             self.server_button.setEnabled(True)
             self.server_button.setText('Connect')
+            self.name_edit.setEnabled(True)
 
 
 class HomebrewPage(QtWidgets.QWizardPage):

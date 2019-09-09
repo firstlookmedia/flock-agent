@@ -58,7 +58,8 @@ class FlockApiClient(object):
         self.c.log("FlockApiClient", "register")
 
         obj = self._make_request('/register', 'post', False, {
-            'username': self.c.settings.get('gateway_username')
+            'username': self.c.settings.get('gateway_username'),
+            'name': self.c.settings.get('gateway_name')
         })
 
         if 'auth_token' not in obj:
@@ -71,7 +72,7 @@ class FlockApiClient(object):
 
     def ping(self):
         self.c.log("FlockApiClient", "ping")
-        obj = self._make_request('/ping', 'get', True)
+        self._make_request('/ping', 'get', True)
 
     def submit(self, data):
         """
@@ -79,7 +80,7 @@ class FlockApiClient(object):
         data should a string, not an object.
         """
         self.c.log("FlockApiClient", "submit")
-        obj = self._make_request('/submit', 'post', True, data)
+        self._make_request('/submit', 'post', True, data)
 
     def _make_request(self, path, method, auth, data=None):
         url = self._build_url(path)
