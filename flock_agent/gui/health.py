@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
 
+from ..common import Platform
+
 
 class HealthItemBase(QtWidgets.QWidget):
     def __init__(self, common, name, good_string, bad_string, query, help_url):
@@ -91,21 +93,21 @@ class HealthOsqueryThread(QtCore.QThread):
         self.query_finished.emit(data)
 
 
-class HealthItemFileVault(HealthItemBase):
+class HealthItemMacOSFileVault(HealthItemBase):
     def __init__(self, common):
-        super(HealthItemFileVault, self).__init__(
+        super(HealthItemMacOSFileVault, self).__init__(
             common,
             "FileVault", "FileVault is enabled", "FileVault should be enabled",
             "select disk_encryption.encrypted from mounts join disk_encryption on mounts.device_alias = disk_encryption.name where mounts.path = '/'",
-            "https://github.com/firstlookmedia/flock-agent/wiki/Health-Check:-FileVault"
+            "https://github.com/firstlookmedia/flock-agent/wiki/macOS-Health-Check:-FileVault"
         )
-        self.c.log('HealthItemFileVault', '__init__')
+        self.c.log('HealthItemMacOSFileVault', '__init__')
         self.refresh()
 
     def query_finished(self, data):
         # Query response should look like:
         # [{"encrypted":"1"}]
-        self.c.log('HealthItemFileVault', 'query_finished')
+        self.c.log('HealthItemMacOSFileVault', 'query_finished')
         try:
             if data[0]['encrypted'] == '1':
                 self.is_good()
@@ -115,21 +117,21 @@ class HealthItemFileVault(HealthItemBase):
             self.is_bad()
 
 
-class HealthItemGatekeeper(HealthItemBase):
+class HealthItemMacOSGatekeeper(HealthItemBase):
     def __init__(self, common):
-        super(HealthItemGatekeeper, self).__init__(
+        super(HealthItemMacOSGatekeeper, self).__init__(
             common,
             "Gatekeeper", "Gatekeeper is enabled", "Gatekeeper should be enabled",
             "select assessments_enabled from gatekeeper",
-            "https://github.com/firstlookmedia/flock-agent/wiki/Health-Check:-Gatekeeper"
+            "https://github.com/firstlookmedia/flock-agent/wiki/macOS-Health-Check:-Gatekeeper"
         )
-        self.c.log('HealthItemGatekeeper', '__init__')
+        self.c.log('HealthItemMacOSGatekeeper', '__init__')
         self.refresh()
 
     def query_finished(self, data):
         # Query response should look like:
         # {"assessments_enabled":"1"}
-        self.c.log('HealthItemGatekeeper', 'query_finished')
+        self.c.log('HealthItemMacOSGatekeeper', 'query_finished')
         try:
             if data[0]['assessments_enabled'] == '1':
                 self.is_good()
@@ -139,21 +141,21 @@ class HealthItemGatekeeper(HealthItemBase):
             self.is_bad()
 
 
-class HealthItemFirewall(HealthItemBase):
+class HealthItemMacOSFirewall(HealthItemBase):
     def __init__(self, common):
-        super(HealthItemFirewall, self).__init__(
+        super(HealthItemMacOSFirewall, self).__init__(
             common,
             "Firewall", "Firewall is enabled", "Firewall should be enabled",
             "select global_state from alf",
-            "https://github.com/firstlookmedia/flock-agent/wiki/Health-Check:-Firewall"
+            "https://github.com/firstlookmedia/flock-agent/wiki/macOS-Health-Check:-Firewall"
         )
-        self.c.log('HealthItemFirewall', '__init__')
+        self.c.log('HealthItemMacOSFirewall', '__init__')
         self.refresh()
 
     def query_finished(self, data):
         # Query response should look like:
         # [{"global_state":"2"}]
-        self.c.log('HealthItemFirewall', 'query_finished')
+        self.c.log('HealthItemMacOSFirewall', 'query_finished')
         try:
             if data[0]['global_state'] == '1' or data[0]['global_state'] == '2':
                 self.is_good()
@@ -163,21 +165,21 @@ class HealthItemFirewall(HealthItemBase):
             self.is_bad()
 
 
-class HealthItemRemoteSharing(HealthItemBase):
+class HealthItemMacOSRemoteSharing(HealthItemBase):
     def __init__(self, common):
-        super(HealthItemRemoteSharing, self).__init__(
+        super(HealthItemMacOSRemoteSharing, self).__init__(
             common,
             "Remote sharing", "Remote sharing is disabled", "Remote sharing should be disabled",
             "select * from sharing_preferences",
-            "https://github.com/firstlookmedia/flock-agent/wiki/Health-Check:-Remote-Sharing"
+            "https://github.com/firstlookmedia/flock-agent/wiki/macOS-Health-Check:-Remote-Sharing"
         )
-        self.c.log('HealthItemRemoteSharing', '__init__')
+        self.c.log('HealthItemMacOSRemoteSharing', '__init__')
         self.refresh()
 
     def query_finished(self, data):
         # Query response should look like:
         # [{"bluetooth_sharing":"0","content_caching":"0","disc_sharing":"0","file_sharing":"0","internet_sharing":"0","printer_sharing":"0","remote_apple_events":"0","remote_login":"0","remote_management":"0","screen_sharing":"0"}]
-        self.c.log('HealthItemRemoteSharing', 'query_finished')
+        self.c.log('HealthItemMacOSRemoteSharing', 'query_finished')
         try:
             if data[0]['bluetooth_sharing'] == '0' and \
                 data[0]['content_caching'] == '0' and \
@@ -196,21 +198,21 @@ class HealthItemRemoteSharing(HealthItemBase):
             self.is_bad()
 
 
-class HealthItemAutoUpdates(HealthItemBase):
+class HealthItemMacOSAutoUpdates(HealthItemBase):
     def __init__(self, common):
-        super(HealthItemAutoUpdates, self).__init__(
+        super(HealthItemMacOSAutoUpdates, self).__init__(
             common,
             "macOS automatic updates", "macOS automatic updates are enabled", "macOS automatic updates should be enabled",
             "select value from plist where path = '/Library/Preferences/com.apple.commerce.plist' and key = 'AutoUpdate'",
-            "https://github.com/firstlookmedia/flock-agent/wiki/Health-Check:-macOS-Automatic-Updates"
+            "https://github.com/firstlookmedia/flock-agent/wiki/macOS-Health-Check:-macOS-Automatic-Updates"
         )
-        self.c.log('HealthItemAutoUpdates', '__init__')
+        self.c.log('HealthItemMacOSAutoUpdates', '__init__')
         self.refresh()
 
     def query_finished(self, data):
         # Query response should look like:
         # [{"value":"1"}]
-        self.c.log('HealthItemAutoUpdates', 'query_finished')
+        self.c.log('HealthItemMacOSAutoUpdates', 'query_finished')
         try:
             if data[0]['value'] == '1':
                 self.is_good()
@@ -220,21 +222,21 @@ class HealthItemAutoUpdates(HealthItemBase):
             self.is_bad()
 
 
-class HealthItemGuestUser(HealthItemBase):
+class HealthItemMacOSGuestUser(HealthItemBase):
     def __init__(self, common):
-        super(HealthItemGuestUser, self).__init__(
+        super(HealthItemMacOSGuestUser, self).__init__(
             common,
             "Guest user", "Guest user is disabled", "Guest user should be disabled",
             "select value from plist where path='/Library/Preferences/com.apple.loginwindow.plist' and key='GuestEnabled'",
-            "https://github.com/firstlookmedia/flock-agent/wiki/Health-Check:-Guest-User"
+            "https://github.com/firstlookmedia/flock-agent/wiki/macOS-Health-Check:-Guest-User"
         )
-        self.c.log('HealthItemGuestUser', '__init__')
+        self.c.log('HealthItemMacOSGuestUser', '__init__')
         self.refresh()
 
     def query_finished(self, data):
         # Query response should look like:
         # [{"value":"0"}]
-        self.c.log('HealthItemGuestUser', 'query_finished')
+        self.c.log('HealthItemMacOSGuestUser', 'query_finished')
         try:
             if data[0]['value'] == '0':
                 self.is_good()
@@ -244,21 +246,21 @@ class HealthItemGuestUser(HealthItemBase):
             self.is_bad()
 
 
-class HealthItemSIP(HealthItemBase):
+class HealthItemMacOSSIP(HealthItemBase):
     def __init__(self, common):
-        super(HealthItemSIP, self).__init__(
+        super(HealthItemMacOSSIP, self).__init__(
             common,
             "System Integrity Protection", "System Integrity Protection is enabled", "System Integrity Protection should be enabled",
             "select enabled from sip_config where config_flag='sip'",
-            "https://github.com/firstlookmedia/flock-agent/wiki/Health-Check:-System-Integrity-Protection"
+            "https://github.com/firstlookmedia/flock-agent/wiki/macOS-Health-Check:-System-Integrity-Protection"
         )
-        self.c.log('HealthItemSIP', '__init__')
+        self.c.log('HealthItemMacOSSIP', '__init__')
         self.refresh()
 
     def query_finished(self, data):
         # Query response should look like:
         # [{"enabled":"1"}]
-        self.c.log('HealthItemSIP', 'query_finished')
+        self.c.log('HealthItemMacOSSIP', 'query_finished')
         try:
             if data[0]['enabled'] == '1':
                 self.is_good()

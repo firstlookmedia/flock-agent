@@ -3,6 +3,7 @@ import os
 import sys
 import inspect
 import json
+import platform
 
 from .settings import Settings
 from .osquery import Osquery
@@ -45,6 +46,20 @@ class Common(object):
             prefix = os.path.join(os.path.dirname(os.path.dirname(sys.executable)), 'Resources/share')
 
         resource_path = os.path.join(prefix, filename)
-
-        #self.log('Common', 'get_resource_path', resource_path)
         return resource_path
+
+
+class Platform:
+    MACOS = 'macos'
+    LINUX = 'linux'
+    UNKNOWN = 'unknown'
+
+    @staticmethod
+    def current():
+        system = platform.system()
+        if system == 'Darwin':
+            return Platform.MACOS
+        elif system == 'Linux':
+            return Platform.LINUX
+        else:
+            return Platform.UNKNOWN

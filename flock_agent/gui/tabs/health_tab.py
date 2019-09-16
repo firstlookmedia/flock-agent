@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-from ..health import HealthItemFileVault, HealthItemGatekeeper, \
-                     HealthItemFirewall, HealthItemRemoteSharing, \
-                     HealthItemAutoUpdates, HealthItemGuestUser, \
-                     HealthItemSIP
+from ..health import *
+from ...common import Platform
 
 
 class HealthTab(QtWidgets.QWidget):
@@ -18,15 +16,18 @@ class HealthTab(QtWidgets.QWidget):
         self.c.log('HealthTab', '__init__')
 
         # Health items
-        self.health_items = [
-            HealthItemFileVault(self.c),
-            HealthItemGatekeeper(self.c),
-            HealthItemFirewall(self.c),
-            HealthItemRemoteSharing(self.c),
-            HealthItemAutoUpdates(self.c),
-            HealthItemGuestUser(self.c),
-            HealthItemSIP(self.c)
-        ]
+        if Platform.current() == Platform.MACOS:
+            self.health_items = [
+                HealthItemMacOSFileVault(self.c),
+                HealthItemMacOSGatekeeper(self.c),
+                HealthItemMacOSFirewall(self.c),
+                HealthItemMacOSRemoteSharing(self.c),
+                HealthItemMacOSAutoUpdates(self.c),
+                HealthItemMacOSGuestUser(self.c),
+                HealthItemMacOSSIP(self.c)
+            ]
+        else:
+            self.health_items = []
         health_item_layout = QtWidgets.QVBoxLayout()
         for health_item in self.health_items:
             health_item_layout.addWidget(health_item)
