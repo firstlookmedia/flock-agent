@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
-from Foundation import NSUserDefaults
 from urllib.parse import urlparse
 
 from ..api_client import FlockApiClient, PermissionDenied, BadStatusCode, \
     ResponseIsNotJson, RespondedWithError, InvalidResponse, ConnectionError
+from ..common import Platform
+
+
+if Platform.current() == Platform.MACOS:
+    from Foundation import NSUserDefaults
 
 
 class GuiCommon(object):
@@ -15,11 +19,14 @@ class GuiCommon(object):
         self.c = common
 
         # Preload icons
+        if Platform.current() == Platform.MACOS:
         self.icon = QtGui.QIcon(self.c.get_resource_path('images/icon.png'))
-        if NSUserDefaults.standardUserDefaults().stringForKey_('AppleInterfaceStyle') == 'Dark':
-            self.systray_icon = QtGui.QIcon(self.c.get_resource_path('images/systray-dark.png'))
+            if NSUserDefaults.standardUserDefaults().stringForKey_('AppleInterfaceStyle') == 'Dark':
+                self.systray_icon = QtGui.QIcon(self.c.get_resource_path('images/systray-dark.png'))
+            else:
+                self.systray_icon = QtGui.QIcon(self.c.get_resource_path('images/systray-light.png'))
         else:
-            self.systray_icon = QtGui.QIcon(self.c.get_resource_path('images/systray-light.png'))
+            self.systray_icon = QtGui.QIcon(self.c.get_resource_path('images/systray.png'))
 
         # Stylesheets
         self.css = {
