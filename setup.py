@@ -15,6 +15,10 @@ setuptools.setup(
     url="https://github.com/firstlookmedia/flock-agent",
     packages=['flock_agent'],
     package_data={'flock_agent': ['share/*']},
+    data_files=[
+        (os.path.join(sys.prefix, 'share/applications'), ['share/autostart/linux/media.firstlook.flock-agent.desktop']),
+        (os.path.join(sys.prefix, 'share/icons/hicolor/64x64/apps'), ['install/media.firstlook.flock-agent.png'])
+    ],
     classifiers=(
         "Development Status :: 4 - Beta",
         "Programming Language :: Python",

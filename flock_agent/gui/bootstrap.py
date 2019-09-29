@@ -2,6 +2,7 @@
 import os
 import subprocess
 import shutil
+import appdir
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from .gui_common import Alert
@@ -24,25 +25,37 @@ class Bootstrap(object):
 
         self.c.log('Bootstrap', 'go', 'Bootstrapping Flock Agent', always=True)
 
-        self.c.log('Bootstrap', 'go', 'Making sure Flock Agent starts automatically')
-        if platform == Platform.MACOS:
-            autorun_filename = 'media.firstlook.flock_agent.plist'
-            autorun_dir = os.path.expanduser("~/Library/LaunchAgents")
+        if platform == Platform.UNKNOWN:
+            self.c.log("Bootstrap", 'go', 'Unknown platform: Unable to make sure Flock Agent starts automatically')
+        else:
+            self.c.log('Bootstrap', 'go', 'Making sure Flock Agent starts automatically')
+            if platform == Platform.MACOS:
+                autorun_filename = 'media.firstlook.flock_agent.plist'
+                autorun_dir = os.path.expanduser("~/Library/LaunchAgents")
+            elif platform == Platform.LINUX:
+                autorun_dir = appdirs.user_config_dir('autostart')
+                autorun_filename = 'media.firstlook.flock_agent.desktop'
+            
             os.makedirs(autorun_dir, exist_ok=True)
             shutil.copy(
-                self.c.get_resource_path(os.path.join('autostart/macos', autorun_filename)),
+                self.c.get_resource_path(os.path.join('autostart/linux', autorun_filename)),
                 os.path.join(autorun_dir, autorun_filename)
             )
-        elif platform == Platform.LINUX:
-            pass
-        else:
-            self.c.log("Bootstrap", 'go', 'Unknown platform, unable to make Flock Agent start automatically')
 
-        self.c.log('Bootstrap', 'go', 'Making sure osquery is installed')
-        if not os.path.exists('/usr/local/bin/osqueryd') or not os.path.exists('/usr/local/bin/osqueryi'):
-            message = '<b>Osquery is not installed (but it really should be).</b><br><br>You can either install it with Homebrew, or download it from <a href="https://osquery.io/downloads">https://osquery.io/downloads</a>. Install osquery and then run Flock again.'
-            Alert(self.c, message, contains_links=True).launch()
-            return False
+        if platform == Platform.UNKNOWN:
+            self.c.log("Bootstrap", 'go', 'Unknown platform: Unable to make sure osquery is installed')
+        else:
+            self.c.log('Bootstrap', 'go', 'Making sure osquery is installed')
+            if platform == Platform.MACOS:
+                if not os.path.exists('/usr/local/bin/osqueryd') or not os.path.exists('/usr/local/bin/osqueryi'):
+                    message = '<b>Osquery is not installed (but it really should be).</b><br><br>You can either install it with Homebrew, or download it from <a href="https://osquery.io/downloads">https://osquery.io/downloads</a>. Install osquery and then run Flock again.'
+                    Alert(self.c, message, contains_links=True).launch()
+                    return False
+            elif platform == Platform.LINUX:
+                if not os.path.exists('/usr/bin/osqueryd') or not os.path.exists('/usr/bin/osqueryi'):
+                    message = '<b>Osquery is not installed (but it really should be).</b><br><br>Follow the instructions at <a href="https://osquery.io/downloads">https://osquery.io/downloads</a>, under "Alternative Install Options", for either Debian Linux (for Debian, Ubuntu, Mint, etc.) or RPM Linux (for Fedora, Red Hat, CentOS, etc.) to add the osquery repository to your computer and install the osquery package. Install osquery and then run Flock again.'
+                    Alert(self.c, message, contains_links=True).launch()
+                    return False
 
         self.c.log('Bootstrap', 'go', 'Ensuring osquery data directory exists')
         try:
