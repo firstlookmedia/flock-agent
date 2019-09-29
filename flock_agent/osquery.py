@@ -75,8 +75,13 @@ class Osquery(object):
                 subprocess.run(['/usr/bin/sudo', '/usr/bin/systemctl', 'stop', 'osqueryd'])
 
             # Write the config file
-            with open(self.config_filename, 'w') as config_file:
-                json.dump(config, config_file, indent=4)
+            try:
+                with open(self.config_filename, 'w') as config_file:
+                    json.dump(config, config_file, indent=4)
+            except PermissionError:
+                # TODO: hack until flock-agentd runs as root
+                subprocess.run(['/usr/bin/sudo', '/usr/bin/touch', self.config_filename])
+                subprocess.run(['/usr/bin/sudo', '/usr/bin/chown', '$USER:$USER', self.config_filename])
 
             # Start osqueryd
             if self.Platform.current() == self.Platform.MACOS:
