@@ -4,6 +4,8 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from .tabs import HomebrewTab, HealthTab, TwigsTab, SettingsTab
 from .systray import SysTray
 
+from ..common import Platform
+
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, app, common):
@@ -33,10 +35,11 @@ class MainWindow(QtWidgets.QMainWindow):
         header_layout.addStretch()
 
         # Tabs
-        self.homebrew_tab = HomebrewTab(self.c, self.systray)
-        self.homebrew_tab.update_homebrew_tab.connect(self.update_homebrew_tab)
+        if Platform.current() == Platform.MACOS:
+            self.homebrew_tab = HomebrewTab(self.c, self.systray)
+            self.homebrew_tab.update_homebrew_tab.connect(self.update_homebrew_tab)
 
-        self.health_tab = HealthTab(self.c)
+            self.health_tab = HealthTab(self.c)
 
         self.opt_in_tab = TwigsTab(self.c, is_opt_in=True)
         self.opt_in_tab.refresh.connect(self.update_ui)
@@ -49,7 +52,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings_tab.quit.connect(self.quit)
 
         self.tabs = QtWidgets.QTabWidget()
-        self.tabs.addTab(self.health_tab, "Health")
+        if Platform.current() == Platform.MACOS:
+            self.tabs.addTab(self.health_tab, "Health")
         self.tabs.addTab(self.settings_tab, "Settings")
 
         # Layout
@@ -91,22 +95,28 @@ class MainWindow(QtWidgets.QMainWindow):
         data_tab_index = self.tabs.indexOf(self.data_tab)
         if data_tab_index != -1:
             self.tabs.removeTab(data_tab_index)
-        homebrew_tab_index = self.tabs.indexOf(self.homebrew_tab)
-        if homebrew_tab_index != -1:
-            self.tabs.removeTab(homebrew_tab_index)
+        if Platform.current() == Platform.MACOS:
+            homebrew_tab_index = self.tabs.indexOf(self.homebrew_tab)
+            if homebrew_tab_index != -1:
+                self.tabs.removeTab(homebrew_tab_index)
 
         # Only show data or opt-in tabs if using a server
         if self.c.settings.get('use_server'):
             data_tab_should_show = len(self.c.settings.get_decided_twig_ids()) > 0
             if data_tab_should_show:
-                self.tabs.insertTab(1, self.data_tab, "Data")
+                # In macOS, Data tab index is 1 because Health is always 0, but in Linux it's 0
+                if Platform.current() == Platform.MACOS:
+                    self.tabs.insertTab(1, self.data_tab, "Data")
+                else:
+                    self.tabs.insertTab(0, self.data_tab, "Data")
             opt_in_tab_should_show = len(self.c.settings.get_undecided_twig_ids()) > 0
             if opt_in_tab_should_show:
                 self.tabs.insertTab(0, self.opt_in_tab, "Opt-In")
 
-        # Only show homebrew tab if there are homebrew updates available
-        if self.homebrew_tab.should_show:
-            self.tabs.insertTab(0, self.homebrew_tab, "Homebrew")
+        if Platform.current() == Platform.MACOS:
+            # Only show homebrew tab if there are homebrew updates available
+            if self.homebrew_tab.should_show:
+                self.tabs.insertTab(0, self.homebrew_tab, "Homebrew")
 
         # Set the active tab
         if active_tab == None:
@@ -117,7 +127,8 @@ class MainWindow(QtWidgets.QMainWindow):
             elif active_tab == 'data':
                 index = self.tabs.indexOf(self.data_tab)
             elif active_tab == 'homebrew':
-                index = self.tabs.indexOf(self.homebrew_tab)
+                if Platform.current() == Platform.MACOS:
+                    index = self.tabs.indexOf(self.homebrew_tab)
             elif active_tab == 'settings':
                 index = self.tabs.indexOf(self.settings_tab)
             else:
