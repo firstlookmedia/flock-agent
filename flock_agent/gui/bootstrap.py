@@ -2,7 +2,7 @@
 import os
 import subprocess
 import shutil
-import appdir
+import appdirs
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from .gui_common import Alert
@@ -48,12 +48,12 @@ class Bootstrap(object):
             self.c.log('Bootstrap', 'go', 'Making sure osquery is installed')
             if platform == Platform.MACOS:
                 if not os.path.exists('/usr/local/bin/osqueryd') or not os.path.exists('/usr/local/bin/osqueryi'):
-                    message = '<b>Osquery is not installed (but it really should be).</b><br><br>You can either install it with Homebrew, or download it from <a href="https://osquery.io/downloads">https://osquery.io/downloads</a>. Install osquery and then run Flock again.'
+                    message = '<b>Osquery is not installed but it really should be.</b><br><br>You can either install it with Homebrew, or download it from <a href="https://osquery.io/downloads">https://osquery.io/downloads</a>. Install osquery and then run Flock again.'
                     Alert(self.c, message, contains_links=True).launch()
                     return False
             elif platform == Platform.LINUX:
                 if not os.path.exists('/usr/bin/osqueryd') or not os.path.exists('/usr/bin/osqueryi'):
-                    message = '<b>Osquery is not installed (but it really should be).</b><br><br>Follow the instructions at <a href="https://osquery.io/downloads">https://osquery.io/downloads</a>, under "Alternative Install Options", for either Debian Linux (for Debian, Ubuntu, Mint, etc.) or RPM Linux (for Fedora, Red Hat, CentOS, etc.) to add the osquery repository to your computer and install the osquery package. Install osquery and then run Flock again.'
+                    message = '<b>Osquery is not installed, but it really should be.</b><br><br>To add the osquery repository to your system and install the osquery package, follow the instructions at <a href="https://osquery.io/downloads">https://osquery.io/downloads</a> under "Alternative Install Options".<br><br>For Debian, Ubuntu, or Mint, follow the "Debian Linux" instructions, and for Fedora, Red Hat, or CentOS, follow the "RPM Linux" instructions.<br><br>Install osquery and then run Flock again.'
                     Alert(self.c, message, contains_links=True).launch()
                     return False
 
