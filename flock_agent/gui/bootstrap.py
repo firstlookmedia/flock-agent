@@ -35,7 +35,7 @@ class Bootstrap(object):
             elif platform == Platform.LINUX:
                 autorun_dir = appdirs.user_config_dir('autostart')
                 autorun_filename = 'media.firstlook.flock-agent.desktop'
-            
+
             os.makedirs(autorun_dir, exist_ok=True)
             shutil.copy(
                 self.c.get_resource_path(os.path.join('autostart/linux', autorun_filename)),
@@ -62,10 +62,17 @@ class Bootstrap(object):
             os.makedirs(self.c.osquery.dir, exist_ok=True)
             os.makedirs(self.c.osquery.log_dir, exist_ok=True)
         except:
-            message = '<b>Error creating directory:<br>{}</b><br><br>Maybe your permissions are wrong. Click ok to fix your permissions. You will have to type your macOS password.<br><br>After it\'s fixed, run Flock again.'.format(self.c.osquery.dir)
-            if Alert(self.c, message, has_cancel_button=True).launch():
-                self.c.log('Bootstrap', 'go', 'Fixing permissions: sudo chown -R "$USER":admin /usr/local/var')
-                self.exec('osascript -e \'tell application "Terminal" to do script "sudo chown -R \\"$USER\\":admin /usr/local/var && exit"\'')
+            if platform == Platform.MACOS:
+                message = '<b>Error creating directory:<br>{}</b><br><br>Maybe your permissions are wrong. Click ok to fix your permissions. You will have to type your macOS password.<br><br>After it\'s fixed, run Flock again.'.format(self.c.osquery.dir)
+                if Alert(self.c, message, has_cancel_button=True).launch():
+                    self.c.log('Bootstrap', 'go', 'Fixing permissions')
+                    self.exec('osascript -e \'tell application "Terminal" to do script "sudo chown -R \\"$USER\\":admin /usr/local/var && exit"\'')
+            elif platform == Platform.LINUX:
+                message = '<b>Error creating directory:<br>{}</b><br><br>Maybe your permissions are wrong. Click ok to fix your permissions. You may have to type your Linux user password.<br><br>After it\'s fixed, run Flock again.'.format(self.c.osquery.dir)
+                if Alert(self.c, message, has_cancel_button=True).launch():
+                    self.c.log('Bootstrap', 'go', 'Fixing permissions')
+                    self.exec(['/usr/bin/xterm', '-display', ':0', '-e',
+                        'sudo mkdir -p /usr/local/var/osquery && sudo chown -R $USER:$USER /usr/local/var/osquery'])
 
             return False
 
