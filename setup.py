@@ -4,6 +4,14 @@ import sys
 from flock_agent import flock_agent_version
 
 
+def file_list(path):
+    files = []
+    for filename in os.listdir(path):
+        if os.path.isfile(os.path.join(path, filename)):
+            files.append(os.path.join(path, filename))
+    return files
+
+
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
@@ -21,10 +29,11 @@ setuptools.setup(
         'flock_agent.gui',
         'flock_agent.gui.tabs'
     ],
-    package_data={'flock_agent': ['share/*']},
     data_files=[
         (os.path.join(sys.prefix, 'share/applications'), ['share/autostart/linux/media.firstlook.flock-agent.desktop']),
-        (os.path.join(sys.prefix, 'share/icons/hicolor/64x64/apps'), ['install/media.firstlook.flock-agent.png'])
+        (os.path.join(sys.prefix, 'share/icons/hicolor/64x64/apps'), ['install/media.firstlook.flock-agent.png']),
+        (os.path.join(sys.prefix, 'share/flock-agent/images'), file_list('share/images')),
+        (os.path.join(sys.prefix, 'share/flock-agent/autostart/linux'), file_list('share/autostart/linux'))
     ],
     classifiers=(
         "Development Status :: 4 - Beta",

@@ -44,7 +44,10 @@ class Common(object):
 
         # Otherwise assume the app is "frozen" in an app bundle
         else:
-            prefix = os.path.join(os.path.dirname(os.path.dirname(sys.executable)), 'Resources/share')
+            if Platform.current() == Platform.MACOS:
+                prefix = os.path.join(os.path.dirname(os.path.dirname(sys.executable)), 'Resources/share')
+            elif Platform.current() == Platform.LINUX:
+                prefix = os.path.join(sys.prefix, 'share/flock-agent')
 
         resource_path = os.path.join(prefix, filename)
         return resource_path
