@@ -5,6 +5,7 @@ import shutil
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from .gui_common import Alert
+from ..common import Platform
 
 
 class Bootstrap(object):
@@ -19,16 +20,23 @@ class Bootstrap(object):
         """
         Go through all the bootstrap steps
         """
+        platform = Platform.current()
+
         self.c.log('Bootstrap', 'go', 'Bootstrapping Flock Agent', always=True)
 
         self.c.log('Bootstrap', 'go', 'Making sure Flock Agent starts automatically')
-        autorun_filename = 'media.firstlook.flock_agent.plist'
-        autorun_dir = os.path.expanduser("~/Library/LaunchAgents")
-        os.makedirs(autorun_dir, exist_ok=True)
-        shutil.copy(
-            self.c.get_resource_path(autorun_filename),
-            os.path.join(autorun_dir, autorun_filename)
-        )
+        if platform == Platform.MACOS:
+            autorun_filename = 'media.firstlook.flock_agent.plist'
+            autorun_dir = os.path.expanduser("~/Library/LaunchAgents")
+            os.makedirs(autorun_dir, exist_ok=True)
+            shutil.copy(
+                self.c.get_resource_path(os.path.join('autostart/macos', autorun_filename)),
+                os.path.join(autorun_dir, autorun_filename)
+            )
+        elif platform == Platform.LINUX:
+            pass
+        else:
+            self.c.log("Bootstrap", 'go', 'Unknown platform, unable to make Flock Agent start automatically')
 
         self.c.log('Bootstrap', 'go', 'Making sure osquery is installed')
         if not os.path.exists('/usr/local/bin/osqueryd') or not os.path.exists('/usr/local/bin/osqueryi'):

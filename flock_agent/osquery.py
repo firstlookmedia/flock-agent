@@ -70,7 +70,7 @@ class Osquery(object):
 
             # Copy the launchd plist into the correct place
             shutil.copyfile(
-                self.c.get_resource_path('com.facebook.osqueryd.plist'),
+                self.c.get_resource_path('autostart/macos/com.facebook.osqueryd.plist'),
                 self.plist_filename
             )
 

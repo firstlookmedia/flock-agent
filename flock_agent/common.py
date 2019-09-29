@@ -4,6 +4,7 @@ import sys
 import inspect
 import json
 import platform
+import appdirs
 
 from .settings import Settings
 from .osquery import Osquery
@@ -18,7 +19,7 @@ class Common(object):
         self.log('Common', '__init__')
 
         self.version = version
-        self.appdata_path = os.path.expanduser("~/Library/Application Support/Flock Agent")
+        self.appdata_path = appdirs.user_config_dir("FlockAgent")
 
         # Create an osquery object
         self.osquery = Osquery(self)

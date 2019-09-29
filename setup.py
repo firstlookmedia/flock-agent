@@ -14,7 +14,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/firstlookmedia/flock-agent",
     packages=['flock_agent'],
-    package_data={'flock_agent': ['config/*']},
+    package_data={'flock_agent': ['share/*']},
     classifiers=(
         "Development Status :: 4 - Beta",
         "Programming Language :: Python",
