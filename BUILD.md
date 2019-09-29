@@ -1,4 +1,13 @@
-# Build instructions
+# Build Flock Agent
+
+Start by getting the source code:
+
+```sh
+git clone https://github.com/firstlookmedia/flock-agent.git
+cd flock-agent
+```
+
+## macOS
 
 Install Xcode from the Mac App Store. Once it's installed, run it for the first time to set it up. Also, run this to make sure command line tools are installed: `xcode-select --install`. And finally, open Xcode, go to Preferences > Locations, and make sure under Command Line Tools you select an installed version from the dropdown. (This is required for installing Qt5.)
 
@@ -34,6 +43,24 @@ install/build_pkg.py --without-codesign # this doesn't
 ```
 
 After making a release, you should have `dist/FlockAgent-[version].pkg`.
+
+## Linux
+
+Install the needed dependencies:
+
+For Fedora-like distros: `dnf install -y rpm-build python3-qt5 python3-requests`
+
+For Debian-like distros: `sudo apt install -y build-essential fakeroot python3-all python3-stdeb dh-python python3-qt5 python3-requests`
+
+Here's how you run Flock Agent, without having to build a package:
+
+```sh
+./flock-agent -v
+```
+
+Create a .rpm package: `./install/build_rpm.py`
+
+Create a .deb package: `./install/build_deb.py`
 
 # Release instructions
 

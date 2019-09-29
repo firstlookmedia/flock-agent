@@ -34,7 +34,7 @@ class Bootstrap(object):
                 autorun_dir = os.path.expanduser("~/Library/LaunchAgents")
             elif platform == Platform.LINUX:
                 autorun_dir = appdirs.user_config_dir('autostart')
-                autorun_filename = 'media.firstlook.flock_agent.desktop'
+                autorun_filename = 'media.firstlook.flock-agent.desktop'
             
             os.makedirs(autorun_dir, exist_ok=True)
             shutil.copy(

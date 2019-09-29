@@ -1,5 +1,8 @@
 import setuptools
+import os
+import sys
 from flock_agent import flock_agent_version
+
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -13,7 +16,11 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/firstlookmedia/flock-agent",
-    packages=['flock_agent'],
+    packages=[
+        'flock_agent',
+        'flock_agent.gui',
+        'flock_agent.gui.tabs'
+    ],
     package_data={'flock_agent': ['share/*']},
     data_files=[
         (os.path.join(sys.prefix, 'share/applications'), ['share/autostart/linux/media.firstlook.flock-agent.desktop']),
@@ -27,7 +34,7 @@ setuptools.setup(
     ),
     entry_points={
         'console_scripts': [
-            'flock_agent = flock_agent:main',
+            'flock-agent = flock_agent:main',
         ],
     },
 )
