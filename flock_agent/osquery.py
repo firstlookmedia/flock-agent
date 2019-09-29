@@ -13,15 +13,21 @@ class Osquery(object):
     This class takes care of all interaction with osquery, including running queries,
     dynamically generating the config file, and making sure the daemon is running
     """
-    def __init__(self, common):
+    def __init__(self, common, Platform):
+        self.Platform = Platform
         self.c = common
         self.c.log('Osquery', '__init__')
 
-        self.dir = '/usr/local/var/osquery'
-        self.log_dir = '/usr/local/var/osquery/logs'
-        self.config_filename = os.path.join(self.dir, 'osquery.conf')
-        self.results_filename = os.path.join(self.log_dir, 'osqueryd.results.log')
-        self.plist_filename = os.path.expanduser('~/Library/LaunchAgents/com.facebook.osqueryd.plist')
+        if self.Platform.current() == self.Platform.MACOS:
+            self.dir = '/usr/local/var/osquery'
+            self.log_dir = '/usr/local/var/osquery/logs'
+            self.config_filename = os.path.join(self.dir, 'osquery.conf')
+            self.results_filename = os.path.join(self.log_dir, 'osqueryd.results.log')
+            self.plist_filename = os.path.expanduser('~/Library/LaunchAgents/com.facebook.osqueryd.plist')
+        else:
+            self.log_dir = '/var/log/osquery'
+            self.config_filename = '/etc/osquery/osquery.conf'
+            self.results_filename = os.path.join(self.log_dir, 'osqueryd.results.log')
 
         # Define the skeleton osquery config file, without any twigs
         self.config_skeleton = {
@@ -61,21 +67,27 @@ class Osquery(object):
                 }
 
             # Stop osqueryd
-            if os.path.exists(self.plist_filename):
-                subprocess.run(['/bin/launchctl', 'unload', self.plist_filename])
+            if self.Platform.current() == self.Platform.MACOS:
+                if os.path.exists(self.plist_filename):
+                    subprocess.run(['/bin/launchctl', 'unload', self.plist_filename])
+            elif self.Platform.current() == self.Platform.LINUX:
+                # TODO: replace sudo with gksudo
+                subprocess.run(['/usr/bin/sudo', '/usr/bin/systemctl', 'stop', 'osqueryd'])
 
             # Write the config file
             with open(self.config_filename, 'w') as config_file:
                 json.dump(config, config_file, indent=4)
 
-            # Copy the launchd plist into the correct place
-            shutil.copyfile(
-                self.c.get_resource_path('autostart/macos/com.facebook.osqueryd.plist'),
-                self.plist_filename
-            )
-
             # Start osqueryd
-            subprocess.run(['/bin/launchctl', 'load', self.plist_filename])
+            if self.Platform.current() == self.Platform.MACOS:
+                shutil.copyfile(
+                    self.c.get_resource_path('autostart/macos/com.facebook.osqueryd.plist'),
+                    self.plist_filename
+                )
+                subprocess.run(['/bin/launchctl', 'load', self.plist_filename])
+            elif self.Platform.current() == self.Platform.LINUX:
+                # TODO: replace sudo with gksudo
+                subprocess.run(['/usr/bin/sudo', '/usr/bin/systemctl', 'start', 'osqueryd'])
 
         else:
             self.c.log('Osquery', 'refresh_osqueryd', 'use_server=False, so making sure osqueryd is disabled')

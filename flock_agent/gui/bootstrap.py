@@ -57,22 +57,16 @@ class Bootstrap(object):
                     Alert(self.c, message, contains_links=True).launch()
                     return False
 
-        self.c.log('Bootstrap', 'go', 'Ensuring osquery data directory exists')
-        try:
-            os.makedirs(self.c.osquery.dir, exist_ok=True)
-            os.makedirs(self.c.osquery.log_dir, exist_ok=True)
-        except:
-            if platform == Platform.MACOS:
+        if platform == Platform.MACOS:
+            self.c.log('Bootstrap', 'go', 'Ensuring osquery data directory exists')
+            try:
+                os.makedirs(self.c.osquery.dir, exist_ok=True)
+                os.makedirs(self.c.osquery.log_dir, exist_ok=True)
+            except:
                 message = '<b>Error creating directory:<br>{}</b><br><br>Maybe your permissions are wrong. Click ok to fix your permissions. You will have to type your macOS password.<br><br>After it\'s fixed, run Flock again.'.format(self.c.osquery.dir)
                 if Alert(self.c, message, has_cancel_button=True).launch():
                     self.c.log('Bootstrap', 'go', 'Fixing permissions')
                     self.exec('osascript -e \'tell application "Terminal" to do script "sudo chown -R \\"$USER\\":admin /usr/local/var && exit"\'')
-            elif platform == Platform.LINUX:
-                message = '<b>Error creating directory:<br>{}</b><br><br>Maybe your permissions are wrong. Click ok to fix your permissions. You may have to type your Linux user password.<br><br>After it\'s fixed, run Flock again.'.format(self.c.osquery.dir)
-                if Alert(self.c, message, has_cancel_button=True).launch():
-                    self.c.log('Bootstrap', 'go', 'Fixing permissions')
-                    self.exec(['/usr/bin/xterm', '-display', ':0', '-e',
-                        'sudo mkdir -p /usr/local/var/osquery && sudo chown -R $USER:$USER /usr/local/var/osquery'])
 
             return False
 

@@ -22,7 +22,7 @@ class Common(object):
         self.appdata_path = appdirs.user_config_dir("FlockAgent")
 
         # Create an osquery object
-        self.osquery = Osquery(self)
+        self.osquery = Osquery(self, Platform)
 
         # Load settings
         self.settings = Settings(self)
