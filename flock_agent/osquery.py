@@ -93,14 +93,20 @@ class Osquery(object):
             elif self.Platform.current() == self.Platform.LINUX:
                 # TODO: replace sudo with gksudo
                 subprocess.run(['/usr/bin/sudo', '/usr/bin/systemctl', 'start', 'osqueryd'])
+                subprocess.run(['/usr/bin/sudo', '/usr/bin/systemctl', 'enable', 'osqueryd'])
 
         else:
             self.c.log('Osquery', 'refresh_osqueryd', 'use_server=False, so making sure osqueryd is disabled')
 
-            if os.path.exists(self.plist_filename):
-                # Stop osqueryd and delete the plist file
-                subprocess.run(['/bin/launchctl', 'unload', self.plist_filename])
-                os.remove(self.plist_filename)
+            if self.Platform.current() == self.Platform.MACOS:
+                if os.path.exists(self.plist_filename):
+                    # Stop osqueryd and delete the plist file
+                    subprocess.run(['/bin/launchctl', 'unload', self.plist_filename])
+                    os.remove(self.plist_filename)
+            elif self.Platform.current() == self.Platform.LINUX:
+                # TODO: replace sudo with gksudo
+                subprocess.run(['/usr/bin/sudo', '/usr/bin/systemctl', 'stop', 'osqueryd'])
+                subprocess.run(['/usr/bin/sudo', '/usr/bin/systemctl', 'disable', 'osqueryd'])
 
     def exec(self, query):
         """
