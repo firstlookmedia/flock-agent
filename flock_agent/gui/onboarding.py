@@ -2,6 +2,8 @@
 import os
 from PyQt5 import QtCore, QtWidgets, QtGui
 
+from ..common import Platform
+
 
 class Pages:
     SERVER = 1
@@ -46,7 +48,10 @@ class ServerPage(QtWidgets.QWizardPage):
         if self.use_server_yes.isChecked():
             return Pages.DATA
         else:
-            return Pages.HOMEBREW
+            if Platform.current() == Platform.MACOS:
+                return Pages.HOMEBREW
+            else:
+                return Pages.APPLET
 
     def isComplete(self):
         return self.use_server_yes.isChecked() or self.use_server_no.isChecked()
@@ -221,6 +226,7 @@ class AppletPage(QtWidgets.QWizardPage):
         label.setWordWrap(True)
         label.setStyleSheet(self.c.gui.css['Onboarding label'])
 
+        # TODO: make separate macOS/Linux screenshots for this icon
         systray_image = QtWidgets.QLabel()
         systray_image.setPixmap(QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/onboarding-systray.png"))))
 
@@ -249,12 +255,14 @@ class Onboarding(QtWidgets.QWizard):
 
         self.server_page = ServerPage(self.c)
         self.data_page = DataPage(self.c)
-        self.homebrew_page = HomebrewPage(self.c)
+        if Platform.current() == Platform.MACOS:
+            self.homebrew_page = HomebrewPage(self.c)
         self.applet_page = AppletPage(self.c)
 
         self.setPage(Pages.SERVER, self.server_page)
         self.setPage(Pages.DATA, self.data_page)
-        self.setPage(Pages.HOMEBREW, self.homebrew_page)
+        if Platform.current() == Platform.MACOS:
+            self.setPage(Pages.HOMEBREW, self.homebrew_page)
         self.setPage(Pages.APPLET, self.applet_page)
 
     def done(self, result):
@@ -267,16 +275,19 @@ class Onboarding(QtWidgets.QWizard):
             # gateway_url and gateway_token were saved when registering
             automatically_enable_twigs = self.data_page.automatically_enable_twigs_checkbox.checkState() == QtCore.Qt.CheckState.Checked
             self.c.settings.set('automatically_enable_twigs', automatically_enable_twigs)
+
             # Automatically enable the twigs, if checkbox was checked
             if automatically_enable_twigs:
                 for twig_id in self.c.settings.get_undecided_twig_ids():
                     self.c.settings.enable_twig(twig_id)
-        homebrew_update_prompt = self.homebrew_page.homebrew_update_prompt_checkbox.checkState() == QtCore.Qt.CheckState.Checked
-        self.c.settings.set('homebrew_update_prompt', homebrew_update_prompt)
-        homebrew_autoupdate = self.homebrew_page.homebrew_autoupdate_checkbox.checkState() == QtCore.Qt.CheckState.Checked
-        self.c.settings.set('homebrew_autoupdate', homebrew_autoupdate)
-        self.c.settings.save()
 
+        if Platform.current() == Platform.MACOS:
+            homebrew_update_prompt = self.homebrew_page.homebrew_update_prompt_checkbox.checkState() == QtCore.Qt.CheckState.Checked
+            self.c.settings.set('homebrew_update_prompt', homebrew_update_prompt)
+            homebrew_autoupdate = self.homebrew_page.homebrew_autoupdate_checkbox.checkState() == QtCore.Qt.CheckState.Checked
+            self.c.settings.set('homebrew_autoupdate', homebrew_autoupdate)
+
+        self.c.settings.save()
         self.finished.emit()
 
     def go(self):
