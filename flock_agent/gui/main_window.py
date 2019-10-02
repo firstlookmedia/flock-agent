@@ -19,8 +19,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowIcon(self.c.gui.icon)
 
         # System tray
-        self.systray = SysTray(self.c)
+        self.systray = QtWidgets.QSystemTrayIcon(self.c.gui.systray_icon)
         self.systray.activated.connect(self.toggle_window)
+        self.systray.show()
 
         # Header
         logo = QtWidgets.QLabel()
