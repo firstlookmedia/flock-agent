@@ -2,6 +2,7 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from ..gui_common import Alert, HidableSpacer
+from ...common import Platform
 
 
 class SettingsTab(QtWidgets.QWidget):
@@ -64,22 +65,23 @@ class SettingsTab(QtWidgets.QWidget):
         self.server_settings_group.setLayout(server_settings_layout)
         self.server_settings_group_spacer = HidableSpacer()
 
-        # Autoupdate homebrew checkbox
-        self.homebrew_update_prompt_checkbox = QtWidgets.QCheckBox("Prompt me when Homebrew updates are available")
-        self.homebrew_update_prompt_checkbox.stateChanged.connect(self.homebrew_update_prompt_toggled)
+        if Platform.current() == Platform.MACOS:
+            # Autoupdate homebrew checkbox
+            self.homebrew_update_prompt_checkbox = QtWidgets.QCheckBox("Prompt me when Homebrew updates are available")
+            self.homebrew_update_prompt_checkbox.stateChanged.connect(self.homebrew_update_prompt_toggled)
 
-        # Autoupdate homebrew cask checkbox
-        self.homebrew_autoupdate_checkbox = QtWidgets.QCheckBox("Automatically install Homebrew updates (if they don't require a password)")
-        self.homebrew_autoupdate_checkbox.stateChanged.connect(self.homebrew_autoupdate_toggled)
+            # Autoupdate homebrew cask checkbox
+            self.homebrew_autoupdate_checkbox = QtWidgets.QCheckBox("Automatically install Homebrew updates (if they don't require a password)")
+            self.homebrew_autoupdate_checkbox.stateChanged.connect(self.homebrew_autoupdate_toggled)
 
-        # Homebrew group
-        homebrew_settings_layout = QtWidgets.QVBoxLayout()
-        homebrew_settings_layout.addWidget(self.homebrew_update_prompt_checkbox)
-        homebrew_settings_layout.addWidget(self.homebrew_autoupdate_checkbox)
-        homebrew_settings_group = QtWidgets.QGroupBox("Homebrew settings")
-        homebrew_settings_group.setStyleSheet(self.c.gui.css['SettingsTab group_box'])
-        homebrew_settings_group.setLayout(homebrew_settings_layout)
-        homebrew_settings_group_spacer = HidableSpacer()
+            # Homebrew group
+            homebrew_settings_layout = QtWidgets.QVBoxLayout()
+            homebrew_settings_layout.addWidget(self.homebrew_update_prompt_checkbox)
+            homebrew_settings_layout.addWidget(self.homebrew_autoupdate_checkbox)
+            homebrew_settings_group = QtWidgets.QGroupBox("Homebrew settings")
+            homebrew_settings_group.setStyleSheet(self.c.gui.css['SettingsTab group_box'])
+            homebrew_settings_group.setLayout(homebrew_settings_layout)
+            homebrew_settings_group_spacer = HidableSpacer()
 
         # Buttons
         quit_button = QtWidgets.QPushButton('Quit Flock Agent')
@@ -98,8 +100,9 @@ class SettingsTab(QtWidgets.QWidget):
         layout.addWidget(use_server_checkbox_spacer)
         layout.addWidget(self.server_settings_group)
         layout.addWidget(self.server_settings_group_spacer) # custom spacing widget, so we can hide it
-        layout.addWidget(homebrew_settings_group)
-        layout.addWidget(homebrew_settings_group_spacer)
+        if Platform.current() == Platform.MACOS:
+            layout.addWidget(homebrew_settings_group)
+            layout.addWidget(homebrew_settings_group_spacer)
         layout.addStretch()
         layout.addLayout(buttons_layout)
         self.setLayout(layout)
@@ -153,17 +156,18 @@ class SettingsTab(QtWidgets.QWidget):
         else:
             self.automatically_enable_twigs_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
-        # Homebrew update prompt checkbox
-        if self.c.settings.get('homebrew_update_prompt'):
-            self.homebrew_update_prompt_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
-        else:
-            self.homebrew_update_prompt_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
+        if Platform.current() == Platform.MACOS:
+            # Homebrew update prompt checkbox
+            if self.c.settings.get('homebrew_update_prompt'):
+                self.homebrew_update_prompt_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
+            else:
+                self.homebrew_update_prompt_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
-        # Homebrew autoupdate checkbox
-        if self.c.settings.get('homebrew_autoupdate'):
-            self.homebrew_autoupdate_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
-        else:
-            self.homebrew_autoupdate_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
+            # Homebrew autoupdate checkbox
+            if self.c.settings.get('homebrew_autoupdate'):
+                self.homebrew_autoupdate_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
+            else:
+                self.homebrew_autoupdate_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
     def server_button_clicked(self):
         self.c.log('SettingsTab', 'server_button_clicked')
