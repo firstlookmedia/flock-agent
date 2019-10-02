@@ -18,14 +18,14 @@ def run(cmd):
 
 
 def main():
-    build_path = os.path.join(root, 'build')
     dist_path = os.path.join(root, 'dist')
+    deb_dist_path = os.path.join(root, 'deb_dist')
 
-    print('○ Deleting old build and dist')
-    if os.path.exists(build_path):
-        shutil.rmtree(build_path)
+    print('○ Deleting old dist and deb_dist')
     if os.path.exists(dist_path):
         shutil.rmtree(dist_path)
+    if os.path.exists(deb_dist_path):
+        shutil.rmtree(deb_dist_path)
 
     print('○ Building DEB package')
     run(['python3', 'setup.py', '--command-packages=stdeb.command', 'bdist_deb'])
