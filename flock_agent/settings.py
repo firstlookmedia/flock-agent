@@ -6,8 +6,9 @@ from .twigs import twigs
 
 
 class Settings(object):
-    def __init__(self, common):
+    def __init__(self, common, Platform):
         self.c = common
+        self.platform = Platform.current()
 
         self.settings_filename = os.path.join(self.c.appdata_path, 'settings.json')
 
@@ -107,27 +108,31 @@ class Settings(object):
 
         # Fill in new twigs, and update existing twigs
         for twig_id in twigs:
-            add = False
-            if twig_id in self.settings['twigs']:
-                if self.settings['twigs'][twig_id]['query'] != twigs[twig_id]['query']:
-                    # The query has changed, so change enabled to undecided
+            if self.platform in twigs[twig_id]['platforms']:
+                add = False
+                if twig_id in self.settings['twigs']:
+                    if self.settings['twigs'][twig_id]['query'] != twigs[twig_id]['query']:
+                        # The query has changed, so change enabled to undecided
+                        add = True
+
+                else:
+                    # The twig doesn't exist, so add it
                     add = True
 
+                # Add or update the twig
+                if add:
+                    if self.settings['automatically_enable_twigs']:
+                        enabled_state = 'enabled'
+                    else:
+                        enabled_state = 'undecided'
+
+                    self.settings['twigs'][twig_id] = {
+                        'query': twigs[twig_id]['query'],
+                        'enabled': enabled_state
+                    }
             else:
-                # The twig doesn't exist, so add it
-                add = True
-
-            # Add or update the twig
-            if add:
-                if self.settings['automatically_enable_twigs']:
-                    enabled_state = 'enabled'
-                else:
-                    enabled_state = 'undecided'
-
-                self.settings['twigs'][twig_id] = {
-                    'query': twigs[twig_id]['query'],
-                    'enabled': enabled_state
-                }
+                if twig_id in self.settings['twigs']:
+                    del self.settings['twigs'][twig_id]
 
         # Delete obsolete twigs
         twig_ids = [twig_id for twig_id in self.settings['twigs']]

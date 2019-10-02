@@ -25,7 +25,7 @@ class Common(object):
         self.osquery = Osquery(self, Platform)
 
         # Load settings
-        self.settings = Settings(self)
+        self.settings = Settings(self, Platform)
 
     def log(self, module, func, msg='', always=False):
         if self.verbose:

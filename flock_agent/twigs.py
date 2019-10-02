@@ -6,131 +6,153 @@
 
 twigs = {
     "os_version": {
-        "name": "macOS version",
+        "name": "Operating system version",
         "query": "select * from os_version;",
         "interval": 86400,
-        "description": "The current version of macOS that's on your computer"
+        "description": "The current version of operating system that's on your computer",
+        "platforms": ["macos", "linux"]
     },
     "browser_plugins": {
         "name": "Browser plugins",
         "query": "select browser_plugins.* from users join browser_plugins using (uid);",
         "interval": 86400,
-        "description": "List of browser plugins, which can allow us to detect if you have malicious ones installed"
+        "description": "List of browser plugins, which can allow us to detect if you have malicious ones installed",
+        "platforms": ["macos"]
     },
     "safari_extensions": {
         "name": "Safari extensions",
         "query": "select safari_extensions.* from users join safari_extensions using (uid);",
         "interval": 86400,
-        "description": "List of Safari extensions, which can allow us to detect if you have malicious ones installed"
+        "description": "List of Safari extensions, which can allow us to detect if you have malicious ones installed",
+        "platforms": ["macos"]
     },
     "opera_extensions": {
         "name": "Opera extensions",
         "query": "select opera_extensions.* from users join opera_extensions using (uid);",
         "interval": 86400,
-        "description": "List of Opera extensions, which can allow us to detect if you have malicious ones installed"
+        "description": "List of Opera extensions, which can allow us to detect if you have malicious ones installed",
+        "platforms": ["macos", "linux"]
     },
     "chrome_extensions": {
         "name": "Chrome extensions",
         "query": "select chrome_extensions.* from users join chrome_extensions using (uid);",
         "interval": 86400,
-        "description": "List of Chrome extensions, which can allow us to detect if you have malicious ones installed"
+        "description": "List of Chrome extensions, which can allow us to detect if you have malicious ones installed",
+        "platforms": ["macos", "linux"]
     },
     "firefox_addons": {
         "name": "Firefox add-ons",
         "query": "select firefox_addons.* from users join firefox_addons using (uid);",
         "interval": 86400,
-        "description": "List of Firefox add-ons, which can allow us to detect if you have malicious ones installed"
+        "description": "List of Firefox add-ons, which can allow us to detect if you have malicious ones installed",
+        "platforms": ["macos", "linux"]
     },
     "launchd": {
         "name": "Launch daemons",
         "query": "select * from launchd;",
         "interval": 3600,
-        "description": "What daemons (background services) automatically start on your computer, which malware could use for persistence"
+        "description": "What daemons (background services) automatically start on your computer, which malware could use for persistence",
+        "platforms": ["macos"]
     },
     "startup_items": {
         "name": "Startup items",
         "query": "select * from startup_items;",
         "interval": 3600,
-        "description": "What apps automatically start on your computer, which malware could use for persistence"
+        "description": "What apps automatically start on your computer, which malware could use for persistence",
+        "platforms": ["macos"]
     },
     "crontab": {
         "name": "Scheduled tasks (cron jobs)",
         "query": "select * from crontab;",
         "interval": 3600,
-        "description": "What programs are scheduled to run at regular intervals, which malware could use for persistence"
+        "description": "What programs are scheduled to run at regular intervals, which malware could use for persistence",
+        "platforms": ["macos", "linux"]
     },
     "loginwindow1": {
         "name": "Login window values",
         "query": "select key, subkey, value from plist where path = '/Library/Preferences/com.apple.loginwindow.plist';",
         "interval": 86400,
-        "description": "What loginwindow values are set, including if the guest user is enabled, and which malware could use for persistence on system boot"
+        "description": "What loginwindow values are set, including if the guest user is enabled, and which malware could use for persistence on system boot",
+        "platforms": ["macos"]
     },
     "alf": {
         "name": "Application firewall configuration",
         "query": "select * from alf;",
         "interval": 3600,
-        "description": "How the application firewall is configured"
+        "description": "How the application firewall is configured",
+        "platforms": ["macos"]
     },
     "alf_services": {
         "name": "Application firewall services",
         "query": "select * from alf_services;",
         "interval": 3600,
-        "description": "Which network services are allowed through the firewall, allowing us to identify unwanted firewall holes made by malware or humans"
+        "description": "Which network services are allowed through the firewall, allowing us to identify unwanted firewall holes made by malware or humans",
+        "platforms": ["macos"]
     },
     "etc_hosts": {
         "name": "Local hostnames",
         "query": "select * from etc_hosts;",
         "interval": 86400,
-        "description": "Values from the /etc/hosts file, which could be used to redirect or block network communications"
+        "description": "Values from the /etc/hosts file, which could be used to redirect or block network communications",
+        "platforms": ["macos", "linux"]
     },
     "kextstat": {
         "name": "Kernel extensions",
         "query": "select * from kernel_extensions;",
         "interval": 3600,
-        "description": "What current kernel extensions are loaded; some malware has a kernel extension component and this could help us catch it"
+        "description": "What current kernel extensions are loaded; some malware has a kernel extension component and this could help us catch it",
+        "platforms": ["macos"]
     },
     "installed_applications": {
         "name": "Installed applications",
         "query": "select * from apps;",
         "interval": 3600,
-        "description": "List of applications that are currently installed, to help identify malware, adware, or vulnerable applications that are installed"
+        "description": "List of applications that are currently installed, to help identify malware, adware, or vulnerable applications that are installed",
+        "platforms": ["macos"]
     },
     "suid_bin": {
         "name": "Setuid binaries",
         "query": "select * from suid_bin;",
         "interval": 3600,
-        "description": "List of binary files on your computer with setuid enabled, which could be used for privilege escalation, including privilege escalation backdoors"
+        "description": "List of binary files on your computer with setuid enabled, which could be used for privilege escalation, including privilege escalation backdoors",
+        "platforms": ["macos", "linux"]
     },
     "disk_encryption": {
         "name": "Disk encryption",
         "query": "select disk_encryption.* from mounts join disk_encryption on mounts.device_alias = disk_encryption.name where mounts.path = '/'",
         "interval": 86400,
-        "description": "Whether FileVault disk encryption is enabled"
+        "description": "Whether FileVault disk encryption is enabled",
+        "platforms": ["macos"]
     },
     "sharing_preferences": {
         "name": "Remote sharing preferences",
         "query": "select * from sharing_preferences",
         "interval": 86400,
-        "description": "Whether people can remotely login to your computer to access your screen, files, printers, or other services"
+        "description": "Whether people can remotely login to your computer to access your screen, files, printers, or other services",
+        "platforms": ["macos"]
     },
     "gatekeeper": {
         "name": "Gatekeeper",
         "query": "select * from gatekeeper",
         "interval": 86400,
-        "description": "Whether Gatekeeper is enabled, which protects your computer from running malicious apps"
+        "description": "Whether Gatekeeper is enabled, which protects your computer from running malicious apps",
+        "platforms": ["macos"]
     },
     "sip": {
         "name": "System Integrity Protection",
         "query": "select * from sip_config where config_flag='sip'",
         "interval": 86400,
-        "description": "Whether System Integrity Protection is enabled, which protects your macOS system files from getting modified by malware"
+        "description": "Whether System Integrity Protection is enabled, which protects your macOS system files from getting modified by malware",
+        "platforms": ["macos"]
     },
     # Detect reverse shells, from https://clo.ng/blog/osquery_reverse_shell/
+    # Note: this doesn't seem to work reliably in linux, only in macOS
     "reverse_shell": {
         "name": "Reverse shells",
         "query": "SELECT DISTINCT(processes.pid), processes.parent, processes.name, processes.path, processes.cmdline, processes.cwd, processes.root, processes.uid, processes.gid, processes.start_time, process_open_sockets.remote_address, process_open_sockets.remote_port, (SELECT cmdline FROM processes AS parent_cmdline WHERE pid=processes.parent) AS parent_cmdline FROM processes JOIN process_open_sockets USING (pid) LEFT OUTER JOIN process_open_files ON processes.pid = process_open_files.pid WHERE ( name='sh' OR name='bash' ) AND process_open_files.pid IS NULL;",
         "interval": 60,
-        "description": "Detect reverse shells, which is the first step attackers often take after an initial compromise in order to more easily run commands on your computer"
+        "description": "Detect reverse shells, which is the first step attackers often take after an initial compromise in order to more easily run commands on your computer",
+        "platforms": ["macos", "linux"]
     }
 
     # These twigs are commented out because, while they may be useful at some point,
