@@ -253,6 +253,8 @@ class Onboarding(QtWidgets.QWizard):
         self.setMinimumWidth(790)
         self.setMinimumHeight(540)
 
+        self.setWizardStyle(QtWidgets.QWizard.MacStyle)
+
         self.server_page = ServerPage(self.c)
         self.data_page = DataPage(self.c)
         if Platform.current() == Platform.MACOS:
