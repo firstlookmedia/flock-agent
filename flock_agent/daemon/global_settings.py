@@ -3,16 +3,15 @@ import os
 import json
 
 from .twigs import twigs
+from ..common import Platform
 
 
-class Settings(object):
-    def __init__(self, common, Platform):
+class GlobalSettings(object):
+    def __init__(self, common):
         self.c = common
-        self.platform = Platform.current()
+        self.settings_filename = os.path.join(self.c.appdata_path, 'global_settings.json')
 
-        self.settings_filename = os.path.join(self.c.appdata_path, 'settings.json')
-
-        self.c.log("Settings", "__init__", "settings_filename: {}".format(self.settings_filename))
+        self.c.log("GlobalSettings", "__init__", "settings_filename: {}".format(self.settings_filename))
 
         self.default_settings = {
             # Server settings
@@ -41,7 +40,7 @@ class Settings(object):
         return self.settings[key]
 
     def set(self, key, val):
-        self.c.log("Settings", "set", "{} = {}".format(key, val))
+        self.c.log("GlobalSettings", "set", "{} = {}".format(key, val))
         self.settings[key] = val
 
     def get_twig(self, twig_id):
@@ -75,7 +74,7 @@ class Settings(object):
         return twig_ids
 
     def load(self):
-        self.c.log("Settings", "load")
+        self.c.log("GlobalSettings", "load")
         if os.path.isfile(self.settings_filename):
             self.first_run = False
 
@@ -91,14 +90,14 @@ class Settings(object):
 
             except:
                 # If there's an error loading settings, fallback to default settings
-                self.c.log("Settings", "load", "error loading settings, falling back to default")
+                self.c.log("GlobalSettings", "load", "error loading settings, falling back to default")
                 self.settings = self.default_settings
 
         else:
             self.first_run = True
 
             # Save with default settings
-            self.c.log("Settings", "load", "settings file doesn't exist, starting with default")
+            self.c.log("GlobalSettings", "load", "settings file doesn't exist, starting with default")
             self.settings = self.default_settings
 
             # Figure out the default gateway username
@@ -108,7 +107,7 @@ class Settings(object):
 
         # Fill in new twigs, and update existing twigs
         for twig_id in twigs:
-            if self.platform in twigs[twig_id]['platforms']:
+            if Platform in twigs[twig_id]['platforms']:
                 add = False
                 if twig_id in self.settings['twigs']:
                     if self.settings['twigs'][twig_id]['query'] != twigs[twig_id]['query']:
@@ -143,7 +142,7 @@ class Settings(object):
         self.save()
 
     def save(self):
-        self.c.log("Settings", "save")
+        self.c.log("GlobalSettings", "save")
         os.makedirs(self.c.appdata_path, exist_ok=True)
         with open(self.settings_filename, 'w') as settings_file:
             json.dump(self.settings, settings_file, indent=4)

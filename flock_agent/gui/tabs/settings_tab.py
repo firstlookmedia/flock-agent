@@ -158,13 +158,13 @@ class SettingsTab(QtWidgets.QWidget):
 
         if Platform.current() == Platform.MACOS:
             # Homebrew update prompt checkbox
-            if self.c.settings.get('homebrew_update_prompt'):
+            if self.c.gui.settings.get('homebrew_update_prompt'):
                 self.homebrew_update_prompt_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
             else:
                 self.homebrew_update_prompt_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
             # Homebrew autoupdate checkbox
-            if self.c.settings.get('homebrew_autoupdate'):
+            if self.c.gui.settings.get('homebrew_autoupdate'):
                 self.homebrew_autoupdate_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
             else:
                 self.homebrew_autoupdate_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
@@ -200,14 +200,14 @@ class SettingsTab(QtWidgets.QWidget):
     def homebrew_update_prompt_toggled(self):
         self.c.log('SettingsTab', 'homebrew_update_prompt_toggled')
         is_checked = self.homebrew_update_prompt_checkbox.checkState() == QtCore.Qt.CheckState.Checked
-        self.c.settings.set('homebrew_update_prompt', is_checked)
-        self.c.settings.save()
+        self.c.gui.settings.set('homebrew_update_prompt', is_checked)
+        self.c.gui.settings.save()
 
     def homebrew_autoupdate_toggled(self):
         self.c.log('SettingsTab', 'homebrew_autoupdate_toggled')
         is_checked = self.homebrew_autoupdate_checkbox.checkState() == QtCore.Qt.CheckState.Checked
-        self.c.settings.set('homebrew_autoupdate', is_checked)
-        self.c.settings.save()
+        self.c.gui.settings.set('homebrew_autoupdate', is_checked)
+        self.c.gui.settings.save()
 
     def quit_clicked(self):
         self.c.log('SettingsTab', 'quit_clicked')

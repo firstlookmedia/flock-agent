@@ -186,7 +186,7 @@ class HomebrewPage(QtWidgets.QWizardPage):
         # Autoupdate homebrew checkbox
         self.homebrew_update_prompt_checkbox = QtWidgets.QCheckBox("Prompt me when Homebrew updates are available")
         self.homebrew_update_prompt_checkbox.setStyleSheet(self.c.gui.css['Onboarding checkbox'])
-        if self.c.settings.get('homebrew_update_prompt'):
+        if self.c.gui.settings.get('homebrew_update_prompt'):
             self.homebrew_update_prompt_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
         else:
             self.homebrew_update_prompt_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
@@ -194,7 +194,7 @@ class HomebrewPage(QtWidgets.QWizardPage):
         # Autoupdate homebrew cask checkbox
         self.homebrew_autoupdate_checkbox = QtWidgets.QCheckBox("Automatically install Homebrew updates (if they don't require a password)")
         self.homebrew_autoupdate_checkbox.setStyleSheet(self.c.gui.css['Onboarding checkbox'])
-        if self.c.settings.get('homebrew_autoupdate'):
+        if self.c.gui.settings.get('homebrew_autoupdate'):
             self.homebrew_autoupdate_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
         else:
             self.homebrew_autoupdate_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
@@ -285,11 +285,11 @@ class Onboarding(QtWidgets.QWizard):
 
         if Platform.current() == Platform.MACOS:
             homebrew_update_prompt = self.homebrew_page.homebrew_update_prompt_checkbox.checkState() == QtCore.Qt.CheckState.Checked
-            self.c.settings.set('homebrew_update_prompt', homebrew_update_prompt)
+            self.c.gui.settings.set('homebrew_update_prompt', homebrew_update_prompt)
             homebrew_autoupdate = self.homebrew_page.homebrew_autoupdate_checkbox.checkState() == QtCore.Qt.CheckState.Checked
-            self.c.settings.set('homebrew_autoupdate', homebrew_autoupdate)
+            self.c.gui.settings.set('homebrew_autoupdate', homebrew_autoupdate)
 
-        self.c.settings.save()
+        self.c.gui.settings.save()
         self.finished.emit()
 
     def go(self):

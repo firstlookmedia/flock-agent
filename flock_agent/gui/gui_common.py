@@ -2,6 +2,7 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 from urllib.parse import urlparse
 
+from .settings import Settings
 from ..api_client import FlockApiClient, PermissionDenied, BadStatusCode, \
     ResponseIsNotJson, RespondedWithError, InvalidResponse, ConnectionError
 from ..common import Platform
@@ -17,6 +18,9 @@ class GuiCommon(object):
     """
     def __init__(self, common):
         self.c = common
+
+        # Load settings
+        self.settings = Settings(self.c)
 
         # Preload icons
         self.icon = QtGui.QIcon(self.c.get_resource_path('images/icon.png'))

@@ -129,8 +129,8 @@ class HomebrewUpdateCheckThread(QtCore.QThread):
             self.c.log('HomebrewUpdateCheckThread', 'run', 'Homebrew is not installed, returning early')
             return
 
-        homebrew_update_prompt = self.c.settings.get('homebrew_update_prompt')
-        homebrew_autoupdate = self.c.settings.get('homebrew_autoupdate')
+        homebrew_update_prompt = self.c.gui.settings.get('homebrew_update_prompt')
+        homebrew_autoupdate = self.c.gui.settings.get('homebrew_autoupdate')
 
         if homebrew_update_prompt or homebrew_autoupdate:
             # Update homebrew taps

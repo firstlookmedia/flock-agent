@@ -6,6 +6,7 @@ import shutil
 
 from .api_client import FlockApiClient
 from .twigs import twigs
+from ..common import Platform
 
 
 class Osquery(object):
@@ -13,12 +14,11 @@ class Osquery(object):
     This class takes care of all interaction with osquery, including running queries,
     dynamically generating the config file, and making sure the daemon is running
     """
-    def __init__(self, common, Platform):
-        self.Platform = Platform
+    def __init__(self, common):
         self.c = common
         self.c.log('Osquery', '__init__')
 
-        if self.Platform.current() == self.Platform.MACOS:
+        if Platform.current() == Platform.MACOS:
             self.dir = '/usr/local/var/osquery'
             self.log_dir = '/usr/local/var/osquery/logs'
             self.config_filename = os.path.join(self.dir, 'osquery.conf')
@@ -67,10 +67,10 @@ class Osquery(object):
                 }
 
             # Stop osqueryd
-            if self.Platform.current() == self.Platform.MACOS:
+            if Platform.current() == Platform.MACOS:
                 if os.path.exists(self.plist_filename):
                     subprocess.run(['/bin/launchctl', 'unload', self.plist_filename])
-            elif self.Platform.current() == self.Platform.LINUX:
+            elif Platform.current() == Platform.LINUX:
                 subprocess.run(['/usr/bin/pkexec', '/usr/bin/systemctl', 'stop', 'osqueryd'])
 
             # Write the config file
@@ -83,25 +83,25 @@ class Osquery(object):
                 subprocess.run(['/usr/bin/pkexec', '/usr/bin/chown', '$USER:$USER', self.config_filename])
 
             # Start osqueryd
-            if self.Platform.current() == self.Platform.MACOS:
+            if Platform.current() == Platform.MACOS:
                 shutil.copyfile(
                     self.c.get_resource_path('autostart/macos/com.facebook.osqueryd.plist'),
                     self.plist_filename
                 )
                 subprocess.run(['/bin/launchctl', 'load', self.plist_filename])
-            elif self.Platform.current() == self.Platform.LINUX:
+            elif Platform.current() == Platform.LINUX:
                 subprocess.run(['/usr/bin/pkexec', '/usr/bin/systemctl', 'start', 'osqueryd'])
                 subprocess.run(['/usr/bin/pkexec', '/usr/bin/systemctl', 'enable', 'osqueryd'])
 
         else:
             self.c.log('Osquery', 'refresh_osqueryd', 'use_server=False, so making sure osqueryd is disabled')
 
-            if self.Platform.current() == self.Platform.MACOS:
+            if Platform.current() == Platform.MACOS:
                 if os.path.exists(self.plist_filename):
                     # Stop osqueryd and delete the plist file
                     subprocess.run(['/bin/launchctl', 'unload', self.plist_filename])
                     os.remove(self.plist_filename)
-            elif self.Platform.current() == self.Platform.LINUX:
+            elif Platform.current() == Platform.LINUX:
                 subprocess.run(['/usr/bin/pkexec', '/usr/bin/systemctl', 'stop', 'osqueryd'])
                 subprocess.run(['/usr/bin/pkexec', '/usr/bin/systemctl', 'disable', 'osqueryd'])
 
