@@ -9,6 +9,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+deb_dist/
 develop-eggs/
 dist/
 downloads/
@@ -24,6 +25,7 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+flock-agent-*.tar.gz
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
