@@ -2,7 +2,7 @@
 import os
 import json
 
-from .twigs import twigs
+from ..twigs import twigs
 from ..common import Platform
 
 
@@ -21,10 +21,6 @@ class GlobalSettings(object):
             'gateway_username': None,
             'automatically_enable_twigs': False,
             'last_osquery_result_timestamp': 0, # Timestamp of the last osquery result sent to the server
-
-            # Homebrew settings
-            'homebrew_update_prompt': True,
-            'homebrew_autoupdate': False,
 
             # Twigs
             'twigs': {}

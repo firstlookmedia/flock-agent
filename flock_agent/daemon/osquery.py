@@ -5,7 +5,7 @@ import json
 import shutil
 
 from .api_client import FlockApiClient
-from .twigs import twigs
+from ..twigs import twigs
 from ..common import Platform
 
 

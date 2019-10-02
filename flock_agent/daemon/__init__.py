@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
-from .global_settings import GlobalSettings
-from .osquery import Osquery
+import asyncio
+from .daemon import Daemon
 
 
 def main(common):
-    # Create an osquery object
-    osquery = Osquery(common)
-
-    # Load settings
-    global_settings = GlobalSettings(common)
-
-    print("Daemon not implemented yet")
+    d = Daemon(common)
+    asyncio.run(d.start())

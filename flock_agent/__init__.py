@@ -19,16 +19,16 @@ def main():
     # Parse arguments
     parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog,max_help_position=48))
     parser.add_argument('-v', '--verbose', action='store_true', dest='verbose', help="Display verbose output")
-    parser.add_argument('--daemon', action='store_true', dest='daemon', help="Run the background daemon")
+    parser.add_argument('--daemon', action='store_true', dest='start_daemon', help="Run the background daemon")
     args = parser.parse_args()
 
     verbose = args.verbose
-    daemon = args.daemon
+    start_daemon = args.start_daemon
 
     # Create the common object
     common = Common(verbose, flock_agent_version)
 
-    if daemon:
+    if start_daemon:
         # Background daemon
         if os.geteuid() != 0:
             print("This daemon must be run as root")

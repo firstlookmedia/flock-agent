@@ -3,8 +3,8 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from urllib.parse import urlparse
 
 from .settings import Settings
-from ..api_client import FlockApiClient, PermissionDenied, BadStatusCode, \
-    ResponseIsNotJson, RespondedWithError, InvalidResponse, ConnectionError
+#from ..api_client import FlockApiClient, PermissionDenied, BadStatusCode, \
+#    ResponseIsNotJson, RespondedWithError, InvalidResponse, ConnectionError
 from ..common import Platform
 
 
@@ -187,6 +187,7 @@ class GuiCommon(object):
         self.c.settings.set('gateway_url', server_url)
         self.c.settings.save()
 
+        """
         # Try to register
         self.c.log('SettingsTab', 'server_button_clicked', 'registering with server')
         api_client = FlockApiClient(self.c)
@@ -207,6 +208,7 @@ class GuiCommon(object):
         except ConnectionError:
             Alert(self.c, 'Error connecting to server').launch()
         return False
+        """
 
 
 class Alert(QtWidgets.QDialog):
