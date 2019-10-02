@@ -2,7 +2,6 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from .tabs import HomebrewTab, HealthTab, TwigsTab, SettingsTab
-from .systray import SysTray
 
 from ..common import Platform
 
