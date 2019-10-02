@@ -28,7 +28,7 @@ def main():
         shutil.rmtree(dist_path)
 
     print('○ Building RPM package')
-    run(['python3', 'setup.py', 'bdist_rpm', '--requires=python3-qt5,python3-requests,python3-appdirs'])
+    run(['python3', 'setup.py', 'bdist_rpm', '--requires=python3-qt5,python3-requests,python3-appdirs,python3-aiohttp'])
 
     print("")
     print('○ To install run:')
