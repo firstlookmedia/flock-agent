@@ -71,8 +71,7 @@ class Osquery(object):
                 if os.path.exists(self.plist_filename):
                     subprocess.run(['/bin/launchctl', 'unload', self.plist_filename])
             elif self.Platform.current() == self.Platform.LINUX:
-                # TODO: replace sudo with gksudo
-                subprocess.run(['/usr/bin/sudo', '/usr/bin/systemctl', 'stop', 'osqueryd'])
+                subprocess.run(['/usr/bin/pkexec', '/usr/bin/systemctl', 'stop', 'osqueryd'])
 
             # Write the config file
             try:
@@ -80,8 +79,8 @@ class Osquery(object):
                     json.dump(config, config_file, indent=4)
             except PermissionError:
                 # TODO: hack until flock-agentd runs as root
-                subprocess.run(['/usr/bin/sudo', '/usr/bin/touch', self.config_filename])
-                subprocess.run(['/usr/bin/sudo', '/usr/bin/chown', '$USER:$USER', self.config_filename])
+                subprocess.run(['/usr/bin/pkexec', '/usr/bin/touch', self.config_filename])
+                subprocess.run(['/usr/bin/pkexec', '/usr/bin/chown', '$USER:$USER', self.config_filename])
 
             # Start osqueryd
             if self.Platform.current() == self.Platform.MACOS:
@@ -91,9 +90,8 @@ class Osquery(object):
                 )
                 subprocess.run(['/bin/launchctl', 'load', self.plist_filename])
             elif self.Platform.current() == self.Platform.LINUX:
-                # TODO: replace sudo with gksudo
-                subprocess.run(['/usr/bin/sudo', '/usr/bin/systemctl', 'start', 'osqueryd'])
-                subprocess.run(['/usr/bin/sudo', '/usr/bin/systemctl', 'enable', 'osqueryd'])
+                subprocess.run(['/usr/bin/pkexec', '/usr/bin/systemctl', 'start', 'osqueryd'])
+                subprocess.run(['/usr/bin/pkexec', '/usr/bin/systemctl', 'enable', 'osqueryd'])
 
         else:
             self.c.log('Osquery', 'refresh_osqueryd', 'use_server=False, so making sure osqueryd is disabled')
@@ -104,9 +102,8 @@ class Osquery(object):
                     subprocess.run(['/bin/launchctl', 'unload', self.plist_filename])
                     os.remove(self.plist_filename)
             elif self.Platform.current() == self.Platform.LINUX:
-                # TODO: replace sudo with gksudo
-                subprocess.run(['/usr/bin/sudo', '/usr/bin/systemctl', 'stop', 'osqueryd'])
-                subprocess.run(['/usr/bin/sudo', '/usr/bin/systemctl', 'disable', 'osqueryd'])
+                subprocess.run(['/usr/bin/pkexec', '/usr/bin/systemctl', 'stop', 'osqueryd'])
+                subprocess.run(['/usr/bin/pkexec', '/usr/bin/systemctl', 'disable', 'osqueryd'])
 
     def exec(self, query):
         """
