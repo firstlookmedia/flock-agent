@@ -9,9 +9,9 @@ from ..common import Platform
 class GlobalSettings(object):
     def __init__(self, common):
         self.c = common
-        self.settings_filename = os.path.join(
-            self.c.appdata_path, "global_settings.json"
-        )
+
+        os.makedirs("/etc/flock-agent", exist_ok=True)
+        self.settings_filename = "/etc/flock-agent/global_settings.json"
 
         self.c.log(
             "GlobalSettings",

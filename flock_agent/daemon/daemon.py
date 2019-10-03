@@ -42,7 +42,9 @@ class Daemon:
 
     async def submit_loop(self):
         while True:
-            if self.c.settings.global_settings.get("use_server"):
+            if self.global_settings.get("use_server") and self.global_settings.get(
+                "gateway_token"
+            ):
                 # Submit osquery logs
                 self.c.log("Daemon", "submit_loop", "Submitting osquery logs")
                 try:
