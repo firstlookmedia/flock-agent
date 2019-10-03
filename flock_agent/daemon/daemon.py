@@ -42,17 +42,18 @@ class Daemon:
 
     async def submit_loop(self):
         while True:
-            # Submit osquery logs
-            self.c.log("Daemon", "submit_loop", "Submitting osquery logs")
-            try:
-                self.osquery.submit_logs()
-            except Exception as e:
-                exception_type = type(e).__name__
-                self.c.log(
-                    "Daemon",
-                    "submit_loop",
-                    "Exception submitting logs: {}".format(exception_type),
-                )
+            if self.c.settings.global_settings.get("use_server"):
+                # Submit osquery logs
+                self.c.log("Daemon", "submit_loop", "Submitting osquery logs")
+                try:
+                    self.osquery.submit_logs()
+                except Exception as e:
+                    exception_type = type(e).__name__
+                    self.c.log(
+                        "Daemon",
+                        "submit_loop",
+                        "Exception submitting logs: {}".format(exception_type),
+                    )
 
             # Wait a minute
             await asyncio.sleep(60)
