@@ -9,11 +9,12 @@ class HealthTab(QtWidgets.QWidget):
     """
     Health
     """
+
     def __init__(self, common):
         super(HealthTab, self).__init__()
         self.c = common
 
-        self.c.log('HealthTab', '__init__')
+        self.c.log("HealthTab", "__init__")
 
         # Health items
         if Platform.current() == Platform.MACOS:
@@ -24,7 +25,7 @@ class HealthTab(QtWidgets.QWidget):
                 HealthItemMacOSRemoteSharing(self.c),
                 HealthItemMacOSAutoUpdates(self.c),
                 HealthItemMacOSGuestUser(self.c),
-                HealthItemMacOSSIP(self.c)
+                HealthItemMacOSSIP(self.c),
             ]
         else:
             self.health_items = []
@@ -48,6 +49,6 @@ class HealthTab(QtWidgets.QWidget):
         self.setLayout(layout)
 
     def clicked_refresh_button(self):
-        self.c.log('HealthTab', 'clicked_refresh_button')
+        self.c.log("HealthTab", "clicked_refresh_button")
         for health_item in self.health_items:
             health_item.refresh()

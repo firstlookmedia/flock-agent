@@ -3,7 +3,8 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from urllib.parse import urlparse
 
 from .settings import Settings
-#from ..api_client import FlockApiClient, PermissionDenied, BadStatusCode, \
+
+# from ..api_client import FlockApiClient, PermissionDenied, BadStatusCode, \
 #    ResponseIsNotJson, RespondedWithError, InvalidResponse, ConnectionError
 from ..common import Platform
 
@@ -16,6 +17,7 @@ class GuiCommon(object):
     """
     Shared functionality across the GUI
     """
+
     def __init__(self, common):
         self.c = common
 
@@ -23,114 +25,111 @@ class GuiCommon(object):
         self.settings = Settings(self.c)
 
         # Preload icons
-        self.icon = QtGui.QIcon(self.c.get_resource_path('images/icon.png'))
+        self.icon = QtGui.QIcon(self.c.get_resource_path("images/icon.png"))
         if Platform.current() == Platform.MACOS:
-            if NSUserDefaults.standardUserDefaults().stringForKey_('AppleInterfaceStyle') == 'Dark':
-                self.systray_icon = QtGui.QIcon(self.c.get_resource_path('images/systray-dark.png'))
+            if (
+                NSUserDefaults.standardUserDefaults().stringForKey_(
+                    "AppleInterfaceStyle"
+                )
+                == "Dark"
+            ):
+                self.systray_icon = QtGui.QIcon(
+                    self.c.get_resource_path("images/systray-dark.png")
+                )
             else:
-                self.systray_icon = QtGui.QIcon(self.c.get_resource_path('images/systray-light.png'))
+                self.systray_icon = QtGui.QIcon(
+                    self.c.get_resource_path("images/systray-light.png")
+                )
         else:
-            self.systray_icon = QtGui.QIcon(self.c.get_resource_path('images/systray.png'))
+            self.systray_icon = QtGui.QIcon(
+                self.c.get_resource_path("images/systray.png")
+            )
 
         # Stylesheets
         self.css = {
-            'Onboarding label': """
+            "Onboarding label": """
                 QLabel {
                     font-size: 16px;
                 }
                 """,
-
-            'Onboarding url_label': """
+            "Onboarding url_label": """
                 QLabel {
                     font-size: 16px;
                     font-weight: bold;
                     font-family: monospace;
                 }
                 """,
-
-            'Onboarding line_edit': """
+            "Onboarding line_edit": """
                 QLineEdit {
                     font-size: 16px;
                     padding: 5px;
                 }
                 """,
-
-            'Onboarding radio_button': """
+            "Onboarding radio_button": """
                 QRadioButton {
                     font-size: 16px;
                 }
                 """,
-
-            'Onboarding checkbox': """
+            "Onboarding checkbox": """
                 QCheckBox {
                     font-size: 16px;
                 }
                 """,
-
-            'Onboarding brew_not_installed_label': """
+            "Onboarding brew_not_installed_label": """
                 QLabel {
                     font-size: 16px;
                     color: #666666;
                 }
                 """,
-
-            'MainWindow header_label': """
+            "MainWindow header_label": """
                 QLabel {
                     font-size: 16px;
                     margin-left: 10px;
                 }
                 """,
-
-            'HomebrewView package_names': """
+            "HomebrewView package_names": """
                 QLabel {
                     font-weight: bold;
                     padding-top: 10px;
                     padding-bottom: 10px;
                 }
                 """,
-
-            'TwigView enabled_checkbox': """
+            "TwigView enabled_checkbox": """
                 QCheckBox {
                     font-weight: bold;
                     font-size: 14px;
                     margin-right: 20px;
                 }
                 """,
-
-            'TwigDialog name_label': """
+            "TwigDialog name_label": """
                 QLabel {
                     font-weight: bold;
                     font-size: 20px;
                 }
                 """,
-
-            'TwigDialog description_label': """
+            "TwigDialog description_label": """
                 QLabel {
                     margin-bottom: 20px;
                 }
                 """,
-
-            'TwigDialog interval_label': """
+            "TwigDialog interval_label": """
                 QLabel {
                     font-style: italic;
                     color: #666666;
                 }
                 """,
-
-            'TwigDialog osquery_label': """
+            "TwigDialog osquery_label": """
                 QLabel {
                     font-family: monospace;
                 }
                 """,
-
-            'TwigDialog table_item_header': """
+            "TwigDialog table_item_header": """
                 QLabel {
                     font-family: monospace;
                     font-weight: bold;
                 }
                 """,
-
-            'OptInTab enable_all_button': """
+            "OptInTab enable_all_button": """
                 QPushButton {
                     color: #ffffff;
                     background-color: #2e8e2a;
@@ -140,21 +139,18 @@ class GuiCommon(object):
                     padding: 5px 10px 5px 10px;
                 }
                 """,
-
-            'SettingsTab group_box': """
+            "SettingsTab group_box": """
                 QGroupBox {
                     font-size: 14px;
                 }
             """,
-
-            'SettingsTab server_url_label': """
+            "SettingsTab server_url_label": """
                 QLabel {
                     font-family: monospace;
                     font-weight: bold;
                 }
             """,
-
-            'SettingsTab quit_button': """
+            "SettingsTab quit_button": """
                 QPushButton {
                     color: #ffffff;
                     background-color: #ea2a2a;
@@ -163,8 +159,7 @@ class GuiCommon(object):
                     padding: 5px 10px 5px 10px;
                 }
                 """,
-
-            'link_button': """
+            "link_button": """
                 QPushButton {
                     color: #3461bc;
                     text-decoration: underline;
@@ -177,14 +172,19 @@ class GuiCommon(object):
     def register_server(self, server_url, name):
         # Validate server URL
         o = urlparse(server_url)
-        if (o.scheme != 'http' and o.scheme != 'https') or (o.path != '' and o.path != '/') or \
-            o.params != '' or o.query != '' or o.fragment != '':
+        if (
+            (o.scheme != "http" and o.scheme != "https")
+            or (o.path != "" and o.path != "/")
+            or o.params != ""
+            or o.query != ""
+            or o.fragment != ""
+        ):
 
-            Alert(self.c, 'Invalid server URL').launch()
+            Alert(self.c, "Invalid server URL").launch()
             return False
 
         # Save the server URL in settings
-        self.c.settings.set('gateway_url', server_url)
+        self.c.settings.set("gateway_url", server_url)
         self.c.settings.save()
 
         """
@@ -215,22 +215,38 @@ class Alert(QtWidgets.QDialog):
     """
     A custom alert dialog
     """
-    def __init__(self, common, message, contains_links=False, has_cancel_button=False, ok_text='Ok'):
+
+    def __init__(
+        self,
+        common,
+        message,
+        contains_links=False,
+        has_cancel_button=False,
+        ok_text="Ok",
+    ):
         super(Alert, self).__init__()
         self.c = common
 
-        self.setWindowTitle('Flock')
+        self.setWindowTitle("Flock")
         self.setWindowIcon(self.c.gui.icon)
         self.setModal(True)
         self.setSizeGripEnabled(False)
 
-        flags = QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | \
-            QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowCloseButtonHint | \
-            QtCore.Qt.WindowStaysOnTopHint
+        flags = (
+            QtCore.Qt.CustomizeWindowHint
+            | QtCore.Qt.WindowTitleHint
+            | QtCore.Qt.WindowSystemMenuHint
+            | QtCore.Qt.WindowCloseButtonHint
+            | QtCore.Qt.WindowStaysOnTopHint
+        )
         self.setWindowFlags(flags)
 
         logo = QtWidgets.QLabel()
-        logo.setPixmap(QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/icon.png"))))
+        logo.setPixmap(
+            QtGui.QPixmap.fromImage(
+                QtGui.QImage(self.c.get_resource_path("images/icon.png"))
+            )
+        )
 
         message_label = QtWidgets.QLabel(message)
         message_label.setWordWrap(True)
@@ -246,7 +262,7 @@ class Alert(QtWidgets.QDialog):
         ok_button.clicked.connect(self.accept)
 
         if has_cancel_button:
-            cancel_button = QtWidgets.QPushButton('Cancel')
+            cancel_button = QtWidgets.QPushButton("Cancel")
             cancel_button.clicked.connect(self.reject)
 
         buttons_layout = QtWidgets.QHBoxLayout()
@@ -268,6 +284,7 @@ class HidableSpacer(QtWidgets.QWidget):
     """
     A custom widget that's used as spacing in a layout which can be shown or hidden
     """
+
     def __init__(self, size=10):
         super(HidableSpacer, self).__init__()
         self.setMinimumSize(size, size)

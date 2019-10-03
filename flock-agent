@@ -5,8 +5,10 @@
 
 import os
 import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.flock_agent_dev = True
 
 import flock_agent
+
 flock_agent.main()

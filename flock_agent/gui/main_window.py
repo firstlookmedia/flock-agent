@@ -14,7 +14,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.c.log("MainWindow", "__init__")
 
-        self.setWindowTitle('Flock')
+        self.setWindowTitle("Flock")
         self.setWindowIcon(self.c.gui.icon)
 
         # System tray
@@ -24,11 +24,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Header
         logo = QtWidgets.QLabel()
-        logo.setPixmap(QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/icon.png"))))
-        header_label = QtWidgets.QLabel('<b><font color="#3461bc">Flock</font></b> monitors your computer for security issues while respecting your privacy')
+        logo.setPixmap(
+            QtGui.QPixmap.fromImage(
+                QtGui.QImage(self.c.get_resource_path("images/icon.png"))
+            )
+        )
+        header_label = QtWidgets.QLabel(
+            '<b><font color="#3461bc">Flock</font></b> monitors your computer for security issues while respecting your privacy'
+        )
         header_label.setTextFormat(QtCore.Qt.RichText)
         header_label.setWordWrap(True)
-        header_label.setStyleSheet(self.c.gui.css['MainWindow header_label'])
+        header_label.setStyleSheet(self.c.gui.css["MainWindow header_label"])
         header_layout = QtWidgets.QHBoxLayout()
         header_layout.addWidget(logo)
         header_layout.addWidget(header_label, stretch=1)
@@ -68,7 +74,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.currently_submitting = False
         self.submit_timer = QtCore.QTimer()
         self.submit_timer.timeout.connect(self.run_submit)
-        self.update_use_server(None) # this calls self.update_ui()
+        self.update_use_server(None)  # this calls self.update_ui()
 
         self.hide()
 
@@ -101,7 +107,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.tabs.removeTab(homebrew_tab_index)
 
         # Only show data or opt-in tabs if using a server
-        if self.c.settings.get('use_server'):
+        if self.c.settings.get("use_server"):
             data_tab_should_show = len(self.c.settings.get_decided_twig_ids()) > 0
             if data_tab_should_show:
                 # In macOS, Data tab index is 1 because Health is always 0, but in Linux it's 0
@@ -122,14 +128,14 @@ class MainWindow(QtWidgets.QMainWindow):
         if active_tab == None:
             self.tabs.setCurrentIndex(0)
         else:
-            if active_tab == 'opt-in':
+            if active_tab == "opt-in":
                 index = self.tabs.indexOf(self.opt_in_tab)
-            elif active_tab == 'data':
+            elif active_tab == "data":
                 index = self.tabs.indexOf(self.data_tab)
-            elif active_tab == 'homebrew':
+            elif active_tab == "homebrew":
                 if Platform.current() == Platform.MACOS:
                     index = self.tabs.indexOf(self.homebrew_tab)
-            elif active_tab == 'settings':
+            elif active_tab == "settings":
                 index = self.tabs.indexOf(self.settings_tab)
             else:
                 index = -1
@@ -141,7 +147,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def update_homebrew_tab(self):
         if self.homebrew_tab.should_show:
-            self.update_ui('homebrew')
+            self.update_ui("homebrew")
             if not self.isVisible():
                 self.show()
                 self.activateWindow()
@@ -173,14 +179,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def submit_error(self, exception_type):
         # TODO: make the exception handling more robust
-        self.systray.showMessage("Error Submitting Data", "Exception type: {}".format(exception_type))
+        self.systray.showMessage(
+            "Error Submitting Data", "Exception type: {}".format(exception_type)
+        )
 
-    def update_use_server(self, active_tab='settings'):
-        use_server = self.c.settings.get('use_server')
+    def update_use_server(self, active_tab="settings"):
+        use_server = self.c.settings.get("use_server")
 
         if use_server:
             # Start the submit timer
-            self.submit_timer.start(60000) # 1 minute
+            self.submit_timer.start(60000)  # 1 minute
 
         else:
             # Stop the submit timer
@@ -204,6 +212,7 @@ class SubmitThread(QtCore.QThread):
     """
     Submit osquery records to the Flock server
     """
+
     submit_finished = QtCore.pyqtSignal()
     submit_error = QtCore.pyqtSignal(str)
 
@@ -212,17 +221,21 @@ class SubmitThread(QtCore.QThread):
         self.c = common
 
     def run(self):
-        if self.c.settings.get('use_server'):
-            self.c.log('SubmitThread', 'run')
+        if self.c.settings.get("use_server"):
+            self.c.log("SubmitThread", "run")
 
             try:
                 self.c.osquery.submit_logs()
             except Exception as e:
                 exception_type = type(e).__name__
-                self.c.log('SubmitThread', 'run', 'Exception submitting logs: {}'.format(exception_type))
+                self.c.log(
+                    "SubmitThread",
+                    "run",
+                    "Exception submitting logs: {}".format(exception_type),
+                )
                 self.submit_error.emit(exception_type)
 
         else:
-            self.c.log('SubmitThread', 'run', 'use_server=False, so skipping')
+            self.c.log("SubmitThread", "run", "use_server=False, so skipping")
 
         self.submit_finished.emit()

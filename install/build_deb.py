@@ -10,7 +10,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import flock_agent
 
 version = flock_agent.flock_agent_version
-root = os.path.dirname(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))
+root = os.path.dirname(
+    os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+)
 
 
 def run(cmd):
@@ -18,22 +20,22 @@ def run(cmd):
 
 
 def main():
-    dist_path = os.path.join(root, 'dist')
-    deb_dist_path = os.path.join(root, 'deb_dist')
+    dist_path = os.path.join(root, "dist")
+    deb_dist_path = os.path.join(root, "deb_dist")
 
-    print('○ Deleting old dist and deb_dist')
+    print("○ Deleting old dist and deb_dist")
     if os.path.exists(dist_path):
         shutil.rmtree(dist_path)
     if os.path.exists(deb_dist_path):
         shutil.rmtree(deb_dist_path)
 
-    print('○ Building DEB package')
-    run(['python3', 'setup.py', '--command-packages=stdeb.command', 'bdist_deb'])
+    print("○ Building DEB package")
+    run(["python3", "setup.py", "--command-packages=stdeb.command", "bdist_deb"])
 
     print("")
-    print('○ To install run:')
-    print('sudo dpkg -i deb_dist/flock-agent_{}-1_all.deb'.format(version))
+    print("○ To install run:")
+    print("sudo dpkg -i deb_dist/flock-agent_{}-1_all.deb".format(version))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

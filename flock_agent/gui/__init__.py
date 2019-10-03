@@ -26,6 +26,7 @@ def main(common):
 
     # Onboarding wizard
     if common.settings.first_run:
+
         def show_main_window():
             main_window.update_ui()
             main_window.show()
@@ -35,7 +36,10 @@ def main(common):
         onboarding.go()
     else:
         # Show or hide main window?
-        if common.settings.get('use_server') and len(common.settings.get_undecided_twig_ids()) == 0:
+        if (
+            common.settings.get("use_server")
+            and len(common.settings.get_undecided_twig_ids()) == 0
+        ):
             main_window.hide()
         else:
             main_window.show()
@@ -43,6 +47,7 @@ def main(common):
     # Clean up when app quits
     def shutdown():
         main_window.shutdown()
+
     app.aboutToQuit.connect(shutdown)
 
     sys.exit(app.exec_())

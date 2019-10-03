@@ -10,7 +10,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import flock_agent
 
 version = flock_agent.flock_agent_version
-root = os.path.dirname(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))
+root = os.path.dirname(
+    os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+)
 
 
 def run(cmd):
@@ -18,22 +20,29 @@ def run(cmd):
 
 
 def main():
-    build_path = os.path.join(root, 'build')
-    dist_path = os.path.join(root, 'dist')
+    build_path = os.path.join(root, "build")
+    dist_path = os.path.join(root, "dist")
 
-    print('○ Deleting old build and dist')
+    print("○ Deleting old build and dist")
     if os.path.exists(build_path):
         shutil.rmtree(build_path)
     if os.path.exists(dist_path):
         shutil.rmtree(dist_path)
 
-    print('○ Building RPM package')
-    run(['python3', 'setup.py', 'bdist_rpm', '--requires=python3-qt5,python3-requests,python3-appdirs,python3-aiohttp'])
+    print("○ Building RPM package")
+    run(
+        [
+            "python3",
+            "setup.py",
+            "bdist_rpm",
+            "--requires=python3-qt5,python3-requests,python3-appdirs,python3-aiohttp",
+        ]
+    )
 
     print("")
-    print('○ To install run:')
-    print('sudo dnf install dist/flock-agent-{}-1.noarch.rpm'.format(version))
+    print("○ To install run:")
+    print("sudo dnf install dist/flock-agent-{}-1.noarch.rpm".format(version))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
