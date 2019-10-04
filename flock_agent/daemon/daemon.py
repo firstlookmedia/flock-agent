@@ -2,6 +2,7 @@
 import os
 import grp
 import asyncio
+import json
 from aiohttp import web
 
 from .global_settings import GlobalSettings
@@ -13,10 +14,11 @@ class Daemon:
         self.c = common
         self.c.log("Daemon", "__init__")
 
-        self.osquery = Osquery(common)
-        common.osquery = self.osquery
-
         self.global_settings = GlobalSettings(common)
+
+        self.osquery = Osquery(common, self.global_settings)
+        self.osquery.refresh_osqueryd()
+        common.osquery = self.osquery
 
         # Prepare the unix socket path
         self.unix_socket_path = "/var/lib/flock-agent/socket"
@@ -63,11 +65,13 @@ class Daemon:
     async def http_server(self):
         self.c.log("Daemon", "http_server", "Starting http server")
 
-        async def hello(request):
-            return web.Response(text="Hello, world")
+        # GET /ping, to check if the daemon is running
+        async def ping(request):
+            self.c.log("Daemon", "http_server", "GET /ping")
+            return web.json_response(True)
 
         app = web.Application()
-        app.router.add_get("/", hello)
+        app.router.add_get("/ping", ping)
 
         loop = asyncio.get_event_loop()
         await loop.create_unix_server(app.make_handler(), self.unix_socket_path)

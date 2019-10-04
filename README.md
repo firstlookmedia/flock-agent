@@ -71,3 +71,11 @@ This will output verbose information in the Terminal about what Flock Agent is d
 ## Building from source
 
 Follow the [instructions here](/BUILD.md) run Flock Agent from the source tree.
+
+## License
+
+Flock Agent is released under [GPLv3](./LICENSE.md).
+
+Other licenses:
+
+* [requests-unixsocket](https://github.com/msabramo/requests-unixsocket/), Apache License 2.0 (code is bundled in this project instead of as a dependency because it's not packaged in Fedora)

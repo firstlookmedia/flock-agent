@@ -6,6 +6,7 @@ import appdirs
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from .gui_common import Alert
+from .daemon_client import DaemonNotRunningException, PermissionDeniedException
 from ..common import Platform
 
 
@@ -63,36 +64,29 @@ class Bootstrap(object):
                 if not os.path.exists("/usr/local/bin/osqueryd") or not os.path.exists(
                     "/usr/local/bin/osqueryi"
                 ):
-                    message = '<b>Osquery is not installed but it really should be.</b><br><br>You can either install it with Homebrew, or download it from <a href="https://osquery.io/downloads">https://osquery.io/downloads</a>. Install osquery and then run Flock again.'
+                    message = '<b>Osquery is not installed.</b><br><br>You can either install it with Homebrew, or download it from <a href="https://osquery.io/downloads">https://osquery.io/downloads</a>. Install osquery and then run Flock again.'
                     Alert(self.c, message, contains_links=True).launch()
                     return False
             elif platform == Platform.LINUX:
                 if not os.path.exists("/usr/bin/osqueryd") or not os.path.exists(
                     "/usr/bin/osqueryi"
                 ):
-                    message = '<b>Osquery is not installed, but it really should be.</b><br><br>To add the osquery repository to your system and install the osquery package, follow the instructions at <a href="https://osquery.io/downloads">https://osquery.io/downloads</a> under "Alternative Install Options".<br><br>For Debian, Ubuntu, or Mint, follow the "Debian Linux" instructions, and for Fedora, Red Hat, or CentOS, follow the "RPM Linux" instructions.<br><br>Install osquery and then run Flock again.'
+                    message = '<b>Osquery is not installed.</b><br><br>To add the osquery repository to your system and install the osquery package, follow the instructions at <a href="https://osquery.io/downloads">https://osquery.io/downloads</a> under "Alternative Install Options".<br><br>For Debian, Ubuntu, or Mint, follow the "Debian Linux" instructions, and for Fedora, Red Hat, or CentOS, follow the "RPM Linux" instructions.<br><br>Install osquery and then run Flock again.'
                     Alert(self.c, message, contains_links=True).launch()
                     return False
 
-        if platform == Platform.MACOS:
-            self.c.log("Bootstrap", "go", "Ensuring osquery data directory exists")
-            try:
-                os.makedirs(self.c.osquery.dir, exist_ok=True)
-                os.makedirs(self.c.osquery.log_dir, exist_ok=True)
-            except:
-                message = "<b>Error creating directory:<br>{}</b><br><br>Maybe your permissions are wrong. Click ok to fix your permissions. You will have to type your macOS password.<br><br>After it's fixed, run Flock again.".format(
-                    self.c.osquery.dir
-                )
-                if Alert(self.c, message, has_cancel_button=True).launch():
-                    self.c.log("Bootstrap", "go", "Fixing permissions")
-                    self.exec(
-                        'osascript -e \'tell application "Terminal" to do script "sudo chown -R \\"$USER\\":admin /usr/local/var && exit"\''
-                    )
-
+        self.c.log("Bootstrap", "go", "Making sure the Flock Agent daemon is running")
+        try:
+            self.c.daemon.ping()
+        except DaemonNotRunningException:
+            # TODO: actually start the daemon
+            message = "<b>Flock Agent daemon is not running.</b>"
+            Alert(self.c, message).launch()
             return False
-
-        self.c.log("Bootstrap", "go", "Refreshing osquery daemon")
-        self.c.osquery.refresh_osqueryd()
+        except PermissionDeniedException:
+            message = "<b>Permission denied.</b><br><br>Sorry, you must have admin rights on your computer to configure Flock Agent."
+            Alert(self.c, message).launch()
+            return False
 
         self.c.log("Bootstrap", "go", "Bootstrap complete")
         return True
