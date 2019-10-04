@@ -14,6 +14,8 @@ class Settings(object):
         )
 
         self.default_settings = {
+            # First run
+            "first_run": True,
             # Homebrew settings
             "homebrew_update_prompt": True,
             "homebrew_autoupdate": False,

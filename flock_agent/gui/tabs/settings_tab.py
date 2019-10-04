@@ -136,13 +136,13 @@ class SettingsTab(QtWidgets.QWidget):
         self.c.log("SettingsTab", "update_ui")
 
         # Determine server status
-        if self.c.settings.get("gateway_url") and self.c.settings.get("gateway_token"):
+        if self.c.daemon.get("gateway_url") and self.c.daemon.get("gateway_token"):
             self.status = self.STATUS_REGISTERED
         else:
             self.status = self.STATUS_NOT_REGISTERED
 
         # Use server checkbox
-        if self.c.settings.get("use_server"):
+        if self.c.daemon.get("use_server"):
             self.use_server_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
             self.server_settings_group.show()
             self.server_settings_group_spacer.show()
@@ -170,13 +170,13 @@ class SettingsTab(QtWidgets.QWidget):
             self.server_name_edit.hide()
             self.server_label.setText("You're sending data to this server:")
             self.server_url_edit.hide()
-            self.server_url_label.setText(self.c.settings.get("gateway_url"))
+            self.server_url_label.setText(self.c.daemon.get("gateway_url"))
             self.server_url_label.show()
             self.server_button.hide()
 
         # Automatically opt-in checkbox
         self.automatically_enable_twigs_checkbox.show()
-        if self.c.settings.get("automatically_enable_twigs"):
+        if self.c.daemon.get("automatically_enable_twigs"):
             self.automatically_enable_twigs_checkbox.setCheckState(
                 QtCore.Qt.CheckState.Checked
             )
@@ -225,8 +225,7 @@ class SettingsTab(QtWidgets.QWidget):
         is_checked = (
             self.use_server_checkbox.checkState() == QtCore.Qt.CheckState.Checked
         )
-        self.c.settings.set("use_server", is_checked)
-        self.c.settings.save()
+        self.c.daemon.set("use_server", is_checked)
         self.update_use_server.emit()
         self.update_ui()
 
@@ -236,8 +235,7 @@ class SettingsTab(QtWidgets.QWidget):
             self.automatically_enable_twigs_checkbox.checkState()
             == QtCore.Qt.CheckState.Checked
         )
-        self.c.settings.set("automatically_enable_twigs", is_checked)
-        self.c.settings.save()
+        self.c.daemon.set("automatically_enable_twigs", is_checked)
 
     def homebrew_update_prompt_toggled(self):
         self.c.log("SettingsTab", "homebrew_update_prompt_toggled")

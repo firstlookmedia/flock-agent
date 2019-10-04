@@ -27,7 +27,7 @@ def main(common):
     main_window = MainWindow(app, common)
 
     # Onboarding wizard
-    if common.settings.first_run:
+    if common.gui.settings.get("first_run"):
 
         def show_main_window():
             main_window.update_ui()
@@ -39,8 +39,8 @@ def main(common):
     else:
         # Show or hide main window?
         if (
-            common.settings.get("use_server")
-            and len(common.settings.get_undecided_twig_ids()) == 0
+            common.daemon.get("use_server")
+            and len(common.daemon.get_undecided_twig_ids()) == 0
         ):
             main_window.hide()
         else:

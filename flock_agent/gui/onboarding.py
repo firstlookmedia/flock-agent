@@ -327,24 +327,7 @@ class Onboarding(QtWidgets.QWizard):
     def done(self, result):
         super(Onboarding, self).done(result)
 
-        # Save settings
-        use_server = self.server_page.use_server_yes.isChecked()
-        self.c.settings.set("use_server", use_server)
-        if use_server:
-            # gateway_url and gateway_token were saved when registering
-            automatically_enable_twigs = (
-                self.data_page.automatically_enable_twigs_checkbox.checkState()
-                == QtCore.Qt.CheckState.Checked
-            )
-            self.c.settings.set(
-                "automatically_enable_twigs", automatically_enable_twigs
-            )
-
-            # Automatically enable the twigs, if checkbox was checked
-            if automatically_enable_twigs:
-                for twig_id in self.c.settings.get_undecided_twig_ids():
-                    self.c.settings.enable_twig(twig_id)
-
+        # Save GUI settings
         if Platform.current() == Platform.MACOS:
             homebrew_update_prompt = (
                 self.homebrew_page.homebrew_update_prompt_checkbox.checkState()
@@ -357,7 +340,25 @@ class Onboarding(QtWidgets.QWizard):
             )
             self.c.gui.settings.set("homebrew_autoupdate", homebrew_autoupdate)
 
+        self.c.gui.settings.set("first_run", False)
         self.c.gui.settings.save()
+
+        # Save global settings
+        use_server = self.server_page.use_server_yes.isChecked()
+        self.c.daemon.set("use_server", use_server)
+        if use_server:
+            # gateway_url and gateway_token were saved when registering
+            automatically_enable_twigs = (
+                self.data_page.automatically_enable_twigs_checkbox.checkState()
+                == QtCore.Qt.CheckState.Checked
+            )
+            self.c.daemon.set("automatically_enable_twigs", automatically_enable_twigs)
+
+            # Automatically enable the twigs, if checkbox was checked
+            if automatically_enable_twigs:
+                for twig_id in self.c.settings.get_undecided_twig_ids():
+                    self.c.daemon.enable_twig(twig_id)
+
         self.finished.emit()
 
     def go(self):
