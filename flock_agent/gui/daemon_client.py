@@ -114,7 +114,12 @@ class DaemonClient:
 
     def _http_request(self, method, path, data=None):
         url = "http+unix://{}{}".format(self.unix_socket_path.replace("/", "%2F"), path)
-        self.c.log("DaemonClient", "_request", "{} {} {}".format(method, url, data))
+        if data:
+            self.c.log(
+                "DaemonClient", "_request", "{} {} {}".format(method, path, data)
+            )
+        else:
+            self.c.log("DaemonClient", "_request", "{} {}".format(method, path))
 
         try:
             if method == "get":
