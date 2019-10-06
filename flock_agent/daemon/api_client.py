@@ -68,7 +68,7 @@ class FlockApiClient(object):
             "/register",
             "post",
             False,
-            {"username": self.c.settings.get("gateway_username"), "name": name},
+            {"username": self.c.global_settings.get("gateway_username"), "name": name},
         )
 
         if "auth_token" not in obj:
@@ -76,8 +76,8 @@ class FlockApiClient(object):
 
         # If we made it this far, looks like we registered successfully
         # Save the token
-        self.c.settings.set("gateway_token", obj["auth_token"])
-        self.c.settings.save()
+        self.c.global_settings.set("gateway_token", obj["auth_token"])
+        self.c.global_settings.save()
 
     def ping(self):
         self.c.log("FlockApiClient", "ping")
@@ -134,7 +134,9 @@ class FlockApiClient(object):
         """
         Build the URL of a request, with a path starting with "/"
         """
-        return "{}{}".format(self.c.settings.get("gateway_url").rstrip("/"), path)
+        return "{}{}".format(
+            self.c.global_settings.get("gateway_url").rstrip("/"), path
+        )
 
     def _get_headers(self, auth):
         headers = {}
@@ -142,8 +144,8 @@ class FlockApiClient(object):
         if auth:
             encoded_credentials = base64.b64encode(
                 "{}:{}".format(
-                    self.c.settings.get("gateway_username"),
-                    self.c.settings.get("gateway_token"),
+                    self.c.global_settings.get("gateway_username"),
+                    self.c.global_settings.get("gateway_token"),
                 ).encode()
             ).decode()
             headers["Authorization"] = "Basic {}".format(encoded_credentials)

@@ -2,6 +2,8 @@
 import json
 import requests
 
+from .gui_common import Alert
+
 # requests_unixsocket is included in this repo, because it's not packaged in fedora
 from . import requests_unixsocket
 
@@ -65,46 +67,14 @@ class DaemonClient:
         return res["data"]
 
     def register_server(self, server_url, name):
-        pass
-        """
-        # Validate server URL
-        o = urlparse(server_url)
-        if (
-            (o.scheme != "http" and o.scheme != "https")
-            or (o.path != "" and o.path != "/")
-            or o.params != ""
-            or o.query != ""
-            or o.fragment != ""
-        ):
-
-            Alert(self.c, "Invalid server URL").launch()
+        res = self._http_post(
+            "/register_server", {"server_url": server_url, "name": name}
+        )
+        if res["error"]:
+            Alert(self.c, res["error"]).launch()
             return False
-
-        # Save the server URL in settings
-        self.c.settings.set("gateway_url", server_url)
-        self.c.settings.save()
-
-        # Try to register
-        self.c.log('SettingsTab', 'server_button_clicked', 'registering with server')
-        api_client = FlockApiClient(self.c)
-        try:
-            api_client.register(name)
-            api_client.ping()
+        else:
             return True
-        except PermissionDenied:
-            Alert(self.c, 'Permission denied').launch()
-        except BadStatusCode as e:
-            Alert(self.c, 'Bad status code: {}'.format(e)).launch()
-        except ResponseIsNotJson:
-            Alert(self.c, 'Server response is not JSON').launch()
-        except RespondedWithError as e:
-            Alert(self.c, 'Server error: {}'.format(e)).launch()
-        except InvalidResponse:
-            Alert(self.c, 'Server returned an invalid response').launch()
-        except ConnectionError:
-            Alert(self.c, 'Error connecting to server').launch()
-        return False
-        """
 
     def _http_get(self, path):
         return self._http_request("get", path)

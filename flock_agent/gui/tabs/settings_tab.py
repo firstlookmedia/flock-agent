@@ -216,7 +216,7 @@ class SettingsTab(QtWidgets.QWidget):
             # Try registering
             name = self.server_name_edit.text()
             server_url = self.server_url_edit.text()
-            self.c.gui.register_server(server_url, name)
+            self.c.daemon.register_server(server_url, name)
 
         self.update_ui()
 

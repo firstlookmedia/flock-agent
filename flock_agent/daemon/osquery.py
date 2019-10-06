@@ -15,13 +15,12 @@ class Osquery(object):
     dynamically generating the config file, and making sure the daemon is running
     """
 
-    def __init__(self, common, global_settings):
+    def __init__(self, common):
         self.c = common
         self.c.log("Osquery", "__init__")
 
-        self.global_settings = global_settings
-
         if Platform.current() == Platform.MACOS:
+            self.osqueryi_bin = "/usr/local/bin/osqueryi"
             self.log_dir = "/usr/local/var/osquery/logs"
             self.config_filename = os.path.join(self.dir, "osquery.conf")
             self.results_filename = os.path.join(self.log_dir, "osqueryd.results.log")
@@ -29,6 +28,7 @@ class Osquery(object):
                 "~/Library/LaunchAgents/com.facebook.osqueryd.plist"
             )
         else:
+            self.osqueryi_bin = "/usr/bin/osqueryi"
             self.log_dir = "/var/log/osquery"
             self.config_filename = "/etc/osquery/osquery.conf"
             self.results_filename = os.path.join(self.log_dir, "osqueryd.results.log")
@@ -59,19 +59,19 @@ class Osquery(object):
         Rebuild the osquery config file based on the latest settings, and restart
         the osqueryd daemon
         """
-        if self.global_settings.get("use_server"):
+        if self.c.global_settings.get("use_server"):
             self.c.log(
                 "Osquery",
                 "refresh_osqueryd",
                 "enabling twigs: {}".format(
-                    ", ".join(self.global_settings.get_enabled_twig_ids())
+                    ", ".join(self.c.global_settings.get_enabled_twig_ids())
                 ),
             )
 
             # Rebuild osquery config
             config = self.config_skeleton.copy()
             config["schedule"] = {}  # clear the existing schedule
-            for twig_id in self.global_settings.get_enabled_twig_ids():
+            for twig_id in self.c.global_settings.get_enabled_twig_ids():
                 config["schedule"][twig_id] = {
                     "query": twigs[twig_id]["query"],
                     "interval": twigs[twig_id]["interval"],
@@ -149,14 +149,13 @@ class Osquery(object):
         self.c.log("Osquery", "exec", query)
         try:
             p = subprocess.run(
-                ["/usr/local/bin/osqueryi", "--json", query],
-                capture_output=True,
-                check=True,
+                [self.osqueryi_bin, "--json", query], capture_output=True, check=True
             )
+            self.c.log("Osquery", "exec", repr(p.stdout))
             return json.loads(p.stdout)
-
         except:
             # Error running query
+            self.c.log("Osquery", "exec", "error executing query")
             return None
 
     def submit_logs(self):
@@ -167,7 +166,7 @@ class Osquery(object):
         self.c.log("Osquery", "submit_logs")
 
         # Keep track of the biggest timestamp we see
-        biggest_timestamp = self.global_settings.get("last_osquery_result_timestamp")
+        biggest_timestamp = self.c.global_settings.get("last_osquery_result_timestamp")
 
         try:
             # What's the results file's modified timestamp, before we start the import
@@ -201,7 +200,7 @@ class Osquery(object):
 
                             if "unixTime" in obj:
                                 # If we haven't submitted this yet
-                                if obj["unixTime"] > self.global_settings.get(
+                                if obj["unixTime"] > self.c.global_settings.get(
                                     "last_osquery_result_timestamp"
                                 ):
                                     logs.append(obj)
@@ -244,13 +243,13 @@ class Osquery(object):
 
             # Update timestamp in settings
             if (
-                self.global_settings.get("last_osquery_result_timestamp")
+                self.c.global_settings.get("last_osquery_result_timestamp")
                 < biggest_timestamp
             ):
-                self.global_settings.set(
+                self.c.global_settings.set(
                     "last_osquery_result_timestamp", biggest_timestamp
                 )
-                self.global_settings.save()
+                self.c.global_settings.save()
 
             # If the results file hasn't been modified since we started the import, truncate it
             # (If it has been modified, this means more logs have been added, and we should wait

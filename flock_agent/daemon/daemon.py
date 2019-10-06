@@ -3,11 +3,21 @@ import os
 import grp
 import asyncio
 import json
+from urllib.parse import urlparse
 from aiohttp import web
 from aiohttp.abc import AbstractAccessLogger
 
 from .global_settings import GlobalSettings
 from .osquery import Osquery
+from .api_client import (
+    FlockApiClient,
+    PermissionDenied,
+    BadStatusCode,
+    ResponseIsNotJson,
+    RespondedWithError,
+    InvalidResponse,
+    ConnectionError,
+)
 
 
 class Daemon:
@@ -15,11 +25,16 @@ class Daemon:
         self.c = common
         self.c.log("Daemon", "__init__")
 
-        self.global_settings = GlobalSettings(common)
+        self.osquery = Osquery(common)
+        self.c.osquery = self.osquery
 
-        self.osquery = Osquery(common, self.global_settings)
+        self.global_settings = GlobalSettings(common)
+        self.c.global_settings = self.global_settings
+
+        self.api_client = FlockApiClient(self.c)
+
+        # Start with refreshing osqueryd
         self.osquery.refresh_osqueryd()
-        common.osquery = self.osquery
 
         # Prepare the unix socket path
         self.unix_socket_path = "/var/lib/flock-agent/socket"
@@ -71,10 +86,17 @@ class Daemon:
             return web.json_response(obj)
 
         # Access logs
+        common_log = self.c.log
+
         class AccessLogger(AbstractAccessLogger):
             def log(self, request, response, time):
-                print("{} {} {}".format(request.method, request.path, response.status))
+                common_log(
+                    "Daemon.http_server",
+                    "AccessLogger",
+                    "{} {} {}".format(request.method, request.path, response.status),
+                )
 
+        # Routes
         async def ping(request):
             return response_object()
 
@@ -111,6 +133,50 @@ class Daemon:
         def get_enabled_twig_ids(request):
             return response_object(self.global_settings.get_enabled_twig_ids())
 
+        async def register_server(request):
+            data = await request.json()
+            try:
+                name = data["name"]
+                server_url = data["server_url"]
+            except:
+                return response_object(error="Invalid request to daemon")
+
+            # Validate server URL
+            o = urlparse(server_url)
+            if (
+                (o.scheme != "http" and o.scheme != "https")
+                or (o.path != "" and o.path != "/")
+                or o.params != ""
+                or o.query != ""
+                or o.fragment != ""
+            ):
+                return response_object(error="Invalid server URL")
+
+            # Save the server URL in settings
+            self.global_settings.set("gateway_url", server_url)
+            self.global_settings.save()
+
+            # Try to register
+            try:
+                self.api_client.register(name)
+                self.api_client.ping()
+                return True
+            except PermissionDenied:
+                return response_object(error="Permission denied")
+            except BadStatusCode as e:
+                return response_object(error="Bad status code: {}".format(e))
+            except ResponseIsNotJson:
+                return response_object(error="Server response is not JSON")
+            except RespondedWithError as e:
+                return response_object(error="Server error: {}".format(e))
+            except InvalidResponse:
+                return response_object(error="Server returned an invalid response")
+            except ConnectionError:
+                return response_object(error="Error connecting to server")
+
+            # Success
+            return response_object()
+
         def refresh_osqueryd(request):
             self.osquery.refresh_osqueryd()
             return response_object()
@@ -124,6 +190,7 @@ class Daemon:
         app.router.add_get("/decided_twig_ids", get_decided_twig_ids)
         app.router.add_get("/undecided_twig_ids", get_undecided_twig_ids)
         app.router.add_get("/enabled_twig_ids", get_enabled_twig_ids)
+        app.router.add_post("/register_server", register_server)
         app.router.add_get("/refresh_osqueryd", refresh_osqueryd)
 
         loop = asyncio.get_event_loop()
