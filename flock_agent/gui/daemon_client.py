@@ -91,22 +91,22 @@ class DaemonClient:
         else:
             self.c.log("DaemonClient", "_request", "{} {}".format(method, path))
 
-        try:
-            if method == "get":
-                r = self.session.get(url)
-            else:
-                r = self.session.post(url, json=data)
-        except requests.exceptions.ConnectionError as e:
-            exception_type = type(e.args[0].args[1])
-            if (
-                exception_type == FileNotFoundError
-                or exception_type == ConnectionRefusedError
-            ):
-                raise DaemonNotRunningException
-            elif exception_type == PermissionError:
-                raise PermissionDeniedException
-            else:
-                raise UnknownErrorException
+        # try:
+        if method == "get":
+            r = self.session.get(url)
+        else:
+            r = self.session.post(url, json=data)
+        # except requests.exceptions.ConnectionError as e:
+        #     exception_type = type(e.args[0].args[1])
+        #     if (
+        #         exception_type == FileNotFoundError
+        #         or exception_type == ConnectionRefusedError
+        #     ):
+        #         raise DaemonNotRunningException
+        #     elif exception_type == PermissionError:
+        #         raise PermissionDeniedException
+        #     else:
+        #         raise UnknownErrorException
 
         if r.status_code == 200:
             obj = json.loads(r.text)

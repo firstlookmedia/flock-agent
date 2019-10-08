@@ -165,7 +165,7 @@ class DataPage(QtWidgets.QWizardPage):
         # Try registering the URL
         name = self.name_edit.text()
         server_url = self.server_url_edit.text()
-        if self.c.gui.register_server(server_url, name):
+        if self.c.daemon.register_server(server_url, name):
             self.server_label.setText(
                 "Success! Flock will share data with this server:"
             )
@@ -356,7 +356,7 @@ class Onboarding(QtWidgets.QWizard):
 
             # Automatically enable the twigs, if checkbox was checked
             if automatically_enable_twigs:
-                for twig_id in self.c.settings.get_undecided_twig_ids():
+                for twig_id in self.c.daemon.get_undecided_twig_ids():
                     self.c.daemon.enable_twig(twig_id)
 
         self.finished.emit()

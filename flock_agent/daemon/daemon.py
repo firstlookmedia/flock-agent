@@ -160,7 +160,7 @@ class Daemon:
             try:
                 self.api_client.register(name)
                 self.api_client.ping()
-                return True
+                return response_object()
             except PermissionDenied:
                 return response_object(error="Permission denied")
             except BadStatusCode as e:
@@ -174,8 +174,8 @@ class Daemon:
             except ConnectionError:
                 return response_object(error="Error connecting to server")
 
-            # Success
-            return response_object()
+            # Anything else was an unknown failure
+            return response_object(error="Unknown error")
 
         def refresh_osqueryd(request):
             self.osquery.refresh_osqueryd()
