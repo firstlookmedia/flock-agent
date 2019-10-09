@@ -178,8 +178,8 @@ class GuiCommon:
             # Enable service
             subprocess.run(
                 [
-                    "/usr/sbin/beesu",
-                    self.c.get_resource_path("autostart/linux/enable_service.sh"),
+                    "/usr/bin/pkexec",
+                    self.c.get_resource_path("autostart/linux/enable_daemon"),
                 ]
             )
             # Tell user to restart
