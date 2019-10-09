@@ -25,6 +25,11 @@ from .api_client import (
 class Daemon:
     def __init__(self, common):
         self.c = common
+
+        # Daemon's log
+        os.makedirs("/var/log/flock-agent", exist_ok=True)
+        self.c.log_filename = '/var/log/flock-agent/log'
+
         self.c.log("Daemon", "__init__")
 
         self.osquery = Osquery(common)
