@@ -64,7 +64,6 @@ class Daemon:
                 "gateway_token"
             ):
                 # Submit osquery logs
-                self.c.log("Daemon", "submit_loop", "Submitting osquery logs")
                 try:
                     self.osquery.submit_logs()
                 except Exception as e:

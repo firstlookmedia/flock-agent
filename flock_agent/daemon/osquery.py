@@ -163,8 +163,6 @@ class Osquery(object):
         If there are new osquery result logs, forward them to the Flock server and
         truncate the result file.
         """
-        self.c.log("Osquery", "submit_logs")
-
         # Keep track of the biggest timestamp we see
         biggest_timestamp = self.c.global_settings.get("last_osquery_result_timestamp")
 
@@ -176,6 +174,8 @@ class Osquery(object):
             with open(self.results_filename, "r") as results_file:
                 lines = results_file.readlines()
                 if len(lines) > 0:
+                    self.c.log("Osquery", "submit_logs", "{} lines".format(len(lines)))
+
                     # Start an API client
                     api_client = FlockApiClient(self.c)
                     try:
