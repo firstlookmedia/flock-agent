@@ -2,6 +2,7 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from .tabs import HomebrewTab, HealthTab, TwigsTab, SettingsTab
+from .daemon_client import DaemonNotRunningException, PermissionDeniedException
 
 from ..common import Platform
 
@@ -103,17 +104,24 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.tabs.removeTab(homebrew_tab_index)
 
         # Only show data or opt-in tabs if using a server
-        if self.c.daemon.get("use_server"):
-            data_tab_should_show = len(self.c.daemon.get_decided_twig_ids()) > 0
-            if data_tab_should_show:
-                # In macOS, Data tab index is 1 because Health is always 0, but in Linux it's 0
-                if Platform.current() == Platform.MACOS:
-                    self.tabs.insertTab(1, self.data_tab, "Data")
-                else:
-                    self.tabs.insertTab(0, self.data_tab, "Data")
-            opt_in_tab_should_show = len(self.c.daemon.get_undecided_twig_ids()) > 0
-            if opt_in_tab_should_show:
-                self.tabs.insertTab(0, self.opt_in_tab, "Opt-In")
+        try:
+            if self.c.daemon.get("use_server"):
+                data_tab_should_show = len(self.c.daemon.get_decided_twig_ids()) > 0
+                if data_tab_should_show:
+                    # In macOS, Data tab index is 1 because Health is always 0, but in Linux it's 0
+                    if Platform.current() == Platform.MACOS:
+                        self.tabs.insertTab(1, self.data_tab, "Data")
+                    else:
+                        self.tabs.insertTab(0, self.data_tab, "Data")
+                opt_in_tab_should_show = len(self.c.daemon.get_undecided_twig_ids()) > 0
+                if opt_in_tab_should_show:
+                    self.tabs.insertTab(0, self.opt_in_tab, "Opt-In")
+        except DaemonNotRunningException:
+            self.c.gui.daemon_not_running()
+            return
+        except PermissionDeniedException:
+            self.c.gui.daemon_permission_denied()
+            return
 
         if Platform.current() == Platform.MACOS:
             # Only show homebrew tab if there are homebrew updates available
@@ -161,8 +169,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.raise_()
 
     def update_use_server(self, active_tab="settings"):
-        use_server = self.c.daemon.get("use_server")
-        self.c.daemon.refresh_osqueryd()
+        try:
+            # Either enable or disable osqueryd
+            self.c.daemon.refresh_osqueryd()
+        except DaemonNotRunningException:
+            self.c.gui.daemon_not_running()
+            return
+        except PermissionDeniedException:
+            self.c.gui.daemon_permission_denied()
+            return
 
         # Either show or hide the opt-in and data tabs
         self.update_ui(active_tab)

@@ -2,6 +2,7 @@
 import os
 from PyQt5 import QtCore, QtWidgets, QtGui
 
+from .daemon_client import DaemonNotRunningException, PermissionDeniedException
 from ..common import Platform
 
 
@@ -165,22 +166,27 @@ class DataPage(QtWidgets.QWizardPage):
         # Try registering the URL
         name = self.name_edit.text()
         server_url = self.server_url_edit.text()
-        if self.c.daemon.register_server(server_url, name):
-            self.server_label.setText(
-                "Success! Flock will share data with this server:"
-            )
-            self.server_url_edit.hide()
-            self.server_url_label.setText(server_url)
-            self.server_url_label.show()
-            self.server_button.hide()
+        try:
+            if self.c.daemon.register_server(server_url, name):
+                self.server_label.setText(
+                    "Success! Flock will share data with this server:"
+                )
+                self.server_url_edit.hide()
+                self.server_url_label.setText(server_url)
+                self.server_url_label.show()
+                self.server_button.hide()
 
-            self.is_registered = True
-            self.completeChanged.emit()
+                self.is_registered = True
+                self.completeChanged.emit()
 
-        else:
-            self.server_button.setEnabled(True)
-            self.server_button.setText("Connect")
-            self.name_edit.setEnabled(True)
+            else:
+                self.server_button.setEnabled(True)
+                self.server_button.setText("Connect")
+                self.name_edit.setEnabled(True)
+        except DaemonNotRunningException:
+            self.c.gui.daemon_not_running()
+        except PermissionDeniedException:
+            self.c.gui.daemon_permission_denied()
 
 
 class HomebrewPage(QtWidgets.QWizardPage):
@@ -345,19 +351,26 @@ class Onboarding(QtWidgets.QWizard):
 
         # Save global settings
         use_server = self.server_page.use_server_yes.isChecked()
-        self.c.daemon.set("use_server", use_server)
-        if use_server:
-            # gateway_url and gateway_token were saved when registering
-            automatically_enable_twigs = (
-                self.data_page.automatically_enable_twigs_checkbox.checkState()
-                == QtCore.Qt.CheckState.Checked
-            )
-            self.c.daemon.set("automatically_enable_twigs", automatically_enable_twigs)
+        try:
+            self.c.daemon.set("use_server", use_server)
+            if use_server:
+                # gateway_url and gateway_token were saved when registering
+                automatically_enable_twigs = (
+                    self.data_page.automatically_enable_twigs_checkbox.checkState()
+                    == QtCore.Qt.CheckState.Checked
+                )
+                self.c.daemon.set("automatically_enable_twigs", automatically_enable_twigs)
 
-            # Automatically enable the twigs, if checkbox was checked
-            if automatically_enable_twigs:
-                for twig_id in self.c.daemon.get_undecided_twig_ids():
-                    self.c.daemon.enable_twig(twig_id)
+                # Automatically enable the twigs, if checkbox was checked
+                if automatically_enable_twigs:
+                    for twig_id in self.c.daemon.get_undecided_twig_ids():
+                        self.c.daemon.enable_twig(twig_id)
+        except DaemonNotRunningException:
+            self.c.gui.daemon_not_running()
+            return
+        except PermissionDeniedException:
+            self.c.gui.daemon_permission_denied()
+            return
 
         self.finished.emit()
 

@@ -2,6 +2,7 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from ..twigs import TwigView
+from ..daemon_client import DaemonNotRunningException, PermissionDeniedException
 
 
 class TwigsTab(QtWidgets.QWidget):
@@ -94,10 +95,17 @@ class TwigsTab(QtWidgets.QWidget):
             self.twig_views.remove(twig_view)
 
         # Get list of twig ids
-        if self.mode == "opt-in":
-            twig_ids = self.c.daemon.get_undecided_twig_ids()
-        else:
-            twig_ids = self.c.daemon.get_decided_twig_ids()
+        try:
+            if self.mode == "opt-in":
+                twig_ids = self.c.daemon.get_undecided_twig_ids()
+            else:
+                twig_ids = self.c.daemon.get_decided_twig_ids()
+        except DaemonNotRunningException:
+            self.c.gui.daemon_not_running()
+            return
+        except PermissionDeniedException:
+            self.c.gui.daemon_permission_denied()
+            return
 
         # Add them
         for twig_id in reversed(twig_ids):
@@ -109,31 +117,45 @@ class TwigsTab(QtWidgets.QWidget):
         if self.mode == "opt-in":
             self.c.log("TwigsTab ({})".format(self.mode), "clicked_enable_all_button")
 
-            if (
-                self.automatically_enable_twigs_checkbox.checkState()
-                == QtCore.Qt.CheckState.Checked
-            ):
-                self.c.log(
-                    "TwigsTab ({})".format(self.mode),
-                    "clicked_enable_all_button",
-                    "automatically_enable_twigs=True",
-                )
-                self.c.daemon.set("automatically_enable_twigs", True)
+            try:
+                if (
+                    self.automatically_enable_twigs_checkbox.checkState()
+                    == QtCore.Qt.CheckState.Checked
+                ):
+                    self.c.log(
+                        "TwigsTab ({})".format(self.mode),
+                        "clicked_enable_all_button",
+                        "automatically_enable_twigs=True",
+                    )
+                    self.c.daemon.set("automatically_enable_twigs", True)
 
-            for twig_id in self.c.daemon.get_undecided_twig_ids():
-                self.c.daemon.enable_twig(twig_id)
-            self.c.daemon.refresh_osqueryd()
+                for twig_id in self.c.daemon.get_undecided_twig_ids():
+                    self.c.daemon.enable_twig(twig_id)
+                self.c.daemon.refresh_osqueryd()
+            except DaemonNotRunningException:
+                self.c.gui.daemon_not_running()
+                return
+            except PermissionDeniedException:
+                self.c.gui.daemon_permission_denied()
+                return
 
             self.refresh.emit(self.mode)
 
     def clicked_apply_button(self):
         self.c.log("TwigsTab ({})".format(self.mode), "clicked_apply_button")
 
-        for twig_view in self.twig_views:
-            if twig_view.enabled_status == "enabled":
-                self.c.daemon.enable_twig(twig_view.twig_id)
-            elif twig_view.enabled_status == "disabled":
-                self.c.daemon.disable_twig(twig_view.twig_id)
-        self.c.daemon.refresh_osqueryd()
+        try:
+            for twig_view in self.twig_views:
+                if twig_view.enabled_status == "enabled":
+                    self.c.daemon.enable_twig(twig_view.twig_id)
+                elif twig_view.enabled_status == "disabled":
+                    self.c.daemon.disable_twig(twig_view.twig_id)
+            self.c.daemon.refresh_osqueryd()
+        except DaemonNotRunningException:
+            self.c.gui.daemon_not_running()
+            return
+        except PermissionDeniedException:
+            self.c.gui.daemon_permission_denied()
+            return
 
         self.refresh.emit(self.mode)

@@ -79,13 +79,10 @@ class Bootstrap(object):
         try:
             self.c.daemon.ping()
         except DaemonNotRunningException:
-            # TODO: actually start the daemon
-            message = "<b>Flock Agent daemon is not running.</b>"
-            Alert(self.c, message).launch()
+            self.c.gui.daemon_not_running()
             return False
         except PermissionDeniedException:
-            message = "<b>Permission denied.</b><br><br>Sorry, you must have admin rights on your computer to configure Flock Agent."
-            Alert(self.c, message).launch()
+            self.c.gui.daemon_permission_denied()
             return False
 
         self.c.log("Bootstrap", "go", "Bootstrap complete")

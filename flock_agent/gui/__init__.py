@@ -15,7 +15,7 @@ def main(common):
     app.setQuitOnLastWindowClosed(False)
 
     # Attach the GuiCommon and DaemonClient objects to Common
-    common.gui = GuiCommon(common)
+    common.gui = GuiCommon(common, app)
     common.daemon = DaemonClient(common)
 
     # Run the bootstrap sequence

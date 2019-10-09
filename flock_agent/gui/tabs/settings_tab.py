@@ -2,6 +2,7 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from ..gui_common import Alert, HidableSpacer
+from ..daemon_client import DaemonNotRunningException, PermissionDeniedException
 from ...common import Platform
 
 
@@ -135,76 +136,81 @@ class SettingsTab(QtWidgets.QWidget):
     def update_ui(self):
         self.c.log("SettingsTab", "update_ui")
 
-        # Determine server status
-        if self.c.daemon.get("gateway_url") and self.c.daemon.get("gateway_token"):
-            self.status = self.STATUS_REGISTERED
-        else:
-            self.status = self.STATUS_NOT_REGISTERED
+        try:
+            # Determine server status
+            if self.c.daemon.get("gateway_url") and self.c.daemon.get("gateway_token"):
+                self.status = self.STATUS_REGISTERED
+            else:
+                self.status = self.STATUS_NOT_REGISTERED
 
-        # Use server checkbox
-        if self.c.daemon.get("use_server"):
-            self.use_server_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
-            self.server_settings_group.show()
-            self.server_settings_group_spacer.show()
-        else:
-            self.use_server_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
-            self.server_settings_group.hide()
-            self.server_settings_group_spacer.hide()
+            # Use server checkbox
+            if self.c.daemon.get("use_server"):
+                self.use_server_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
+                self.server_settings_group.show()
+                self.server_settings_group_spacer.show()
+            else:
+                self.use_server_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
+                self.server_settings_group.hide()
+                self.server_settings_group_spacer.hide()
 
-        # Not registered yet
-        self.server_label.show()
-        if self.status == self.STATUS_NOT_REGISTERED:
-            self.server_name_label.show()
-            self.server_name_edit.show()
-            self.server_label.setText(
-                "What's the address of the server you will send data to?"
-            )
-            self.server_url_edit.show()
-            self.server_url_label.hide()
-            self.server_button.show()
-            self.server_button.setEnabled(True)
-            self.server_button.setText("Connect")
+            # Not registered yet
+            self.server_label.show()
+            if self.status == self.STATUS_NOT_REGISTERED:
+                self.server_name_label.show()
+                self.server_name_edit.show()
+                self.server_label.setText(
+                    "What's the address of the server you will send data to?"
+                )
+                self.server_url_edit.show()
+                self.server_url_label.hide()
+                self.server_button.show()
+                self.server_button.setEnabled(True)
+                self.server_button.setText("Connect")
 
-        elif self.status == self.STATUS_REGISTERED:
-            self.server_name_label.hide()
-            self.server_name_edit.hide()
-            self.server_label.setText("You're sending data to this server:")
-            self.server_url_edit.hide()
-            self.server_url_label.setText(self.c.daemon.get("gateway_url"))
-            self.server_url_label.show()
-            self.server_button.hide()
+            elif self.status == self.STATUS_REGISTERED:
+                self.server_name_label.hide()
+                self.server_name_edit.hide()
+                self.server_label.setText("You're sending data to this server:")
+                self.server_url_edit.hide()
+                self.server_url_label.setText(self.c.daemon.get("gateway_url"))
+                self.server_url_label.show()
+                self.server_button.hide()
 
-        # Automatically opt-in checkbox
-        self.automatically_enable_twigs_checkbox.show()
-        if self.c.daemon.get("automatically_enable_twigs"):
-            self.automatically_enable_twigs_checkbox.setCheckState(
-                QtCore.Qt.CheckState.Checked
-            )
-        else:
-            self.automatically_enable_twigs_checkbox.setCheckState(
-                QtCore.Qt.CheckState.Unchecked
-            )
-
-        if Platform.current() == Platform.MACOS:
-            # Homebrew update prompt checkbox
-            if self.c.gui.settings.get("homebrew_update_prompt"):
-                self.homebrew_update_prompt_checkbox.setCheckState(
+            # Automatically opt-in checkbox
+            self.automatically_enable_twigs_checkbox.show()
+            if self.c.daemon.get("automatically_enable_twigs"):
+                self.automatically_enable_twigs_checkbox.setCheckState(
                     QtCore.Qt.CheckState.Checked
                 )
             else:
-                self.homebrew_update_prompt_checkbox.setCheckState(
+                self.automatically_enable_twigs_checkbox.setCheckState(
                     QtCore.Qt.CheckState.Unchecked
                 )
 
-            # Homebrew autoupdate checkbox
-            if self.c.gui.settings.get("homebrew_autoupdate"):
-                self.homebrew_autoupdate_checkbox.setCheckState(
-                    QtCore.Qt.CheckState.Checked
-                )
-            else:
-                self.homebrew_autoupdate_checkbox.setCheckState(
-                    QtCore.Qt.CheckState.Unchecked
-                )
+            if Platform.current() == Platform.MACOS:
+                # Homebrew update prompt checkbox
+                if self.c.gui.settings.get("homebrew_update_prompt"):
+                    self.homebrew_update_prompt_checkbox.setCheckState(
+                        QtCore.Qt.CheckState.Checked
+                    )
+                else:
+                    self.homebrew_update_prompt_checkbox.setCheckState(
+                        QtCore.Qt.CheckState.Unchecked
+                    )
+
+                # Homebrew autoupdate checkbox
+                if self.c.gui.settings.get("homebrew_autoupdate"):
+                    self.homebrew_autoupdate_checkbox.setCheckState(
+                        QtCore.Qt.CheckState.Checked
+                    )
+                else:
+                    self.homebrew_autoupdate_checkbox.setCheckState(
+                        QtCore.Qt.CheckState.Unchecked
+                    )
+        except DaemonNotRunningException:
+            self.c.gui.daemon_not_running()
+        except PermissionDeniedException:
+            self.c.gui.daemon_permission_denied()
 
     def server_button_clicked(self):
         self.c.log("SettingsTab", "server_button_clicked")
@@ -216,7 +222,14 @@ class SettingsTab(QtWidgets.QWidget):
             # Try registering
             name = self.server_name_edit.text()
             server_url = self.server_url_edit.text()
-            self.c.daemon.register_server(server_url, name)
+            try:
+                self.c.daemon.register_server(server_url, name)
+            except DaemonNotRunningException:
+                self.c.gui.daemon_not_running()
+                return
+            except PermissionDeniedException:
+                self.c.gui.daemon_permission_denied()
+                return
 
         self.update_ui()
 
@@ -225,7 +238,14 @@ class SettingsTab(QtWidgets.QWidget):
         is_checked = (
             self.use_server_checkbox.checkState() == QtCore.Qt.CheckState.Checked
         )
-        self.c.daemon.set("use_server", is_checked)
+        try:
+            self.c.daemon.set("use_server", is_checked)
+        except DaemonNotRunningException:
+            self.c.gui.daemon_not_running()
+            return
+        except PermissionDeniedException:
+            self.c.gui.daemon_permission_denied()
+            return
         self.update_use_server.emit()
         self.update_ui()
 
@@ -235,7 +255,12 @@ class SettingsTab(QtWidgets.QWidget):
             self.automatically_enable_twigs_checkbox.checkState()
             == QtCore.Qt.CheckState.Checked
         )
-        self.c.daemon.set("automatically_enable_twigs", is_checked)
+        try:
+            self.c.daemon.set("automatically_enable_twigs", is_checked)
+        except DaemonNotRunningException:
+            self.c.gui.daemon_not_running()
+        except PermissionDeniedException:
+            self.c.gui.daemon_permission_denied()
 
     def homebrew_update_prompt_toggled(self):
         self.c.log("SettingsTab", "homebrew_update_prompt_toggled")

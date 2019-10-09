@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
 
+from .daemon_client import DaemonNotRunningException, PermissionDeniedException
 from ..twigs import twigs
 
 
@@ -76,7 +77,12 @@ class TwigView(QtWidgets.QWidget):
         TwigDialog(self.c, self.twig_id)
 
     def get_twig(self):
-        return self.c.daemon.get_twig(self.twig_id)
+        try:
+            return self.c.daemon.get_twig(self.twig_id)
+        except DaemonNotRunningException:
+            self.c.gui.daemon_not_running()
+        except PermissionDeniedException:
+            self.c.gui.daemon_permission_denied()
 
 
 class TwigDialog(QtWidgets.QDialog):
@@ -145,6 +151,8 @@ class TwigDialog(QtWidgets.QDialog):
         # Run the osquery command in a separate thread
         self.t = TwigOsqueryThread(self.c, twig_id)
         self.t.query_finished.connect(self.query_finished)
+        self.t.daemon_not_running.connect(self.daemon_not_running)
+        self.t.daemon_permission_denied.connect(self.daemon_permission_denied)
         self.t.start()
 
         self.exec_()
@@ -204,6 +212,12 @@ class TwigDialog(QtWidgets.QDialog):
 
         self.adjustSize()
 
+    def daemon_not_running(self):
+        self.c.gui.daemon_not_running()
+
+    def daemon_permission_denied(self):
+        self.c.gui.daemon_permission_denied()
+
 
 class TwigOsqueryThread(QtCore.QThread):
     """
@@ -211,6 +225,8 @@ class TwigOsqueryThread(QtCore.QThread):
     """
 
     query_finished = QtCore.pyqtSignal(list)
+    daemon_not_running = QtCore.pyqtSignal()
+    daemon_permission_denied = QtCore.pyqtSignal()
 
     def __init__(self, common, twig_id):
         super(TwigOsqueryThread, self).__init__()
@@ -220,7 +236,16 @@ class TwigOsqueryThread(QtCore.QThread):
 
     def run(self):
         self.c.log("TwigOsqueryThread", "run")
-        data = self.c.daemon.exec_twig(self.twig_id)
+
+        try:
+            data = self.c.daemon.exec_twig(self.twig_id)
+        except DaemonNotRunningException:
+            self.daemon_not_running.emit()
+            return
+        except PermissionDeniedException:
+            self.daemon_permission_denied.emit()
+            return
+
         if not data:
             data = []
         self.query_finished.emit(data)

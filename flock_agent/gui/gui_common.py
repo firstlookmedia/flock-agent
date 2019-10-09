@@ -14,8 +14,9 @@ class GuiCommon:
     Shared functionality across the GUI
     """
 
-    def __init__(self, common):
+    def __init__(self, common, app):
         self.c = common
+        self.app = app  # the Qt app
 
         # Load settings
         self.settings = Settings(self.c)
@@ -164,6 +165,27 @@ class GuiCommon:
                 }
                 """,
         }
+
+    def daemon_not_running(self):
+        """
+        Handling when the daemon isn't running
+        """
+        self.c.log("GuiCommon", "daemon_not_running")
+        # TODO: actually start the daemon
+        message = "<b>Flock Agent daemon is not running.</b>"
+        Alert(self.c, message).launch()
+        # Quit the app
+        self.app.quit()
+
+    def daemon_permission_denied(self):
+        """
+        Handling when permission to use the daemon is denied
+        """
+        self.c.log("GuiCommon", "daemon_permission_denied")
+        message = "<b>Permission denied.</b><br><br>Sorry, you must have admin rights on your computer to configure Flock Agent."
+        Alert(self.c, message).launch()
+        # Quit the app
+        self.app.exit()
 
 
 class Alert(QtWidgets.QDialog):
