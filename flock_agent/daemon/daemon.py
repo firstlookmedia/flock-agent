@@ -120,6 +120,15 @@ class Daemon:
             except:
                 return response_object(error="invalid twig_id")
 
+        async def exec_twig(request):
+            twig_id = request.match_info.get("twig_id", None)
+            try:
+                twig = self.global_settings.get_twig(twig_id)
+                data = self.osquery.exec(twig["query"])
+                return response_object(data)
+            except:
+                return response_object(error="invalid twig_id")
+
         async def enable_twig(request):
             twig_id = await request.json()
             self.global_settings.enable_twig(twig_id)
@@ -192,6 +201,7 @@ class Daemon:
         app.router.add_get("/setting/{key}", get_setting)
         app.router.add_post("/setting/{key}", set_setting)
         app.router.add_get("/twig/{twig_id}", get_twig)
+        app.router.add_get("/exec/{twig_id}", exec_twig)
         app.router.add_post("/enable_twig", enable_twig)
         app.router.add_post("/disable_twig", disable_twig)
         app.router.add_get("/decided_twig_ids", get_decided_twig_ids)

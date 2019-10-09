@@ -220,7 +220,7 @@ class TwigOsqueryThread(QtCore.QThread):
 
     def run(self):
         self.c.log("TwigOsqueryThread", "run")
-        data = self.c.osquery.exec(twigs[self.twig_id]["query"])
+        data = self.c.daemon.exec_twig(self.twig_id)
         if not data:
             data = []
         self.query_finished.emit(data)
