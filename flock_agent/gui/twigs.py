@@ -76,7 +76,7 @@ class TwigView(QtWidgets.QWidget):
         TwigDialog(self.c, self.twig_id)
 
     def get_twig(self):
-        return self.c.settings.get_twig(self.twig_id)
+        return self.c.daemon.get_twig(self.twig_id)
 
 
 class TwigDialog(QtWidgets.QDialog):

@@ -42,6 +42,10 @@ class DaemonClient:
         res = self._http_post("/setting/{}".format(key), val)
         return res["data"]
 
+    def get_twig(self, twig_id):
+        res = self._http_get("/twig/{}".format(twig_id))
+        return res["data"]
+
     def enable_twig(self, twig_id):
         res = self._http_post("/enable_twig", twig_id)
         return res["data"]

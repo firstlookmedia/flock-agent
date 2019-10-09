@@ -116,7 +116,7 @@ class GlobalSettings(object):
 
         # Fill in new twigs, and update existing twigs
         for twig_id in twigs:
-            if Platform in twigs[twig_id]["platforms"]:
+            if Platform.current() in twigs[twig_id]["platforms"]:
                 add = False
                 if twig_id in self.settings["twigs"]:
                     if (

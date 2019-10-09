@@ -113,6 +113,13 @@ class Daemon:
             self.global_settings.save()
             return response_object()
 
+        async def get_twig(request):
+            twig_id = request.match_info.get("twig_id", None)
+            try:
+                return response_object(self.global_settings.get_twig(twig_id))
+            except:
+                return response_object(error="invalid twig_id")
+
         async def enable_twig(request):
             twig_id = await request.json()
             self.global_settings.enable_twig(twig_id)
@@ -184,6 +191,7 @@ class Daemon:
         app.router.add_get("/ping", ping)
         app.router.add_get("/setting/{key}", get_setting)
         app.router.add_post("/setting/{key}", set_setting)
+        app.router.add_get("/twig/{twig_id}", get_twig)
         app.router.add_post("/enable_twig", enable_twig)
         app.router.add_post("/disable_twig", disable_twig)
         app.router.add_get("/decided_twig_ids", get_decided_twig_ids)
