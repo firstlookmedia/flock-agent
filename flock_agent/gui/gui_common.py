@@ -174,6 +174,7 @@ class GuiCommon:
         self.c.log("GuiCommon", "daemon_not_running")
         message = "<b>Flock Agent daemon is not running.</b><br><br>Click Ok to try starting it in the background. You will have to type your login password."
         if Alert(self.c, message, has_cancel_button=True).launch():
+            self.c.log("GuiCommon", "daemon_not_running", "enabling background daemon")
             # Enable service
             subprocess.run(
                 [
