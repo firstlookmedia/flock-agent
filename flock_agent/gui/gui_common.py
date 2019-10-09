@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import subprocess
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from .settings import Settings
@@ -171,9 +172,19 @@ class GuiCommon:
         Handling when the daemon isn't running
         """
         self.c.log("GuiCommon", "daemon_not_running")
-        # TODO: actually start the daemon
-        message = "<b>Flock Agent daemon is not running.</b>"
-        Alert(self.c, message).launch()
+        message = "<b>Flock Agent daemon is not running.</b><br><br>Click Ok to try starting it in the background. You will have to type your login password."
+        if Alert(self.c, message, has_cancel_button=True).launch():
+            # Enable service
+            subprocess.run(
+                [
+                    "/usr/sbin/beesu",
+                    self.c.get_resource_path("autostart/linux/enable_service.sh"),
+                ]
+            )
+            # Tell user to restart
+            message = "<b>Restart Flock Agent.</b><br><br>The daemon should be running now. Please open Flock Agent again."
+            Alert(self.c, message).launch()
+
         # Quit the app
         self.app.quit()
 

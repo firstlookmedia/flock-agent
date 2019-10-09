@@ -25,7 +25,13 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/firstlookmedia/flock-agent",
-    packages=["flock_agent", "flock_agent.gui", "flock_agent.gui.tabs"],
+    packages=[
+        "flock_agent",
+        "flock_agent.daemon",
+        "flock_agent.gui",
+        "flock_agent.gui.tabs",
+        "flock_agent.gui.requests_unixsocket",
+    ],
     data_files=[
         (
             os.path.join(sys.prefix, "share/applications"),
@@ -43,6 +49,7 @@ setuptools.setup(
             os.path.join(sys.prefix, "share/flock-agent/autostart/linux"),
             file_list("share/autostart/linux"),
         ),
+        ("/etc/systemd/system", ["install/flock-agent.service"]),
     ],
     classifiers=(
         "Development Status :: 4 - Beta",
