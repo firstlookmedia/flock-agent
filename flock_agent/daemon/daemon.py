@@ -132,11 +132,13 @@ class Daemon:
         async def enable_twig(request):
             twig_id = await request.json()
             self.global_settings.enable_twig(twig_id)
+            self.global_settings.save()
             return response_object()
 
         async def disable_twig(request):
             twig_id = await request.json()
             self.global_settings.disable_twig(twig_id)
+            self.global_settings.save()
             return response_object()
 
         def get_decided_twig_ids(request):
