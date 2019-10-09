@@ -34,6 +34,15 @@ class DaemonClient:
     def ping(self):
         self._http_get("/ping")
 
+    def shutdown(self):
+        """
+        Stop the background daemon
+        """
+        try:
+            self._http_post("/shutdown")
+        except:
+            pass
+
     def get(self, key):
         res = self._http_get("/setting/{}".format(key))
         return res["data"]

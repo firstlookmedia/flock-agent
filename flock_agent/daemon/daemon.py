@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
 import grp
 import asyncio
 import json
 from urllib.parse import urlparse
 from aiohttp import web
 from aiohttp.abc import AbstractAccessLogger
+from aiohttp.web_runner import GracefulExit
 
 from .global_settings import GlobalSettings
 from .osquery import Osquery
@@ -98,6 +100,10 @@ class Daemon:
         # Routes
         async def ping(request):
             return response_object()
+
+        async def shutdown(request):
+            self.c.log("Daemon", "http_server", "GET /shutdown, shutting down daemon")
+            raise GracefulExit()
 
         async def get_setting(request):
             key = request.match_info.get("key", None)
@@ -200,6 +206,7 @@ class Daemon:
 
         app = web.Application()
         app.router.add_get("/ping", ping)
+        app.router.add_post("/shutdown", shutdown)
         app.router.add_get("/setting/{key}", get_setting)
         app.router.add_post("/setting/{key}", set_setting)
         app.router.add_get("/twig/{twig_id}", get_twig)

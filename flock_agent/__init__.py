@@ -33,21 +33,32 @@ def main():
         dest="start_daemon",
         help="Run the background daemon",
     )
+    parser.add_argument(
+        "--stop-daemon",
+        action="store_true",
+        dest="stop_daemon",
+        help="If the background daemon is running, stop it",
+    )
     args = parser.parse_args()
 
     verbose = args.verbose
     start_daemon = args.start_daemon
+    stop_daemon = args.stop_daemon
 
     # Create the common object
     common = Common(verbose, flock_agent_version)
 
     if start_daemon:
-        # Background daemon
         if os.geteuid() != 0:
-            print("This daemon must be run as root")
+            print("This command must be run as root")
             return
-
         daemon.main(common)
+
+    elif stop_daemon:
+        if os.geteuid() != 0:
+            print("This command must be run as root")
+            return
+        daemon.stop(common)
 
     else:
         # Launch the GUI
