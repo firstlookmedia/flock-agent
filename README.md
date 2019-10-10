@@ -76,7 +76,7 @@ This will output verbose information in the Terminal about what Flock Agent is d
 
 Follow the [instructions here](./BUILD.md) run Flock Agent from the source tree.
 
-## Completely installing Flock Agent in macOS
+## Completely uninstalling Flock Agent in macOS
 
 If you installed Flock Agent using Homebrew in macOS, you can completely uninstall it with `brew cask uninstall flock-agent`.
 
