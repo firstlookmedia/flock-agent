@@ -29,7 +29,7 @@ def main():
         shutil.rmtree(dist_path)
 
     print("○ Building app bundle")
-    run(["pyinstaller", "install/pyinstaller.spec", "--clean"])
+    run(["pyinstaller", "install/macos/pyinstaller.spec", "--clean"])
     shutil.rmtree(os.path.join(dist_path, "flock-agent"))
 
     print("○ Finished: {}".format(app_path))
