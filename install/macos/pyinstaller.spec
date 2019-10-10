@@ -14,7 +14,7 @@ a = Analysis(
     ['flock-agent'],
     pathex=['.'],
     binaries=None,
-    datas=[('../share', 'share')],
+    datas=[('../../share', 'share')],
     hiddenimports=[],
     hookspath=[],
     runtime_hooks=[],
@@ -49,7 +49,7 @@ coll = COLLECT(
 app = BUNDLE(
   coll,
   name='Flock.app',
-  icon='macos/flock-agent.icns',
+  icon='flock-agent.icns',
   bundle_identifier='media.firstlook.flock_agent',
   info_plist={
       'LSUIElement': True,
