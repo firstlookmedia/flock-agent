@@ -60,7 +60,7 @@ class DaemonClient:
         return res["data"]
 
     def exec_twig(self, twig_id):
-        res = self._http_get("/exec/{}".format(twig_id))
+        res = self._http_get("/exec_twig/{}".format(twig_id))
         return res["data"]
 
     def enable_twig(self, twig_id):
@@ -81,6 +81,10 @@ class DaemonClient:
 
     def get_enabled_twig_ids(self):
         res = self._http_get("/enabled_twig_ids")
+        return res["data"]
+
+    def exec_health(self, health_item_name):
+        res = self._http_get("/exec_health/{}".format(health_item_name))
         return res["data"]
 
     def refresh_osqueryd(self):

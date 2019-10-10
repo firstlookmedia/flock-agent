@@ -21,6 +21,7 @@ from .api_client import (
     ConnectionError,
 )
 from ..common import Platform
+from ..health import health_items
 
 
 class Daemon:
@@ -175,6 +176,26 @@ class Daemon:
         async def get_enabled_twig_ids(request):
             return response_object(self.global_settings.get_enabled_twig_ids())
 
+        async def exec_health(request):
+            health_item_name = request.match_info.get("health_item_name", None)
+            query = None
+            for health_item in health_items[Platform.current()]:
+                if health_item["name"] == health_item_name:
+                    query = health_item["query"]
+                    break
+            if query:
+                try:
+                    data = self.osquery.exec(query)
+                    return response_object(data)
+                except:
+                    return response_object(error="error executing health item query")
+            else:
+                return response_object(error="invalid health_item_name")
+
+        async def refresh_osqueryd(request):
+            self.osquery.refresh_osqueryd()
+            return response_object()
+
         async def register_server(request):
             data = await request.json()
             try:
@@ -219,24 +240,21 @@ class Daemon:
             # Anything else was an unknown failure
             return response_object(error="Unknown error")
 
-        async def refresh_osqueryd(request):
-            self.osquery.refresh_osqueryd()
-            return response_object()
-
         app = web.Application()
         app.router.add_get("/ping", ping)
         app.router.add_post("/shutdown", shutdown)
         app.router.add_get("/setting/{key}", get_setting)
         app.router.add_post("/setting/{key}", set_setting)
         app.router.add_get("/twig/{twig_id}", get_twig)
-        app.router.add_get("/exec/{twig_id}", exec_twig)
+        app.router.add_get("/exec_twig/{twig_id}", exec_twig)
         app.router.add_post("/enable_twig", enable_twig)
         app.router.add_post("/disable_twig", disable_twig)
         app.router.add_get("/decided_twig_ids", get_decided_twig_ids)
         app.router.add_get("/undecided_twig_ids", get_undecided_twig_ids)
         app.router.add_get("/enabled_twig_ids", get_enabled_twig_ids)
-        app.router.add_post("/register_server", register_server)
+        app.router.add_get("/exec_health/{health_item_name}", exec_health)
         app.router.add_get("/refresh_osqueryd", refresh_osqueryd)
+        app.router.add_post("/register_server", register_server)
 
         loop = asyncio.get_event_loop()
         await loop.create_unix_server(
