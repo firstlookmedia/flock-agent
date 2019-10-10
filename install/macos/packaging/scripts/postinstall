@@ -1,3 +1,5 @@
 #!/bin/sh
+/Applications/Flock.app/Contents/Resources/share/autostart/macos/enable_daemon
+/bin/sleep 1
 /usr/bin/open -a "Flock"
 exit 0
