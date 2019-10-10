@@ -175,16 +175,41 @@ class GuiCommon:
         message = "<b>Flock Agent daemon is not running.</b><br><br>Click Ok to try starting it in the background. You will have to type your login password."
         if Alert(self.c, message, has_cancel_button=True).launch():
             self.c.log("GuiCommon", "daemon_not_running", "enabling background daemon")
-            # Enable service
-            subprocess.run(
-                [
-                    "/usr/bin/pkexec",
-                    self.c.get_resource_path("autostart/linux/enable_daemon"),
-                ]
-            )
-            # Tell user to restart
-            message = "<b>Restart Flock Agent.</b><br><br>The daemon should be running now. Please open Flock Agent again."
-            Alert(self.c, message).launch()
+            if Platform.current() == Platform.UNKNOWN:
+                # Unknown platform
+                message = "<b>Flock Agent doesn't recognize your operating system.</b><br><br>Sorry, I don't know how to start the daemon."
+                Alert(self.c, message).launch()
+            else:
+                if Platform.current() == Platform.MACOS:
+                    # Enable service
+                    p = subprocess.run(
+                        [
+                            "/usr/bin/osascript",
+                            "-e",
+                            'do shell script "{}" with administrator privileges'.format(
+                                self.c.get_resource_path(
+                                    "autostart/macos/enable_daemon"
+                                )
+                            ),
+                        ]
+                    )
+                elif Platform.current() == Platform.LINUX:
+                    # Enable service
+                    p = subprocess.run(
+                        [
+                            "/usr/bin/pkexec",
+                            self.c.get_resource_path("autostart/macos/enable_daemon"),
+                        ]
+                    )
+
+                if p.returncode == 0:
+                    # Tell user to restart
+                    message = "<b>Restart Flock Agent.</b><br><br>The daemon should be running now. Please open Flock Agent again."
+                    Alert(self.c, message).launch()
+                else:
+                    # Failed
+                    message = "<b>Starting background daemon failed.</b>"
+                    Alert(self.c, message).launch()
 
         # Quit the app
         self.app.quit()
