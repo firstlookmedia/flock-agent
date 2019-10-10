@@ -1,0 +1,3 @@
+#!/bin/sh
+/bin/cp /Applications/Flock.app/Contents/Resources/share/autostart/macos/media.firstlook.flock-agent-daemon.plist /Library/LaunchAgents
+/bin/launchctl load /Library/LaunchAgents/media.firstlook.flock-agent-daemon.plist

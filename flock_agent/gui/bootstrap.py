@@ -39,12 +39,16 @@ class Bootstrap(object):
             )
             if platform == Platform.MACOS:
                 autorun_dir = os.path.expanduser("~/Library/LaunchAgents")
-                autorun_filename = "media.firstlook.flock_agent.plist"
-                src_filename = self.c.get_resource_path(os.path.join("autostart/macos", autorun_filename))
+                autorun_filename = "media.firstlook.flock-agent.plist"
+                src_filename = self.c.get_resource_path(
+                    os.path.join("autostart/macos", autorun_filename)
+                )
             elif platform == Platform.LINUX:
                 autorun_dir = appdirs.user_config_dir("autostart")
                 autorun_filename = "autostart/linux/media.firstlook.flock-agent.desktop"
-                src_filename = self.c.get_resource_path(os.path.join("autostart/linux", autorun_filename))
+                src_filename = self.c.get_resource_path(
+                    os.path.join("autostart/linux", autorun_filename)
+                )
 
             os.makedirs(autorun_dir, exist_ok=True)
             shutil.copy(src_filename, os.path.join(autorun_dir, autorun_filename))
