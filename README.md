@@ -4,9 +4,9 @@ _**⚠️ This software is under development. It's not ready to be used in produ
 
 Flock is a privacy-preserving fleet management system. The goal of Flock is to gain visibility into a fleet of laptops while protecting the privacy of the laptop users. It achieves this by only collecting information needed to inform security decisions, and by not allowing the IT team to access arbitrary files or execute arbitrary code on the laptops they are monitoring.
 
-This is the macOS agent (Linux version [coming soon](https://github.com/firstlookmedia/flock-agent/issues/35)) that runs on endpoints, collects data, and shares it with the [Flock server](https://github.com/firstlookmedia/flock).
+Flock Agent is available for macOS and Linux. It runs on endpoints, collects data, and shares it with the [Flock server](https://github.com/firstlookmedia/flock).
 
-## Install Flock Agent
+## Install Flock Agent on macOS
 
 The simplest way to install Flock Agent, and to ensure you get automatic updates, is to use Homebrew. First [install Homebrew](https://brew.sh/) if you don't already have it. Then open the Terminal app and run:
 
@@ -21,6 +21,10 @@ brew cask install flock-agent
 If you prefer to install Flock Agent without Homebrew, download and install the latest version from the [GitHub releases](https://github.com/firstlookmedia/flock-agent/releases).
 
 Then launch Flock from `/Applications`.
+
+## Install Flock Agent in Linux
+
+Flock Agent isn't packaged for Linux yet. For now, follow the [build instructions](./BUILD.md) to build a `.deb` or `.rpm`.
 
 ## Why use Flock Agent?
 
@@ -70,7 +74,33 @@ This will output verbose information in the Terminal about what Flock Agent is d
 
 ## Building from source
 
-Follow the [instructions here](/BUILD.md) run Flock Agent from the source tree.
+Follow the [instructions here](./BUILD.md) run Flock Agent from the source tree.
+
+## Completely installing Flock Agent in macOS
+
+If you installed Flock Agent using Homebrew in macOS, you can completely uninstall it with `brew cask uninstall flock-agent`.
+
+Otherwise, run these commands to delete everything:
+
+```
+# Remove osquery
+sudo launchctl unload /Library/LaunchDaemons/com.facebook.osqueryd.plist
+sudo rm /Library/LaunchDaemons/com.facebook.osqueryd.plist
+sudo rm -rf /private/var/log/osquery
+sudo rm -rf /private/var/osquery
+sudo rm /usr/local/bin/osquery*
+sudo pkgutil --forget com.facebook.osquery
+
+# Remove Flock Agent
+sudo launchctl unload /Library/LaunchDaemons/media.firstlook.flock-agentd.plist
+sudo rm /Library/LaunchDaemons/media.firstlook.flock-agentd.plist
+sudo rm -rf /Applications/Flock.app
+sudo rm -rf /usr/local/etc/flock-agent
+sudo rm -rf /usr/local/var/lib/flock-agent
+sudo rm -rf /usr/local/var/log/flock-agent
+sudo pkgutil --forget media.firstlook.flock_agent
+rm -r ~/Library/Application\ Support/FlockAgent/
+```
 
 ## License
 
