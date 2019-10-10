@@ -10,7 +10,7 @@ pyinstaller = "*"
 
 [packages]
 requests = "*"
-aiohttp = "*"
+aiohttp = "==3.6.2"
 appdirs = "*"
 urllib3 = "*"
 pyobjc-core = "*"

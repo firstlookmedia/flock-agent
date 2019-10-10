@@ -20,6 +20,7 @@ from .api_client import (
     InvalidResponse,
     ConnectionError,
 )
+from ..common import Platform
 
 
 class Daemon:
@@ -27,8 +28,13 @@ class Daemon:
         self.c = common
 
         # Daemon's log
-        os.makedirs("/var/log/flock-agent", exist_ok=True)
-        self.c.log_filename = '/var/log/flock-agent/log'
+        if Platform.current() == Platform.MACOS:
+            log_dir = "/usr/local/var/log/flock-agent"
+        else:
+            log_dir = "/var/log/flock-agent"
+        os.makedirs(log_dir, exist_ok=True)
+        log_filename = os.path.join(log_dir, "log")
+        self.c.log_filename = log_filename
 
         self.c.log("Daemon", "__init__")
 
@@ -44,23 +50,31 @@ class Daemon:
         self.osquery.refresh_osqueryd()
 
         # Prepare the unix socket path
-        self.unix_socket_path = "/var/lib/flock-agent/socket"
-        os.makedirs("/var/lib/flock-agent", exist_ok=True)
+        if Platform.current() == Platform.MACOS:
+            lib_dir = "/usr/local/var/lib/flock-agent"
+        else:
+            lib_dir = "/var/lib/flock-agent"
+        os.makedirs(lib_dir, exist_ok=True)
+        self.unix_socket_path = os.path.join(lib_dir, "socket")
         if os.path.exists(self.unix_socket_path):
             os.remove(self.unix_socket_path)
 
-        # The socket uid will be 0 (root), and the group will be the administrator group. In debian-like
-        # distros it's the "sudo" group, and in fedora-like distros it's the "wheel" group.
-        # Other distros? PRs are welcome :).
-        if os.path.isfile("/usr/bin/apt"):
-            groupinfo = grp.getgrnam("sudo")
-            self.gid = groupinfo.gr_gid
-        elif os.path.isfile("/usr/bin/dnf") or os.path.isfile("/usr/bin/yum"):
-            groupinfo = grp.getgrnam("wheel")
+        # The socket uid will be 0 (root), and the group will be the administrator group.
+        # In macOS, this group is "admin". In debian-like distros it's "sudo", and in fedora-like
+        # distros it's the "wheel" group. Other distros? PRs are welcome :).
+        if Platform.current() == Platform.MACOS:
+            groupinfo = grp.getgrnam("admin")
             self.gid = groupinfo.gr_gid
         else:
-            # Unknown, so make the group root
-            self.gid = 0
+            if os.path.isfile("/usr/bin/apt"):
+                groupinfo = grp.getgrnam("sudo")
+                self.gid = groupinfo.gr_gid
+            elif os.path.isfile("/usr/bin/dnf") or os.path.isfile("/usr/bin/yum"):
+                groupinfo = grp.getgrnam("wheel")
+                self.gid = groupinfo.gr_gid
+            else:
+                # Unknown, so make the group root
+                self.gid = 0
 
     async def start(self):
         await asyncio.gather(self.submit_loop(), self.http_server())
@@ -152,13 +166,13 @@ class Daemon:
             self.global_settings.save()
             return response_object()
 
-        def get_decided_twig_ids(request):
+        async def get_decided_twig_ids(request):
             return response_object(self.global_settings.get_decided_twig_ids())
 
-        def get_undecided_twig_ids(request):
+        async def get_undecided_twig_ids(request):
             return response_object(self.global_settings.get_undecided_twig_ids())
 
-        def get_enabled_twig_ids(request):
+        async def get_enabled_twig_ids(request):
             return response_object(self.global_settings.get_enabled_twig_ids())
 
         async def register_server(request):
@@ -205,7 +219,7 @@ class Daemon:
             # Anything else was an unknown failure
             return response_object(error="Unknown error")
 
-        def refresh_osqueryd(request):
+        async def refresh_osqueryd(request):
             self.osquery.refresh_osqueryd()
             return response_object()
 

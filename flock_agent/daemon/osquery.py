@@ -21,12 +21,12 @@ class Osquery(object):
 
         if Platform.current() == Platform.MACOS:
             self.osqueryi_bin = "/usr/local/bin/osqueryi"
-            self.log_dir = "/usr/local/var/osquery/logs"
-            self.config_filename = os.path.join(self.dir, "osquery.conf")
+            self.lib_dir = "/usr/local/var/lib/flock-agent"
+            self.log_dir = os.path.join(self.lib_dir, "osquery_logs")
+            self.config_filename = os.path.join(self.lib_dir, "osquery.conf")
             self.results_filename = os.path.join(self.log_dir, "osqueryd.results.log")
-            self.plist_filename = os.path.expanduser(
-                "~/Library/LaunchAgents/com.facebook.osqueryd.plist"
-            )
+            self.plist_filename = "/Library/LaunchAgents/com.facebook.osqueryd.plist"
+            os.makedirs(self.lib_dir, exist_ok=True)
         else:
             self.osqueryi_bin = "/usr/bin/osqueryi"
             self.log_dir = "/var/log/osquery"

@@ -10,8 +10,12 @@ class GlobalSettings(object):
     def __init__(self, common):
         self.c = common
 
-        os.makedirs("/etc/flock-agent", exist_ok=True)
-        self.settings_filename = "/etc/flock-agent/global_settings.json"
+        if Platform.current() == Platform.MACOS:
+            etc_dir = "/usr/local/etc/flock-agent"
+        else:
+            etc_dir = "/etc/flock-agent"
+        os.makedirs(etc_dir, exist_ok=True)
+        self.settings_filename = os.path.join(etc_dir, "global_settings.json")
 
         self.c.log(
             "GlobalSettings",

@@ -3,6 +3,7 @@ import json
 import requests
 
 from .gui_common import Alert
+from ..common import Platform
 
 # requests_unixsocket is included in this repo, because it's not packaged in fedora
 from . import requests_unixsocket
@@ -29,7 +30,10 @@ class DaemonClient:
         self.c = common
 
         self.session = requests_unixsocket.Session()
-        self.unix_socket_path = "/var/lib/flock-agent/socket"
+        if Platform.current() == Platform.MACOS:
+            self.unix_socket_path = "/usr/local/var/lib/flock-agent/socket"
+        else:
+            self.unix_socket_path = "/var/lib/flock-agent/socket"
 
     def ping(self):
         self._http_get("/ping")

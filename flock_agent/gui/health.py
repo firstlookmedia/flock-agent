@@ -100,7 +100,8 @@ class HealthOsqueryThread(QtCore.QThread):
 
     def run(self):
         self.c.log("HealthOsqueryThread", "run")
-        data = self.c.osquery.exec(self.query)
+        # data = self.c.osquery.exec(self.query)
+        data = None
         if not data:
             data = []
         self.query_finished.emit(data)
