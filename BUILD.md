@@ -30,7 +30,7 @@ pipenv run ./flock-agent -v
 Here's how you build an app bundle:
 
 ```sh
-pipenv run ./install/build_app.py
+pipenv run ./install/macos/build_app.py
 ```
 
 Now you should have `dist/Flock.app`.
@@ -38,8 +38,8 @@ Now you should have `dist/Flock.app`.
 Here's how you make a `.pkg` for distribution:
 
 ```sh
-pipenv run install/build_pkg.py # this requires codesigning certificates
-pipenv run install/build_pkg.py --without-codesign # this doesn't
+pipenv run install/macos/build_pkg.py # this requires codesigning certificates
+pipenv run install/macos/build_pkg.py --without-codesign # this doesn't
 ```
 
 After making a release, you should have `dist/FlockAgent-[version].pkg`.
@@ -58,9 +58,9 @@ Here's how you run Flock Agent, without having to build a package:
 ./flock-agent -v
 ```
 
-Create a .rpm package: `./install/build_rpm.py`
+Create a .rpm package: `./install/linux/build_rpm.py`
 
-Create a .deb package: `./install/build_deb.py`
+Create a .deb package: `./install/linux/build_deb.py`
 
 # Release instructions
 

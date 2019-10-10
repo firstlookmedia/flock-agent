@@ -39,7 +39,7 @@ setuptools.setup(
         ),
         (
             os.path.join(sys.prefix, "share/icons/hicolor/64x64/apps"),
-            ["install/media.firstlook.flock-agent.png"],
+            ["install/linux/media.firstlook.flock-agent.png"],
         ),
         (
             os.path.join(sys.prefix, "share/flock-agent/images"),
@@ -49,7 +49,7 @@ setuptools.setup(
             os.path.join(sys.prefix, "share/flock-agent/autostart/linux"),
             file_list("share/autostart/linux"),
         ),
-        ("/etc/systemd/system", ["install/flock-agent.service"]),
+        ("/etc/systemd/system", ["install/linux/flock-agent.service"]),
     ],
     classifiers=(
         "Development Status :: 4 - Beta",

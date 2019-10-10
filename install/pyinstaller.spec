@@ -49,7 +49,7 @@ coll = COLLECT(
 app = BUNDLE(
   coll,
   name='Flock.app',
-  icon='flock-agent.icns',
+  icon='macos/flock-agent.icns',
   bundle_identifier='media.firstlook.flock_agent',
   info_plist={
       'LSUIElement': True,

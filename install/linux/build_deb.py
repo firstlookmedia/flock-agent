@@ -6,12 +6,16 @@ import inspect
 import subprocess
 import shutil
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
 import flock_agent
 
 version = flock_agent.flock_agent_version
 root = os.path.dirname(
-    os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    os.path.dirname(
+        os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    )
 )
 
 

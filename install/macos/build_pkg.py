@@ -11,7 +11,9 @@ import hashlib
 
 
 root = os.path.dirname(
-    os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    os.path.dirname(
+        os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    )
 )
 
 
@@ -67,8 +69,8 @@ def main():
 
     version = flock_agent.flock_agent_version
 
-    component_plist_path = os.path.join(root, "install/macos-packaging/component.plist")
-    scripts_path = os.path.join(root, "install/macos-packaging/scripts")
+    component_plist_path = os.path.join(root, "install/macos/packaging/component.plist")
+    scripts_path = os.path.join(root, "install/macos/packaging/scripts")
     component_path = os.path.join(dist_path, "FlockAgentComponent.pkg")
     pkg_path = os.path.join(dist_path, "FlockAgent-{}.pkg".format(version))
 
