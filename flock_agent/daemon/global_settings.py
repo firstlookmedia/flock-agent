@@ -162,3 +162,4 @@ class GlobalSettings(object):
         os.makedirs(self.c.appdata_path, exist_ok=True)
         with open(self.settings_filename, "w") as settings_file:
             json.dump(self.settings, settings_file, indent=4)
+        os.chmod(self.settings_filename, 0o600)
