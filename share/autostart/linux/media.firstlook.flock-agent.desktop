@@ -1,0 +1,9 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Flock
+Comment=Join a privacy-preserving, centrally-managed Flock fleet
+Exec=/usr/bin/flock-agent
+Terminal=false
+Type=Application
+Icon=media.firstlook.flock-agent
+Categories=Network;

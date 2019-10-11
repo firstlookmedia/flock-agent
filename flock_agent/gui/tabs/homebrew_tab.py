@@ -12,21 +12,31 @@ class HomebrewTab(QtWidgets.QWidget):
         self.c = common
         self.systray = systray
 
-        self.c.log('HomebrewTab', '__init__')
+        self.c.log("HomebrewTab", "__init__")
 
         self.should_show = False
         self.outdated_casks = []
         self.outdated_formulae = []
 
         # Widgets
-        self.casks_label = QtWidgets.QLabel("Updates are available for the following macOS apps:")
+        self.casks_label = QtWidgets.QLabel(
+            "Updates are available for the following macOS apps:"
+        )
         self.casks_list_label = QtWidgets.QLabel()
-        self.casks_list_label.setStyleSheet(self.c.gui.css['HomebrewView package_names'])
-        self.formulae_label = QtWidgets.QLabel("Updates are available for the following software packages:")
+        self.casks_list_label.setStyleSheet(
+            self.c.gui.css["HomebrewView package_names"]
+        )
+        self.formulae_label = QtWidgets.QLabel(
+            "Updates are available for the following software packages:"
+        )
         self.formulae_list_label = QtWidgets.QLabel()
-        self.formulae_list_label.setStyleSheet(self.c.gui.css['HomebrewView package_names'])
+        self.formulae_list_label.setStyleSheet(
+            self.c.gui.css["HomebrewView package_names"]
+        )
 
-        instructions_label = QtWidgets.QLabel('Click "Install Updates" to open a Terminal and install updates using Homebrew.\nYou may have to type your macOS password if asked.')
+        instructions_label = QtWidgets.QLabel(
+            'Click "Install Updates" to open a Terminal and install updates using Homebrew.\nYou may have to type your macOS password if asked.'
+        )
 
         # Buttons
         install_updates_button = QtWidgets.QPushButton("Install Updates")
@@ -50,7 +60,7 @@ class HomebrewTab(QtWidgets.QWidget):
         # Check for homebrew updates once every 3 hours
         self.update_check_timer = QtCore.QTimer()
         self.update_check_timer.timeout.connect(self.update_check)
-        self.update_check_timer.start(10800000) # 3 hours
+        self.update_check_timer.start(10800000)  # 3 hours
 
     def update_check(self):
         self.homebrew_thread = HomebrewUpdateCheckThread(self.c)
@@ -59,7 +69,13 @@ class HomebrewTab(QtWidgets.QWidget):
         self.homebrew_thread.start()
 
     def updates_available(self, outdated_formulae, outdated_casks):
-        self.c.log('HomebrewTab', 'updates_available', 'outdated_formulae: {}, outdated_casks: {}'.format(outdated_formulae, outdated_casks))
+        self.c.log(
+            "HomebrewTab",
+            "updates_available",
+            "outdated_formulae: {}, outdated_casks: {}".format(
+                outdated_formulae, outdated_casks
+            ),
+        )
 
         self.outdated_casks = outdated_casks
         self.outdated_formulae = outdated_formulae
@@ -73,7 +89,7 @@ class HomebrewTab(QtWidgets.QWidget):
             else:
                 self.casks_label.show()
                 self.casks_list_label.show()
-                self.casks_list_label.setText('\n'.join(outdated_casks))
+                self.casks_list_label.setText("\n".join(outdated_casks))
 
             if len(outdated_formulae) == 0:
                 self.formulae_label.hide()
@@ -81,18 +97,18 @@ class HomebrewTab(QtWidgets.QWidget):
             else:
                 self.formulae_label.show()
                 self.formulae_list_label.show()
-                self.formulae_list_label.setText('\n'.join(outdated_formulae))
+                self.formulae_list_label.setText("\n".join(outdated_formulae))
         else:
             self.should_show = False
 
         self.update_homebrew_tab.emit()
 
     def installing_updates(self, package_list):
-        self.c.log('HomebrewTab', 'homebrew_installing_updates', package_list)
-        self.systray.showMessage("Installing Homebrew Updates", '\n'.join(package_list))
+        self.c.log("HomebrewTab", "homebrew_installing_updates", package_list)
+        self.systray.showMessage("Installing Homebrew Updates", "\n".join(package_list))
 
     def clicked_install_updates_button(self):
-        self.c.log('HomebrewTab', 'clicked_install_updates_button')
+        self.c.log("HomebrewTab", "clicked_install_updates_button")
 
         self.should_show = False
         self.update_homebrew_tab.emit()
@@ -105,13 +121,19 @@ class HomebrewTab(QtWidgets.QWidget):
         cmds.append("exit")
         final_command = " && ".join(cmds)
 
-        subprocess.run('osascript -e \'tell application "Terminal" to do script "{}"\''.format(final_command), shell=True)
+        subprocess.run(
+            'osascript -e \'tell application "Terminal" to do script "{}"\''.format(
+                final_command
+            ),
+            shell=True,
+        )
 
 
 class HomebrewUpdateCheckThread(QtCore.QThread):
     """
     Check for Homebrew updates
     """
+
     updates_available = QtCore.pyqtSignal(list, list)
     installing_updates = QtCore.pyqtSignal(list)
 
@@ -119,22 +141,26 @@ class HomebrewUpdateCheckThread(QtCore.QThread):
         super(HomebrewUpdateCheckThread, self).__init__()
         self.c = common
 
-        self.homebrew_path = '/usr/local/bin/brew'
+        self.homebrew_path = "/usr/local/bin/brew"
 
     def run(self):
-        self.c.log('HomebrewUpdateCheckThread', 'run')
+        self.c.log("HomebrewUpdateCheckThread", "run")
 
         # If homebrew is not installed, skip
         if not os.path.exists(self.homebrew_path):
-            self.c.log('HomebrewUpdateCheckThread', 'run', 'Homebrew is not installed, returning early')
+            self.c.log(
+                "HomebrewUpdateCheckThread",
+                "run",
+                "Homebrew is not installed, returning early",
+            )
             return
 
-        homebrew_update_prompt = self.c.settings.get('homebrew_update_prompt')
-        homebrew_autoupdate = self.c.settings.get('homebrew_autoupdate')
+        homebrew_update_prompt = self.c.settings.get("homebrew_update_prompt")
+        homebrew_autoupdate = self.c.settings.get("homebrew_autoupdate")
 
         if homebrew_update_prompt or homebrew_autoupdate:
             # Update homebrew taps
-            self.exec([self.homebrew_path, 'update'])
+            self.exec([self.homebrew_path, "update"])
 
         outdated_formulae = []
         outdated_casks = []
@@ -143,26 +169,30 @@ class HomebrewUpdateCheckThread(QtCore.QThread):
         # Also, we need to check for these if we will autoupdate
         if homebrew_update_prompt or homebrew_autoupdate:
             # See if there are any outdated formulae
-            p = self.exec([self.homebrew_path, 'outdated'])
+            p = self.exec([self.homebrew_path, "outdated"])
             if p:
                 stdout = p.stdout.decode().strip()
-                if stdout != '':
-                    outdated_formulae = [package.split(' ')[0] for package in stdout.split('\n')]
+                if stdout != "":
+                    outdated_formulae = [
+                        package.split(" ")[0] for package in stdout.split("\n")
+                    ]
 
             if len(outdated_formulae) > 0 and homebrew_autoupdate:
                 # Upgrade those formulae
                 self.installing_updates.emit(outdated_formulae)
-                self.exec([self.homebrew_path, 'upgrade'])
+                self.exec([self.homebrew_path, "upgrade"])
                 outdated_formulae = []
 
         # If we want to prompt for updates, check for outdated casks
         if homebrew_update_prompt:
             # See if there are any outdated casks
-            p = self.exec([self.homebrew_path, 'cask', 'outdated'])
+            p = self.exec([self.homebrew_path, "cask", "outdated"])
             if p:
                 stdout = p.stdout.decode().strip()
-                if stdout != '':
-                    outdated_casks = [package.split(' ')[0] for package in stdout.split('\n')]
+                if stdout != "":
+                    outdated_casks = [
+                        package.split(" ")[0] for package in stdout.split("\n")
+                    ]
 
             # Trigger the update prompt
             # Note that if autodates are enabled, outdated_formulae should be a blank list
@@ -170,9 +200,19 @@ class HomebrewUpdateCheckThread(QtCore.QThread):
 
     def exec(self, command):
         try:
-            self.c.log('HomebrewUpdateCheckThread', 'exec', 'Executing: {}'.format(' '.join(command)), always=True)
+            self.c.log(
+                "HomebrewUpdateCheckThread",
+                "exec",
+                "Executing: {}".format(" ".join(command)),
+                always=True,
+            )
             p = subprocess.run(command, capture_output=True, check=True)
             return p
         except subprocess.CalledProcessError:
-            self.c.log('HomebrewUpdateCheckThread', 'exec', 'Error running command', always=True)
+            self.c.log(
+                "HomebrewUpdateCheckThread",
+                "exec",
+                "Error running command",
+                always=True,
+            )
             return False

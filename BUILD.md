@@ -1,4 +1,13 @@
-# Build instructions
+# Build Flock Agent
+
+Start by getting the source code:
+
+```sh
+git clone https://github.com/firstlookmedia/flock-agent.git
+cd flock-agent
+```
+
+## macOS
 
 Install Xcode from the Mac App Store. Once it's installed, run it for the first time to set it up. Also, run this to make sure command line tools are installed: `xcode-select --install`. And finally, open Xcode, go to Preferences > Locations, and make sure under Command Line Tools you select an installed version from the dropdown. (This is required for installing Qt5.)
 
@@ -6,22 +15,22 @@ Download and install Python 3.7.4 from https://www.python.org/downloads/release/
 
 Install Qt 5.13.0 for macOS from https://www.qt.io/offline-installers. I downloaded `qt-opensource-mac-x64-5.13.0.dmg`. In the installer, you can skip making an account, and all you need is `Qt` > `Qt 5.13.0` > `macOS`.
 
-Now install some python dependencies with pip (note, there's issues building a .app if you install this in a virtualenv):
+If you don't have it already, install pipenv (`pip3 install --user pipenv`). Then install dependencies:
 
 ```sh
-pip3 install -r install/requirements.txt
+pipenv install
 ```
 
 Here's how you run Flock Agent, without having to build an app bundle:
 
 ```sh
-./flock-agent -v
+pipenv run ./flock-agent -v
 ```
 
 Here's how you build an app bundle:
 
 ```sh
-./install/build_app.py
+pipenv run ./install/macos/build_app.py
 ```
 
 Now you should have `dist/Flock.app`.
@@ -29,11 +38,29 @@ Now you should have `dist/Flock.app`.
 Here's how you make a `.pkg` for distribution:
 
 ```sh
-install/build_pkg.py # this requires codesigning certificates
-install/build_pkg.py --without-codesign # this doesn't
+pipenv run install/macos/build_pkg.py # this requires codesigning certificates
+pipenv run install/macos/build_pkg.py --without-codesign # this doesn't
 ```
 
 After making a release, you should have `dist/FlockAgent-[version].pkg`.
+
+## Linux
+
+Install the needed dependencies:
+
+For Fedora-like distros: `dnf install -y rpm-build python3-qt5 python3-requests python3-appdirs python3-aiohttp`
+
+For Debian-like distros: `sudo apt install -y build-essential fakeroot python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp`
+
+Here's how you run Flock Agent, without having to build a package:
+
+```sh
+./flock-agent -v
+```
+
+Create a .rpm package: `./install/linux/build_rpm.py`
+
+Create a .deb package: `./install/linux/build_deb.py`
 
 # Release instructions
 

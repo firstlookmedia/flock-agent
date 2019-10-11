@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
 
+from .daemon_client import DaemonNotRunningException, PermissionDeniedException
 from ..twigs import twigs
 
 
@@ -8,29 +9,30 @@ class TwigView(QtWidgets.QWidget):
     """
     The view of an individual twig
     """
+
     def __init__(self, common, twig_id):
         super(TwigView, self).__init__()
         self.c = common
         self.twig_id = twig_id
 
         # Set the initial enabled status from settings
-        self.enabled_status = self.get_twig()['enabled']
+        self.enabled_status = self.get_twig()["enabled"]
 
         # Widgets
-        self.enabled_checkbox = QtWidgets.QCheckBox(twigs[twig_id]['name'])
-        if self.enabled_status == 'undecided':
+        self.enabled_checkbox = QtWidgets.QCheckBox(twigs[twig_id]["name"])
+        if self.enabled_status == "undecided":
             self.enabled_checkbox.setTristate(True)
         else:
             self.enabled_checkbox.setTristate(False)
-        self.enabled_checkbox.setStyleSheet(self.c.gui.css['TwigView enabled_checkbox'])
+        self.enabled_checkbox.setStyleSheet(self.c.gui.css["TwigView enabled_checkbox"])
         self.enabled_checkbox.stateChanged.connect(self.toggle_enabled)
 
-        description_label = QtWidgets.QLabel(twigs[twig_id]['description'])
+        description_label = QtWidgets.QLabel(twigs[twig_id]["description"])
         description_label.setWordWrap(True)
 
-        details_button = QtWidgets.QPushButton('Details')
+        details_button = QtWidgets.QPushButton("Details")
         details_button.setFlat(True)
-        details_button.setStyleSheet(self.c.gui.css['link_button'])
+        details_button.setStyleSheet(self.c.gui.css["link_button"])
         details_button.clicked.connect(self.clicked_details_button)
 
         # Layout
@@ -52,22 +54,22 @@ class TwigView(QtWidgets.QWidget):
         self.update_ui()
 
     def update_ui(self):
-        if self.enabled_status == 'enabled':
+        if self.enabled_status == "enabled":
             self.enabled_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
-        elif self.enabled_status == 'disabled':
+        elif self.enabled_status == "disabled":
             self.enabled_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
         else:
             self.enabled_checkbox.setCheckState(QtCore.Qt.CheckState.PartiallyChecked)
 
     def toggle_enabled(self, state):
         if state == QtCore.Qt.CheckState.Checked:
-            self.enabled_status = 'enabled'
+            self.enabled_status = "enabled"
             self.enabled_checkbox.setTristate(False)
         elif state == QtCore.Qt.CheckState.Unchecked:
-            self.enabled_status = 'disabled'
+            self.enabled_status = "disabled"
             self.enabled_checkbox.setTristate(False)
         else:
-            self.enabled_status = 'undecided'
+            self.enabled_status = "undecided"
             self.enabled_checkbox.setTristate(True)
         self.update_ui()
 
@@ -75,55 +77,61 @@ class TwigView(QtWidgets.QWidget):
         TwigDialog(self.c, self.twig_id)
 
     def get_twig(self):
-        return self.c.settings.get_twig(self.twig_id)
+        try:
+            return self.c.daemon.get_twig(self.twig_id)
+        except DaemonNotRunningException:
+            self.c.gui.daemon_not_running()
+        except PermissionDeniedException:
+            self.c.gui.daemon_permission_denied()
 
 
 class TwigDialog(QtWidgets.QDialog):
     """
     A dialog box showing details about a twig
     """
+
     def __init__(self, common, twig_id):
         super(TwigDialog, self).__init__()
         self.c = common
         self.twig_id = twig_id
 
-        self.c.log('TwigDialog', '__init__', twig_id)
+        self.c.log("TwigDialog", "__init__", twig_id)
 
-        self.setWindowTitle('Details of: {}'.format(twigs[self.twig_id]['name']))
+        self.setWindowTitle("Details of: {}".format(twigs[self.twig_id]["name"]))
         self.setWindowIcon(self.c.gui.icon)
         self.setModal(True)
 
         self.setMinimumWidth(500)
 
-        name_label = QtWidgets.QLabel(twigs[twig_id]['name'])
-        name_label.setStyleSheet(self.c.gui.css['TwigDialog name_label'])
+        name_label = QtWidgets.QLabel(twigs[twig_id]["name"])
+        name_label.setStyleSheet(self.c.gui.css["TwigDialog name_label"])
 
         interval_label = QtWidgets.QLabel(self.get_interval_string())
-        interval_label.setStyleSheet(self.c.gui.css['TwigDialog interval_label'])
+        interval_label.setStyleSheet(self.c.gui.css["TwigDialog interval_label"])
 
-        description_label = QtWidgets.QLabel(twigs[twig_id]['description'])
+        description_label = QtWidgets.QLabel(twigs[twig_id]["description"])
         description_label.setWordWrap(True)
-        description_label.setStyleSheet(self.c.gui.css['TwigDialog description_label'])
+        description_label.setStyleSheet(self.c.gui.css["TwigDialog description_label"])
 
-        osquery_label = QtWidgets.QLabel(twigs[twig_id]['query'])
-        osquery_label.setStyleSheet(self.c.gui.css['TwigDialog osquery_label'])
+        osquery_label = QtWidgets.QLabel(twigs[twig_id]["query"])
+        osquery_label.setStyleSheet(self.c.gui.css["TwigDialog osquery_label"])
         osquery_label.setWordWrap(True)
         osquery_layout = QtWidgets.QHBoxLayout()
         osquery_layout.addWidget(osquery_label)
         osquery_groupbox = QtWidgets.QGroupBox("Osquery SQL command")
         osquery_groupbox.setLayout(osquery_layout)
 
-        self.table_loading_label = QtWidgets.QLabel('Loading data...')
+        self.table_loading_label = QtWidgets.QLabel("Loading data...")
         self.table_loading_label.show()
 
         self.table = QtWidgets.QTableWidget()
         table_layout = QtWidgets.QHBoxLayout()
         table_layout.addWidget(self.table)
-        self.table_groupbox = QtWidgets.QGroupBox('Current data')
+        self.table_groupbox = QtWidgets.QGroupBox("Current data")
         self.table_groupbox.setLayout(table_layout)
         self.table_groupbox.hide()
 
-        ok_button = QtWidgets.QPushButton('Ok')
+        ok_button = QtWidgets.QPushButton("Ok")
         ok_button.clicked.connect(self.accept)
 
         buttons_layout = QtWidgets.QHBoxLayout()
@@ -143,12 +151,14 @@ class TwigDialog(QtWidgets.QDialog):
         # Run the osquery command in a separate thread
         self.t = TwigOsqueryThread(self.c, twig_id)
         self.t.query_finished.connect(self.query_finished)
+        self.t.daemon_not_running.connect(self.daemon_not_running)
+        self.t.daemon_permission_denied.connect(self.daemon_permission_denied)
         self.t.start()
 
         self.exec_()
 
     def get_interval_string(self):
-        seconds = twigs[self.twig_id]['interval']
+        seconds = twigs[self.twig_id]["interval"]
         minutes = 0
         hours = 0
         if seconds > 60:
@@ -170,7 +180,7 @@ class TwigDialog(QtWidgets.QDialog):
         return text
 
     def query_finished(self, data):
-        self.c.log('TwigDialog', 'query_finished')
+        self.c.log("TwigDialog", "query_finished")
 
         # Count rows and columns
         row_count = len(data)
@@ -202,22 +212,40 @@ class TwigDialog(QtWidgets.QDialog):
 
         self.adjustSize()
 
+    def daemon_not_running(self):
+        self.c.gui.daemon_not_running()
+
+    def daemon_permission_denied(self):
+        self.c.gui.daemon_permission_denied()
+
 
 class TwigOsqueryThread(QtCore.QThread):
     """
     Run the osquery command
     """
+
     query_finished = QtCore.pyqtSignal(list)
+    daemon_not_running = QtCore.pyqtSignal()
+    daemon_permission_denied = QtCore.pyqtSignal()
 
     def __init__(self, common, twig_id):
         super(TwigOsqueryThread, self).__init__()
         self.c = common
         self.twig_id = twig_id
-        self.c.log('TwigOsqueryThread', '__init__', twig_id)
+        self.c.log("TwigOsqueryThread", "__init__", twig_id)
 
     def run(self):
-        self.c.log('TwigOsqueryThread', 'run')
-        data = self.c.osquery.exec(twigs[self.twig_id]['query'])
+        self.c.log("TwigOsqueryThread", "run")
+
+        try:
+            data = self.c.daemon.exec_twig(self.twig_id)
+        except DaemonNotRunningException:
+            self.daemon_not_running.emit()
+            return
+        except PermissionDeniedException:
+            self.daemon_permission_denied.emit()
+            return
+
         if not data:
             data = []
         self.query_finished.emit(data)

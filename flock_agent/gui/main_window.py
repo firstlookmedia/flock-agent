@@ -2,7 +2,9 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from .tabs import HomebrewTab, HealthTab, TwigsTab, SettingsTab
-from .systray import SysTray
+from .daemon_client import DaemonNotRunningException, PermissionDeniedException
+
+from ..common import Platform
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -13,30 +15,38 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.c.log("MainWindow", "__init__")
 
-        self.setWindowTitle('Flock')
+        self.setWindowTitle("Flock")
         self.setWindowIcon(self.c.gui.icon)
 
         # System tray
-        self.systray = SysTray(self.c)
+        self.systray = QtWidgets.QSystemTrayIcon(self.c.gui.systray_icon)
         self.systray.activated.connect(self.toggle_window)
+        self.systray.show()
 
         # Header
         logo = QtWidgets.QLabel()
-        logo.setPixmap(QtGui.QPixmap.fromImage(QtGui.QImage(self.c.get_resource_path("images/icon.png"))))
-        header_label = QtWidgets.QLabel('<b><font color="#3461bc">Flock</font></b> monitors your computer for security issues while respecting your privacy')
+        logo.setPixmap(
+            QtGui.QPixmap.fromImage(
+                QtGui.QImage(self.c.get_resource_path("images/icon.png"))
+            )
+        )
+        header_label = QtWidgets.QLabel(
+            '<b><font color="#3461bc">Flock</font></b> monitors your computer for security issues while respecting your privacy'
+        )
         header_label.setTextFormat(QtCore.Qt.RichText)
         header_label.setWordWrap(True)
-        header_label.setStyleSheet(self.c.gui.css['MainWindow header_label'])
+        header_label.setStyleSheet(self.c.gui.css["MainWindow header_label"])
         header_layout = QtWidgets.QHBoxLayout()
         header_layout.addWidget(logo)
         header_layout.addWidget(header_label, stretch=1)
         header_layout.addStretch()
 
         # Tabs
-        self.homebrew_tab = HomebrewTab(self.c, self.systray)
-        self.homebrew_tab.update_homebrew_tab.connect(self.update_homebrew_tab)
+        if Platform.current() == Platform.MACOS:
+            self.homebrew_tab = HomebrewTab(self.c, self.systray)
+            self.homebrew_tab.update_homebrew_tab.connect(self.update_homebrew_tab)
 
-        self.health_tab = HealthTab(self.c)
+            self.health_tab = HealthTab(self.c)
 
         self.opt_in_tab = TwigsTab(self.c, is_opt_in=True)
         self.opt_in_tab.refresh.connect(self.update_ui)
@@ -49,7 +59,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings_tab.quit.connect(self.quit)
 
         self.tabs = QtWidgets.QTabWidget()
-        self.tabs.addTab(self.health_tab, "Health")
+        if Platform.current() == Platform.MACOS:
+            self.tabs.addTab(self.health_tab, "Health")
         self.tabs.addTab(self.settings_tab, "Settings")
 
         # Layout
@@ -60,11 +71,7 @@ class MainWindow(QtWidgets.QMainWindow):
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
-        # Submit osquery logs to the server on a timer
-        self.currently_submitting = False
-        self.submit_timer = QtCore.QTimer()
-        self.submit_timer.timeout.connect(self.run_submit)
-        self.update_use_server(None) # this calls self.update_ui()
+        self.update_use_server(None)
 
         self.hide()
 
@@ -91,34 +98,48 @@ class MainWindow(QtWidgets.QMainWindow):
         data_tab_index = self.tabs.indexOf(self.data_tab)
         if data_tab_index != -1:
             self.tabs.removeTab(data_tab_index)
-        homebrew_tab_index = self.tabs.indexOf(self.homebrew_tab)
-        if homebrew_tab_index != -1:
-            self.tabs.removeTab(homebrew_tab_index)
+        if Platform.current() == Platform.MACOS:
+            homebrew_tab_index = self.tabs.indexOf(self.homebrew_tab)
+            if homebrew_tab_index != -1:
+                self.tabs.removeTab(homebrew_tab_index)
 
         # Only show data or opt-in tabs if using a server
-        if self.c.settings.get('use_server'):
-            data_tab_should_show = len(self.c.settings.get_decided_twig_ids()) > 0
-            if data_tab_should_show:
-                self.tabs.insertTab(1, self.data_tab, "Data")
-            opt_in_tab_should_show = len(self.c.settings.get_undecided_twig_ids()) > 0
-            if opt_in_tab_should_show:
-                self.tabs.insertTab(0, self.opt_in_tab, "Opt-In")
+        try:
+            if self.c.daemon.get("use_server"):
+                data_tab_should_show = len(self.c.daemon.get_decided_twig_ids()) > 0
+                if data_tab_should_show:
+                    # In macOS, Data tab index is 1 because Health is always 0, but in Linux it's 0
+                    if Platform.current() == Platform.MACOS:
+                        self.tabs.insertTab(1, self.data_tab, "Data")
+                    else:
+                        self.tabs.insertTab(0, self.data_tab, "Data")
+                opt_in_tab_should_show = len(self.c.daemon.get_undecided_twig_ids()) > 0
+                if opt_in_tab_should_show:
+                    self.tabs.insertTab(0, self.opt_in_tab, "Opt-In")
+        except DaemonNotRunningException:
+            self.c.gui.daemon_not_running()
+            return
+        except PermissionDeniedException:
+            self.c.gui.daemon_permission_denied()
+            return
 
-        # Only show homebrew tab if there are homebrew updates available
-        if self.homebrew_tab.should_show:
-            self.tabs.insertTab(0, self.homebrew_tab, "Homebrew")
+        if Platform.current() == Platform.MACOS:
+            # Only show homebrew tab if there are homebrew updates available
+            if self.homebrew_tab.should_show:
+                self.tabs.insertTab(0, self.homebrew_tab, "Homebrew")
 
         # Set the active tab
         if active_tab == None:
             self.tabs.setCurrentIndex(0)
         else:
-            if active_tab == 'opt-in':
+            if active_tab == "opt-in":
                 index = self.tabs.indexOf(self.opt_in_tab)
-            elif active_tab == 'data':
+            elif active_tab == "data":
                 index = self.tabs.indexOf(self.data_tab)
-            elif active_tab == 'homebrew':
-                index = self.tabs.indexOf(self.homebrew_tab)
-            elif active_tab == 'settings':
+            elif active_tab == "homebrew":
+                if Platform.current() == Platform.MACOS:
+                    index = self.tabs.indexOf(self.homebrew_tab)
+            elif active_tab == "settings":
                 index = self.tabs.indexOf(self.settings_tab)
             else:
                 index = -1
@@ -130,7 +151,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def update_homebrew_tab(self):
         if self.homebrew_tab.should_show:
-            self.update_ui('homebrew')
+            self.update_ui("homebrew")
             if not self.isVisible():
                 self.show()
                 self.activateWindow()
@@ -147,39 +168,19 @@ class MainWindow(QtWidgets.QMainWindow):
             self.activateWindow()
             self.raise_()
 
-    def run_submit(self):
-        if self.currently_submitting:
+    def update_use_server(self, active_tab="settings"):
+        try:
+            # Either enable or disable osqueryd
+            self.c.daemon.refresh_osqueryd()
+        except DaemonNotRunningException:
+            self.c.gui.daemon_not_running()
             return
-        self.currently_submitting = True
-
-        self.submit_thread = SubmitThread(self.c)
-        self.submit_thread.submit_finished.connect(self.submit_finished)
-        self.submit_thread.submit_error.connect(self.submit_error)
-        self.submit_thread.start()
-
-    def submit_finished(self):
-        self.currently_submitting = False
-
-    def submit_error(self, exception_type):
-        # TODO: make the exception handling more robust
-        self.systray.showMessage("Error Submitting Data", "Exception type: {}".format(exception_type))
-
-    def update_use_server(self, active_tab='settings'):
-        use_server = self.c.settings.get('use_server')
-
-        if use_server:
-            # Start the submit timer
-            self.submit_timer.start(60000) # 1 minute
-
-        else:
-            # Stop the submit timer
-            self.submit_timer.stop()
+        except PermissionDeniedException:
+            self.c.gui.daemon_permission_denied()
+            return
 
         # Either show or hide the opt-in and data tabs
         self.update_ui(active_tab)
-
-        # Either enable or disable osqueryd
-        self.c.osquery.refresh_osqueryd()
 
     def quit(self):
         self.c.log("MainWindow", "quit")
@@ -187,31 +188,3 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def shutdown(self):
         self.c.log("MainWindow", "shutdown")
-
-
-class SubmitThread(QtCore.QThread):
-    """
-    Submit osquery records to the Flock server
-    """
-    submit_finished = QtCore.pyqtSignal()
-    submit_error = QtCore.pyqtSignal(str)
-
-    def __init__(self, common):
-        super(SubmitThread, self).__init__()
-        self.c = common
-
-    def run(self):
-        if self.c.settings.get('use_server'):
-            self.c.log('SubmitThread', 'run')
-
-            try:
-                self.c.osquery.submit_logs()
-            except Exception as e:
-                exception_type = type(e).__name__
-                self.c.log('SubmitThread', 'run', 'Exception submitting logs: {}'.format(exception_type))
-                self.submit_error.emit(exception_type)
-
-        else:
-            self.c.log('SubmitThread', 'run', 'use_server=False, so skipping')
-
-        self.submit_finished.emit()

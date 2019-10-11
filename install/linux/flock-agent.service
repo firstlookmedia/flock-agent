@@ -1,0 +1,12 @@
+[Unit]
+Description=Flock Agent daemon
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/flock-agent --daemon
+ExecStop=/usr/bin/flock-agent --stop-daemon
+RemainAfterExit=yes
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

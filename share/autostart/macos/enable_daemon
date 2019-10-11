@@ -1,0 +1,6 @@
+#!/bin/sh
+LAUNCHD_FILENAME=/Library/LaunchDaemons/media.firstlook.flock-agentd.plist
+/bin/cp /Applications/Flock.app/Contents/Resources/share/autostart/macos/media.firstlook.flock-agentd.plist $LAUNCHD_FILENAME
+/usr/sbin/chown root:wheel $LAUNCHD_FILENAME
+/bin/chmod 644 $LAUNCHD_FILENAME
+/bin/launchctl load $LAUNCHD_FILENAME
