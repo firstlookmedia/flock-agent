@@ -3,6 +3,7 @@ import os
 import subprocess
 import shutil
 import appdirs
+import time
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from .gui_common import Alert
@@ -78,10 +79,18 @@ class Bootstrap(object):
 
         self.c.log("Bootstrap", "go", "Making sure the Flock Agent daemon is running")
         try:
-            self.c.daemon.ping()
-        except DaemonNotRunningException:
-            self.c.gui.daemon_not_running()
-            return False
+            connected = False
+            for _ in range(10):
+                try:
+                    self.c.daemon.ping()
+                    connected = True
+                    break
+                except DaemonNotRunningException:
+                    self.c.log("Bootstrap", "go", "Failed to connect to daemon ...")
+                    time.sleep(1)
+            if not connected:
+                self.c.gui.daemon_not_running()
+                return False
         except PermissionDeniedException:
             self.c.gui.daemon_permission_denied()
             return False
