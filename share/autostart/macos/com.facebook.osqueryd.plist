@@ -11,9 +11,9 @@
   <key>ProgramArguments</key>
   <array>
     <string>/usr/local/bin/osqueryd</string>
-    <string>--config_path=/usr/local/var/osquery/osquery.conf</string>
-    <string>--database_path=/usr/local/var/osquery/osquery.db</string>
-    <string>--pidfile=/usr/local/var/osquery/osqueryd.pidfile</string>
+    <string>--config_path=/usr/local/var/lib/flock-agent/osquery.conf</string>
+    <string>--database_path=/usr/local/var/lib/flock-agent/osquery.db</string>
+    <string>--pidfile=/usr/local/var/lib/flock-agent/osqueryd.pidfile</string>
   </array>
   <key>RunAtLoad</key>
   <true/>
