@@ -46,7 +46,7 @@ class Bootstrap(object):
                 )
             elif platform == Platform.LINUX:
                 autorun_dir = appdirs.user_config_dir("autostart")
-                autorun_filename = "autostart/linux/media.firstlook.flock-agent.desktop"
+                autorun_filename = "media.firstlook.flock-agent.desktop"
                 src_filename = self.c.get_resource_path(
                     os.path.join("autostart/linux", autorun_filename)
                 )

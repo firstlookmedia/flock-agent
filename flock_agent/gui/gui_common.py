@@ -198,7 +198,7 @@ class GuiCommon:
                     p = subprocess.run(
                         [
                             "/usr/bin/pkexec",
-                            self.c.get_resource_path("autostart/macos/enable_daemon"),
+                            self.c.get_resource_path("autostart/linux/enable_daemon"),
                         ]
                     )
 
