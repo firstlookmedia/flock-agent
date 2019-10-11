@@ -4,6 +4,7 @@ import sys
 import grp
 import asyncio
 import json
+import time
 from urllib.parse import urlparse
 from aiohttp import web
 from aiohttp.abc import AbstractAccessLogger
@@ -11,6 +12,7 @@ from aiohttp.web_runner import GracefulExit
 
 from .global_settings import GlobalSettings
 from .osquery import Osquery
+from .flock_logs import FlockLog, FlockLogTypes
 from .api_client import (
     FlockApiClient,
     PermissionDenied,
@@ -47,15 +49,18 @@ class Daemon:
 
         self.api_client = FlockApiClient(self.c)
 
-        # Start with refreshing osqueryd
-        self.osquery.refresh_osqueryd()
-
-        # Prepare the unix socket path
+        # Flock Agent lib directory
         if Platform.current() == Platform.MACOS:
             lib_dir = "/usr/local/var/lib/flock-agent"
         else:
             lib_dir = "/var/lib/flock-agent"
         os.makedirs(lib_dir, exist_ok=True)
+
+        # Flock Agent keeps its own submission queue separate from osqueryd, for when users
+        # enable/disable the server, or enable/disable twigs
+        self.flock_log = FlockLog(self.c, lib_dir)
+
+        # Prepare the unix socket path
         self.unix_socket_path = os.path.join(lib_dir, "socket")
         if os.path.exists(self.unix_socket_path):
             os.remove(self.unix_socket_path)
@@ -77,6 +82,9 @@ class Daemon:
                 # Unknown, so make the group root
                 self.gid = 0
 
+        # Start with refreshing osqueryd
+        self.osquery.refresh_osqueryd()
+
     async def start(self):
         await asyncio.gather(self.submit_loop(), self.http_server())
 
@@ -95,6 +103,9 @@ class Daemon:
                         "submit_loop",
                         "Exception submitting logs: {}".format(exception_type),
                     )
+
+                # Submit Flock Agent logs
+                self.flock_log.submit_logs()
 
             # Wait a minute
             await asyncio.sleep(60)
@@ -137,6 +148,13 @@ class Daemon:
             val = await request.json()
             self.global_settings.set(key, val)
             self.global_settings.save()
+
+            if key == "use_server":
+                if val:
+                    self.flock_log.log(FlockLogTypes.SERVER_ENABLED)
+                else:
+                    self.flock_log.log(FlockLogTypes.SERVER_DISABLED)
+
             return response_object()
 
         async def get_twig(request):
@@ -159,12 +177,14 @@ class Daemon:
             twig_id = await request.json()
             self.global_settings.enable_twig(twig_id)
             self.global_settings.save()
+            self.flock_log.log(FlockLogTypes.TWIG_ENABLED, twig_id)
             return response_object()
 
         async def disable_twig(request):
             twig_id = await request.json()
             self.global_settings.disable_twig(twig_id)
             self.global_settings.save()
+            self.flock_log.log(FlockLogTypes.TWIG_DISABLED, twig_id)
             return response_object()
 
         async def get_decided_twig_ids(request):
