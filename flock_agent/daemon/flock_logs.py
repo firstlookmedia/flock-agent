@@ -16,14 +16,14 @@ class FlockLog:
             open(self.filename, "a").close()
             os.chmod(self.filename, 0o600)
 
-    def log(self, flock_log_type, twig_id):
+    def log(self, flock_log_type, twig_id=None):
         with open(self.filename, "a") as f:
             f.write(
                 json.dumps(
                     {
                         "type": flock_log_type,
                         "twig_id": twig_id,
-                        "unix_timestamp": int(time.time()),
+                        "timestamp": int(time.time()),
                     }
                 )
                 + "\n"
@@ -106,8 +106,9 @@ class FlockLog:
                     )
 
                     # Update the biggest timestamp, if needed
-                    if logs[-1]["timestamp"] > biggest_timestamp:
-                        biggest_timestamp = logs[-1]["timestamp"]
+                    if len(logs) > 0:
+                        if logs[-1]["timestamp"] > biggest_timestamp:
+                            biggest_timestamp = logs[-1]["timestamp"]
 
             # Update timestamp in settings
             if (
