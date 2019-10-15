@@ -104,7 +104,7 @@ def macos_sip_query_finished(data):
 health_items = {
     "macos": [
         {
-            "name": "FileVault",
+            "name": "filevault",
             "good_string": "FileVault is enabled",
             "bad_string": "FileVault should be enabled",
             "query": "select disk_encryption.encrypted from mounts join disk_encryption on mounts.device_alias = disk_encryption.name where mounts.path = '/'",
@@ -112,7 +112,7 @@ health_items = {
             "query_finished": macos_filevault_query_finished,
         },
         {
-            "name": "Gatekeeper",
+            "name": "gatekeeper",
             "good_string": "Gatekeeper is enabled",
             "bad_string": "Gatekeeper should be enabled",
             "query": "select assessments_enabled from gatekeeper",
@@ -120,7 +120,7 @@ health_items = {
             "query_finished": macos_gatekeeper_query_finished,
         },
         {
-            "name": "Firewall",
+            "name": "firewall",
             "good_string": "Firewall is enabled",
             "bad_string": "Firewall should be enabled",
             "query": "select global_state from alf",
@@ -128,7 +128,7 @@ health_items = {
             "query_finished": macos_firewall_query_finished,
         },
         {
-            "name": "Remote sharing",
+            "name": "remote_sharing",
             "good_string": "Remote sharing is disabled",
             "bad_string": "Remote sharing should be disabled",
             "query": "select * from sharing_preferences",
@@ -136,7 +136,7 @@ health_items = {
             "query_finished": macos_remote_sharing_query_finished,
         },
         {
-            "name": "macOS automatic updates",
+            "name": "macos_automatic_updates",
             "good_string": "macOS automatic updates are enabled",
             "bad_string": "macOS automatic updates should be enabled",
             "query": "select value from plist where path = '/Library/Preferences/com.apple.commerce.plist' and key = 'AutoUpdate'",
@@ -144,7 +144,7 @@ health_items = {
             "query_finished": macos_automatic_updates_query_finished,
         },
         {
-            "name": "Guest user",
+            "name": "guest_user",
             "good_string": "Guest user is disabled",
             "bad_string": "Guest user should be disabled",
             "query": "select value from plist where path='/Library/Preferences/com.apple.loginwindow.plist' and key='GuestEnabled'",
@@ -152,7 +152,7 @@ health_items = {
             "query_finished": macos_guest_user_query_finished,
         },
         {
-            "name": "System Integrity Protection",
+            "name": "sip",
             "good_string": "System Integrity Protection is enabled",
             "bad_string": "System Integrity Protection should be enabled",
             "query": "select enabled from sip_config where config_flag='sip'",
