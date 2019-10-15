@@ -149,7 +149,7 @@ twigs = {
     # Note: this doesn't seem to work reliably in linux, only in macOS
     "reverse_shell": {
         "name": "Reverse shells",
-        "query": "SELECT DISTINCT(processes.pid), processes.parent, processes.name, processes.path, processes.cmdline, processes.cwd, processes.root, processes.uid, processes.gid, processes.start_time, process_open_sockets.remote_address, process_open_sockets.remote_port, (SELECT cmdline FROM processes AS parent_cmdline WHERE pid=processes.parent) AS parent_cmdline FROM processes JOIN process_open_sockets USING (pid) LEFT OUTER JOIN process_open_files ON processes.pid = process_open_files.pid WHERE ( name='sh' OR name='bash' ) AND process_open_files.pid IS NULL;",
+        "query": "SELECT DISTINCT(processes.pid), processes.parent, processes.name, processes.path, processes.cmdline, processes.cwd, processes.root, processes.uid, processes.gid, processes.start_time, process_open_sockets.remote_address, process_open_sockets.remote_port, (SELECT cmdline FROM processes AS parent_cmdline WHERE pid=processes.parent) AS parent_cmdline FROM processes JOIN (SELECT * FROM process_open_sockets WHERE family is 2 OR family is 10 ) AS process_open_sockets USING (pid) WHERE ( name is 'sh' OR name is 'bash' OR name is 'dash' OR name is 'zsh');",
         "interval": 60,
         "description": "Detect reverse shells, which is the first step attackers often take after an initial compromise in order to more easily run commands on your computer",
         "platforms": ["macos", "linux"],
