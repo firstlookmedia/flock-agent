@@ -136,5 +136,5 @@ class FlockLog:
 class FlockLogTypes:
     SERVER_ENABLED = "server_enabled"
     SERVER_DISABLED = "server_disabled"
-    TWIGS_ENABLED = "twig_enabled"
-    TWIGS_DISABLED = "twig_disabled"
+    TWIGS_ENABLED = "twigs_enabled"
+    TWIGS_DISABLED = "twigs_disabled"
