@@ -121,8 +121,8 @@ twigs = {
         "name": "Disk encryption",
         "query": "select disk_encryption.* from mounts join disk_encryption on mounts.device_alias = disk_encryption.name where mounts.path = '/'",
         "interval": 86400,
-        "description": "Whether FileVault disk encryption is enabled",
-        "platforms": ["macos"],
+        "description": "Whether disk encryption is enabled",
+        "platforms": ["macos", "linux"],
     },
     "sharing_preferences": {
         "name": "Remote sharing preferences",
