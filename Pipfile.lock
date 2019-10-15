@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "12f4b734a0c27606c6a86df0afb31be1389150d7fdfd08174f8188d17d94e751"
+            "sha256": "42ba9d2021f764a4965d0e2efd0f3ac9bb94ebe2439e5b84254c1a7acacf5a35"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -51,10 +51,10 @@
         },
         "attrs": {
             "hashes": [
-                "sha256:ec20e7a4825331c1b5ebf261d111e16fa9612c1f7a5e1f884f12bd53a664dfd2",
-                "sha256:f913492e1663d3c36f502e5e9ba6cd13cf19d7fab50aa13239e420fef95e1396"
+                "sha256:08a96c641c3a74e44eb59afb61a24f2cb9f4d7188748e76ba4bb5edfa3cb7d1c",
+                "sha256:f7b7ce16570fe9965acd6d30101a28f62fb4a7f9e926b3bbc9b61f8b04247e72"
             ],
-            "version": "==19.2.0"
+            "version": "==19.3.0"
         },
         "certifi": {
             "hashes": [
@@ -124,6 +124,7 @@
                 "sha256:cd13a2e9be890064a6dd11db7790bbf38502350c532a9a9d05511abb8683b8ea"
             ],
             "index": "pypi",
+            "markers": "platform_system == 'Darwin'",
             "version": "==5.2"
         },
         "pyobjc-framework-cocoa": {
@@ -139,6 +140,7 @@
                 "sha256:e9421ccb48d0c3c9c13f3f8f0f818fa77ced36e67cae998302f87269a1ee1402"
             ],
             "index": "pypi",
+            "markers": "platform_system == 'Darwin'",
             "version": "==5.2"
         },
         "pyobjc-framework-quartz": {
@@ -154,6 +156,7 @@
                 "sha256:d03c1778fdd92c6463559b2e749a0974e065f31aac7a7cd760733bd9f4a81bb8"
             ],
             "index": "pypi",
+            "markers": "platform_system == 'Darwin'",
             "version": "==5.2"
         },
         "pyqt5": {
@@ -244,10 +247,10 @@
         },
         "attrs": {
             "hashes": [
-                "sha256:ec20e7a4825331c1b5ebf261d111e16fa9612c1f7a5e1f884f12bd53a664dfd2",
-                "sha256:f913492e1663d3c36f502e5e9ba6cd13cf19d7fab50aa13239e420fef95e1396"
+                "sha256:08a96c641c3a74e44eb59afb61a24f2cb9f4d7188748e76ba4bb5edfa3cb7d1c",
+                "sha256:f7b7ce16570fe9965acd6d30101a28f62fb4a7f9e926b3bbc9b61f8b04247e72"
             ],
-            "version": "==19.2.0"
+            "version": "==19.3.0"
         },
         "black": {
             "hashes": [
