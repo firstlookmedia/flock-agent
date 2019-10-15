@@ -146,14 +146,29 @@ class Daemon:
         async def set_setting(request):
             key = request.match_info.get("key", None)
             val = await request.json()
-            self.global_settings.set(key, val)
-            self.global_settings.save()
 
-            if key == "use_server":
-                if val:
-                    self.flock_log.log(FlockLogTypes.SERVER_ENABLED)
-                else:
-                    self.flock_log.log(FlockLogTypes.SERVER_DISABLED)
+            # Only change the setting if it's actually changing
+            old_val = self.global_settings.get(key)
+            if old_val == val:
+                self.c.log(
+                    "Daemon",
+                    "http_server.set_settings",
+                    "skipping {}={}, because it's already set".format(key, val),
+                )
+            else:
+                self.c.log(
+                    "Daemon",
+                    "http_server.set_settings",
+                    "setting {}={}".format(key, val),
+                )
+                self.global_settings.set(key, val)
+                self.global_settings.save()
+
+                if key == "use_server":
+                    if val:
+                        self.flock_log.log(FlockLogTypes.SERVER_ENABLED)
+                    else:
+                        self.flock_log.log(FlockLogTypes.SERVER_DISABLED)
 
             return response_object()
 
@@ -175,16 +190,30 @@ class Daemon:
 
         async def enable_twig(request):
             twig_id = await request.json()
-            self.global_settings.enable_twig(twig_id)
-            self.global_settings.save()
-            self.flock_log.log(FlockLogTypes.TWIG_ENABLED, twig_id)
+            if not self.global_settings.is_twig_enabled(twig_id):
+                self.c.log(
+                    "Daemon",
+                    "http_server.enable_twig",
+                    "enabling twig {}".format(twig_id),
+                )
+                self.global_settings.enable_twig(twig_id)
+                self.global_settings.save()
+                self.flock_log.log(FlockLogTypes.TWIG_ENABLED, twig_id)
+
             return response_object()
 
         async def disable_twig(request):
             twig_id = await request.json()
-            self.global_settings.disable_twig(twig_id)
-            self.global_settings.save()
-            self.flock_log.log(FlockLogTypes.TWIG_DISABLED, twig_id)
+            if self.global_settings.is_twig_enabled(twig_id):
+                self.c.log(
+                    "Daemon",
+                    "http_server.disable_twig",
+                    "disabling twig {}".format(twig_id),
+                )
+                self.global_settings.disable_twig(twig_id)
+                self.global_settings.save()
+                self.flock_log.log(FlockLogTypes.TWIG_DISABLED, twig_id)
+
             return response_object()
 
         async def get_decided_twig_ids(request):
