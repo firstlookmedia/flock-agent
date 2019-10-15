@@ -172,13 +172,6 @@ class Daemon:
 
             return response_object()
 
-        async def get_twig(request):
-            twig_id = request.match_info.get("twig_id", None)
-            try:
-                return response_object(self.global_settings.get_twig(twig_id))
-            except:
-                return response_object(error="invalid twig_id")
-
         async def exec_twig(request):
             twig_id = request.match_info.get("twig_id", None)
             try:
@@ -216,6 +209,9 @@ class Daemon:
 
         async def get_enabled_twig_ids(request):
             return response_object(self.global_settings.get_enabled_twig_ids())
+
+        async def get_twig_enabled_statuses(request):
+            return response_object(self.global_settings.get_twig_enabled_statuses())
 
         async def update_twig_status(request):
             twig_status = await request.json()
@@ -336,12 +332,12 @@ class Daemon:
         app.router.add_post("/shutdown", shutdown)
         app.router.add_get("/setting/{key}", get_setting)
         app.router.add_post("/setting/{key}", set_setting)
-        app.router.add_get("/twig/{twig_id}", get_twig)
         app.router.add_get("/exec_twig/{twig_id}", exec_twig)
         app.router.add_post("/enable_undecided_twigs", enable_undecided_twigs)
         app.router.add_get("/decided_twig_ids", get_decided_twig_ids)
         app.router.add_get("/undecided_twig_ids", get_undecided_twig_ids)
         app.router.add_get("/enabled_twig_ids", get_enabled_twig_ids)
+        app.router.add_get("/twig_enabled_statuses", get_twig_enabled_statuses)
         app.router.add_post("/update_twig_status", update_twig_status)
         app.router.add_get("/exec_health/{health_item_name}", exec_health)
         app.router.add_get("/refresh_osqueryd", refresh_osqueryd)

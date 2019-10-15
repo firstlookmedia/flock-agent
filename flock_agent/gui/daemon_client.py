@@ -55,10 +55,6 @@ class DaemonClient:
         res = self._http_post("/setting/{}".format(key), val)
         return res["data"]
 
-    def get_twig(self, twig_id):
-        res = self._http_get("/twig/{}".format(twig_id))
-        return res["data"]
-
     def exec_twig(self, twig_id):
         res = self._http_get("/exec_twig/{}".format(twig_id))
         return res["data"]
@@ -77,6 +73,10 @@ class DaemonClient:
 
     def get_enabled_twig_ids(self):
         res = self._http_get("/enabled_twig_ids")
+        return res["data"]
+
+    def get_twig_enabled_statuses(self):
+        res = self._http_get("/twig_enabled_statuses")
         return res["data"]
 
     def update_twig_status(self, twig_status):

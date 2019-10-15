@@ -82,6 +82,12 @@ class GlobalSettings(object):
                 twig_ids.append(twig_id)
         return twig_ids
 
+    def get_twig_enabled_statuses(self):
+        enabled_statuses = {}
+        for twig_id in self.settings["twigs"]:
+            enabled_statuses[twig_id] = self.settings["twigs"][twig_id]["enabled"]
+        return enabled_statuses
+
     def load(self):
         self.c.log("GlobalSettings", "load")
         if os.path.isfile(self.settings_filename):

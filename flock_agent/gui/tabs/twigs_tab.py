@@ -100,6 +100,7 @@ class TwigsTab(QtWidgets.QWidget):
                 twig_ids = self.c.daemon.get_undecided_twig_ids()
             else:
                 twig_ids = self.c.daemon.get_decided_twig_ids()
+            twig_enabled_statuses = self.c.daemon.get_twig_enabled_statuses()
         except DaemonNotRunningException:
             self.c.gui.daemon_not_running()
             return
@@ -109,7 +110,7 @@ class TwigsTab(QtWidgets.QWidget):
 
         # Add them
         for twig_id in reversed(twig_ids):
-            twig_view = TwigView(self.c, twig_id)
+            twig_view = TwigView(self.c, twig_id, twig_enabled_statuses[twig_id])
             self.twig_views.append(twig_view)
             self.twigs_layout.insertWidget(0, twig_view)
 
