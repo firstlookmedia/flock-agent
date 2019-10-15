@@ -16,13 +16,13 @@ class FlockLog:
             open(self.filename, "a").close()
             os.chmod(self.filename, 0o600)
 
-    def log(self, flock_log_type, twig_id=None):
+    def log(self, flock_log_type, twig_ids=None):
         with open(self.filename, "a") as f:
             f.write(
                 json.dumps(
                     {
                         "type": flock_log_type,
-                        "twig_id": twig_id,
+                        "twig_ids": twig_ids,
                         "timestamp": int(time.time()),
                     }
                 )
@@ -136,5 +136,5 @@ class FlockLog:
 class FlockLogTypes:
     SERVER_ENABLED = "server_enabled"
     SERVER_DISABLED = "server_disabled"
-    TWIG_ENABLED = "twig_enabled"
-    TWIG_DISABLED = "twig_disabled"
+    TWIGS_ENABLED = "twig_enabled"
+    TWIGS_DISABLED = "twig_disabled"

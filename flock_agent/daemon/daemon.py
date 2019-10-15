@@ -188,31 +188,23 @@ class Daemon:
             except:
                 return response_object(error="invalid twig_id")
 
-        async def enable_twig(request):
-            twig_id = await request.json()
-            if not self.global_settings.is_twig_enabled(twig_id):
+        async def enable_undecided_twigs(request):
+            enabled_twig_ids = []
+            twig_ids = self.global_settings.get_undecided_twig_ids()
+            for twig_id in twig_ids:
+                if not self.global_settings.is_twig_enabled(twig_id):
+                    self.global_settings.enable_twig(twig_id)
+                    enabled_twig_ids.append(twig_id)
+
+            if len(enabled_twig_ids) > 0:
                 self.c.log(
                     "Daemon",
-                    "http_server.enable_twig",
-                    "enabling twig {}".format(twig_id),
+                    "http_server.enable_undecided_twigs",
+                    "enabled twigs: {}".format(enabled_twig_ids),
                 )
-                self.global_settings.enable_twig(twig_id)
                 self.global_settings.save()
-                self.flock_log.log(FlockLogTypes.TWIG_ENABLED, twig_id)
-
-            return response_object()
-
-        async def disable_twig(request):
-            twig_id = await request.json()
-            if self.global_settings.is_twig_enabled(twig_id):
-                self.c.log(
-                    "Daemon",
-                    "http_server.disable_twig",
-                    "disabling twig {}".format(twig_id),
-                )
-                self.global_settings.disable_twig(twig_id)
-                self.global_settings.save()
-                self.flock_log.log(FlockLogTypes.TWIG_DISABLED, twig_id)
+                self.osquery.refresh_osqueryd()
+                self.flock_log.log(FlockLogTypes.TWIGS_ENABLED, enabled_twig_ids)
 
             return response_object()
 
@@ -224,6 +216,56 @@ class Daemon:
 
         async def get_enabled_twig_ids(request):
             return response_object(self.global_settings.get_enabled_twig_ids())
+
+        async def update_twig_status(request):
+            twig_status = await request.json()
+
+            # Validate twig_status
+            if type(twig_status) != dict:
+                return response_object(error="twig_status must be a dict")
+            for twig_id in twig_status:
+                if twig_id not in self.global_settings.settings["twigs"]:
+                    return response_object(
+                        error="twig_status contains invalid twig_ids"
+                    )
+                if type(twig_status[twig_id]) != bool:
+                    return response_object(error="twig_status is in an invalid format")
+
+            enabled_twig_ids = []
+            disabled_twig_ids = []
+
+            for twig_id in twig_status:
+                if twig_status[twig_id] and not self.global_settings.is_twig_enabled(
+                    twig_id
+                ):
+                    self.global_settings.enable_twig(twig_id)
+                    enabled_twig_ids.append(twig_id)
+                if not twig_status[twig_id] and self.global_settings.is_twig_enabled(
+                    twig_id
+                ):
+                    self.global_settings.disable_twig(twig_id)
+                    disabled_twig_ids.append(twig_id)
+
+            if len(enabled_twig_ids) > 0 or len(disabled_twig_ids) > 0:
+                self.global_settings.save()
+                self.osquery.refresh_osqueryd()
+
+            if len(enabled_twig_ids) > 0:
+                self.c.log(
+                    "Daemon",
+                    "http_server.update_twig_status",
+                    "enabled twigs: {}".format(enabled_twig_ids),
+                )
+                self.flock_log.log(FlockLogTypes.TWIGS_ENABLED, enabled_twig_ids)
+            if len(disabled_twig_ids) > 0:
+                self.c.log(
+                    "Daemon",
+                    "http_server.update_twig_status",
+                    "disabled twigs: {}".format(disabled_twig_ids),
+                )
+                self.flock_log.log(FlockLogTypes.TWIGS_DISABLED, disabled_twig_ids)
+
+            return response_object()
 
         async def exec_health(request):
             health_item_name = request.match_info.get("health_item_name", None)
@@ -296,11 +338,11 @@ class Daemon:
         app.router.add_post("/setting/{key}", set_setting)
         app.router.add_get("/twig/{twig_id}", get_twig)
         app.router.add_get("/exec_twig/{twig_id}", exec_twig)
-        app.router.add_post("/enable_twig", enable_twig)
-        app.router.add_post("/disable_twig", disable_twig)
+        app.router.add_post("/enable_undecided_twigs", enable_undecided_twigs)
         app.router.add_get("/decided_twig_ids", get_decided_twig_ids)
         app.router.add_get("/undecided_twig_ids", get_undecided_twig_ids)
         app.router.add_get("/enabled_twig_ids", get_enabled_twig_ids)
+        app.router.add_post("/update_twig_status", update_twig_status)
         app.router.add_get("/exec_health/{health_item_name}", exec_health)
         app.router.add_get("/refresh_osqueryd", refresh_osqueryd)
         app.router.add_post("/register_server", register_server)
