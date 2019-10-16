@@ -40,6 +40,11 @@ class HealthTab(QtWidgets.QWidget):
         layout.addLayout(buttons_layout)
         self.setLayout(layout)
 
+        # Automatically refresh every 10 minutes
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.refresh)
+        self.timer.start(600000)
+
         # Refresh them all
         self.refresh()
 
@@ -141,11 +146,9 @@ class HealthOsqueryThread(QtCore.QThread):
     def __init__(self, common, name):
         super(HealthOsqueryThread, self).__init__()
         self.c = common
-        self.c.log("HealthOsqueryThread", "__init__", name)
         self.name = name
 
     def run(self):
-        self.c.log("HealthOsqueryThread", "run")
         data = self.c.daemon.exec_health(self.name)
         if not data:
             data = []
