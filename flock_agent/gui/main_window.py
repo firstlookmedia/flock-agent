@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
 
+from .systray import SysTray
 from .tabs import HomebrewTab, HealthTab, TwigsTab, SettingsTab
 from .daemon_client import DaemonNotRunningException, PermissionDeniedException
 
@@ -19,7 +20,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowIcon(self.c.gui.icon)
 
         # System tray
-        self.systray = QtWidgets.QSystemTrayIcon(self.c.gui.systray_icon)
+        self.systray = SysTray(self.c)
         self.systray.activated.connect(self.toggle_window)
         self.systray.show()
 

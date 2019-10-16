@@ -25,19 +25,12 @@ class GuiCommon:
         # Preload icons
         self.icon = QtGui.QIcon(self.c.get_resource_path("images/icon.png"))
         if Platform.current() == Platform.MACOS:
-            if (
-                NSUserDefaults.standardUserDefaults().stringForKey_(
-                    "AppleInterfaceStyle"
-                )
-                == "Dark"
-            ):
-                self.systray_icon = QtGui.QIcon(
-                    self.c.get_resource_path("images/systray-dark.png")
-                )
-            else:
-                self.systray_icon = QtGui.QIcon(
-                    self.c.get_resource_path("images/systray-light.png")
-                )
+            self.systray_icon_dark = QtGui.QIcon(
+                self.c.get_resource_path("images/systray-dark.png")
+            )
+            self.systray_icon_light = QtGui.QIcon(
+                self.c.get_resource_path("images/systray-light.png")
+            )
         else:
             self.systray_icon = QtGui.QIcon(
                 self.c.get_resource_path("images/systray.png")
