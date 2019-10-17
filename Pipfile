@@ -13,10 +13,10 @@ requests = "*"
 aiohttp = "==3.6.2"
 appdirs = "*"
 urllib3 = "*"
-pyobjc-core = "*"
-pyobjc-framework-cocoa = "*"
-pyobjc-framework-quartz = "*"
 pyqt5 = "*"
+pyobjc-core = { version = "*", platform_system = "== 'Darwin'" }
+pyobjc-framework-cocoa = { version = "*", platform_system = "== 'Darwin'" }
+pyobjc-framework-quartz = { version = "*", platform_system = "== 'Darwin'" }
 
 [requires]
 python_version = "3.7"
