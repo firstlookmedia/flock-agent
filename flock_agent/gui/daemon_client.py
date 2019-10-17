@@ -87,10 +87,6 @@ class DaemonClient:
         res = self._http_get("/exec_health/{}".format(health_item_name))
         return res["data"]
 
-    def refresh_osqueryd(self):
-        res = self._http_get("/refresh_osqueryd")
-        return res["data"]
-
     def register_server(self, server_url, name):
         res = self._http_post(
             "/register_server", {"server_url": server_url, "name": name}

@@ -56,7 +56,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.data_tab.refresh.connect(self.update_ui)
 
         self.settings_tab = SettingsTab(self.c)
-        self.settings_tab.update_use_server.connect(self.update_use_server)
+        self.settings_tab.update_use_server.connect(self.update_ui_settings)
         self.settings_tab.quit.connect(self.quit)
 
         self.tabs = QtWidgets.QTabWidget()
@@ -72,8 +72,7 @@ class MainWindow(QtWidgets.QMainWindow):
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
-        self.update_use_server(None)
-
+        self.update_ui()
         self.hide()
 
     def closeEvent(self, e):
@@ -150,6 +149,9 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 self.tabs.setCurrentIndex(0)
 
+    def update_ui_settings(self):
+        self.update_ui("settings")
+
     def update_homebrew_tab(self):
         if self.homebrew_tab.should_show:
             self.update_ui("homebrew")
@@ -168,20 +170,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.show()
             self.activateWindow()
             self.raise_()
-
-    def update_use_server(self, active_tab="settings"):
-        try:
-            # Either enable or disable osqueryd
-            self.c.daemon.refresh_osqueryd()
-        except DaemonNotRunningException:
-            self.c.gui.daemon_not_running()
-            return
-        except PermissionDeniedException:
-            self.c.gui.daemon_permission_denied()
-            return
-
-        # Either show or hide the opt-in and data tabs
-        self.update_ui(active_tab)
 
     def quit(self):
         self.c.log("MainWindow", "quit")

@@ -279,10 +279,6 @@ class Daemon:
             else:
                 return response_object(error="invalid health_item_name")
 
-        async def refresh_osqueryd(request):
-            self.osquery.refresh_osqueryd()
-            return response_object()
-
         async def register_server(request):
             data = await request.json()
             try:
@@ -340,7 +336,6 @@ class Daemon:
         app.router.add_get("/twig_enabled_statuses", get_twig_enabled_statuses)
         app.router.add_post("/update_twig_status", update_twig_status)
         app.router.add_get("/exec_health/{health_item_name}", exec_health)
-        app.router.add_get("/refresh_osqueryd", refresh_osqueryd)
         app.router.add_post("/register_server", register_server)
 
         loop = asyncio.get_event_loop()
