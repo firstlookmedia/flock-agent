@@ -103,12 +103,9 @@ Then move to the macOS release machine:
   - An app-specific Apple ID password saved in the login keychain called `flockagent-notarize`
 - Verify and checkout the git tag for this release
 - Run `./install/build_pkg.py`; this will make a codesigned installer package called `dist/FlockAgent-$VERSION.pkg`
-
-(These steps will eventually happen, but there's currently issues with codesigning with `--options runtime`, so saving this for later.)
-
-- ~~Notarize it: `xcrun altool --notarize-app --primary-bundle-id "media.firstlook.flock_agent" -u "micah@firstlook.org" -p "@keychain:flockagent-notarize" --file FlockAgent-$VERSION.pkg`~~
-- ~~Wait for it to get approved, check status with: `xcrun altool --notarization-history 0 -u "micah@firstlook.org" -p "@keychain:flockagent-notarize"`~~
-- ~~After it's approved, staple the ticket: `xcrun stapler staple FlockAgent-$VERSION.pkg`~~
+- Notarize it: `xcrun altool --notarize-app --primary-bundle-id "media.firstlook.flock_agent" -u "micah@firstlook.org" -p "@keychain:flockagent-notarize" --file FlockAgent-$VERSION.pkg`
+- Wait for it to get approved, check status with: `xcrun altool --notarization-history 0 -u "micah@firstlook.org" -p "@keychain:flockagent-notarize"`
+- After it's approved, staple the ticket: `xcrun stapler staple FlockAgent-$VERSION.pkg`
 
 This process ends up with the final file:
 
