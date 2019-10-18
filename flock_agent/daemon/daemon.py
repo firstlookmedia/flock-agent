@@ -191,6 +191,7 @@ class Daemon:
                 return response_object(error="invalid twig_id")
 
         async def enable_undecided_twigs(request):
+            # If the user choose to automatically opt-in to new twigs, this enables them all
             enabled_twig_ids = []
             twig_ids = self.global_settings.get_undecided_twig_ids()
             for twig_id in twig_ids:
@@ -198,7 +199,7 @@ class Daemon:
                     self.global_settings.enable_twig(twig_id)
                     enabled_twig_ids.append(twig_id)
 
-            if len(enabled_twig_ids) > 0:
+            if enabled_twig_ids:
                 self.c.log(
                     "Daemon",
                     "http_server.enable_undecided_twigs",
@@ -251,18 +252,18 @@ class Daemon:
                     self.global_settings.disable_twig(twig_id)
                     disabled_twig_ids.append(twig_id)
 
-            if len(enabled_twig_ids) > 0 or len(disabled_twig_ids) > 0:
+            if enabled_twig_ids or disabled_twig_ids:
                 self.global_settings.save()
                 self.osquery.refresh_osqueryd()
 
-            if len(enabled_twig_ids) > 0:
+            if enabled_twig_ids:
                 self.c.log(
                     "Daemon",
                     "http_server.update_twig_status",
                     f"enabled twigs: {enabled_twig_ids}",
                 )
                 self.flock_log.log(FlockLogTypes.TWIGS_ENABLED, enabled_twig_ids)
-            if len(disabled_twig_ids) > 0:
+            if disabled_twig_ids:
                 self.c.log(
                     "Daemon",
                     "http_server.update_twig_status",
