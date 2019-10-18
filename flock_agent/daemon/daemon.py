@@ -93,30 +93,33 @@ class Daemon:
             if self.global_settings.get("use_server") and self.global_settings.get(
                 "gateway_token"
             ):
-                # Submit osquery logs
-                try:
-                    self.osquery.submit_logs()
-                except Exception as e:
-                    exception_type = type(e).__name__
-                    self.c.log(
-                        "Daemon",
-                        "submit_loop",
-                        f"Exception submitting logs: {exception_type}",
-                    )
-
-                # Submit Flock Agent logs
-                try:
-                    self.flock_log.submit_logs()
-                except Exception as e:
-                    exception_type = type(e).__name__
-                    self.c.log(
-                        "Daemon",
-                        "submit_loop",
-                        f"Exception submitting flock logs: {exception_type}",
-                    )
+                await self.submit_logs_osquery()
+                await self.submit_logs_flock()
 
             # Wait a minute
             await asyncio.sleep(60)
+
+    async def submit_logs_osquery(self):
+        # Submit osquery logs
+        try:
+            self.osquery.submit_logs()
+        except Exception as e:
+            exception_type = type(e).__name__
+            self.c.log(
+                "Daemon", "submit_loop", f"Exception submitting logs: {exception_type}"
+            )
+
+    async def submit_logs_flock(self):
+        # Submit Flock Agent logs
+        try:
+            self.flock_log.submit_logs()
+        except Exception as e:
+            exception_type = type(e).__name__
+            self.c.log(
+                "Daemon",
+                "submit_loop",
+                f"Exception submitting flock logs: {exception_type}",
+            )
 
     async def http_server(self):
         self.c.log("Daemon", "http_server", "Starting http server")
@@ -173,6 +176,8 @@ class Daemon:
                         self.flock_log.log(FlockLogTypes.SERVER_ENABLED)
                     else:
                         self.flock_log.log(FlockLogTypes.SERVER_DISABLED)
+                        # Submit flock logs right away
+                        await self.submit_logs_flock()
 
             return response_object()
 
