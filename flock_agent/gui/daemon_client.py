@@ -55,20 +55,12 @@ class DaemonClient:
         res = self._http_post("/setting/{}".format(key), val)
         return res["data"]
 
-    def get_twig(self, twig_id):
-        res = self._http_get("/twig/{}".format(twig_id))
-        return res["data"]
-
     def exec_twig(self, twig_id):
         res = self._http_get("/exec_twig/{}".format(twig_id))
         return res["data"]
 
-    def enable_twig(self, twig_id):
-        res = self._http_post("/enable_twig", twig_id)
-        return res["data"]
-
-    def disable_twig(self, twig_id):
-        res = self._http_post("/disable_twig", twig_id)
+    def enable_undecided_twigs(self):
+        res = self._http_post("/enable_undecided_twigs")
         return res["data"]
 
     def get_decided_twig_ids(self):
@@ -83,12 +75,16 @@ class DaemonClient:
         res = self._http_get("/enabled_twig_ids")
         return res["data"]
 
-    def exec_health(self, health_item_name):
-        res = self._http_get("/exec_health/{}".format(health_item_name))
+    def get_twig_enabled_statuses(self):
+        res = self._http_get("/twig_enabled_statuses")
         return res["data"]
 
-    def refresh_osqueryd(self):
-        res = self._http_get("/refresh_osqueryd")
+    def update_twig_status(self, twig_status):
+        res = self._http_post("/update_twig_status", twig_status)
+        return res["data"]
+
+    def exec_health(self, health_item_name):
+        res = self._http_get("/exec_health/{}".format(health_item_name))
         return res["data"]
 
     def register_server(self, server_url, name):

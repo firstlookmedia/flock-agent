@@ -100,6 +100,7 @@ class TwigsTab(QtWidgets.QWidget):
                 twig_ids = self.c.daemon.get_undecided_twig_ids()
             else:
                 twig_ids = self.c.daemon.get_decided_twig_ids()
+            twig_enabled_statuses = self.c.daemon.get_twig_enabled_statuses()
         except DaemonNotRunningException:
             self.c.gui.daemon_not_running()
             return
@@ -109,7 +110,7 @@ class TwigsTab(QtWidgets.QWidget):
 
         # Add them
         for twig_id in reversed(twig_ids):
-            twig_view = TwigView(self.c, twig_id)
+            twig_view = TwigView(self.c, twig_id, twig_enabled_statuses[twig_id])
             self.twig_views.append(twig_view)
             self.twigs_layout.insertWidget(0, twig_view)
 
@@ -129,9 +130,7 @@ class TwigsTab(QtWidgets.QWidget):
                     )
                     self.c.daemon.set("automatically_enable_twigs", True)
 
-                for twig_id in self.c.daemon.get_undecided_twig_ids():
-                    self.c.daemon.enable_twig(twig_id)
-                self.c.daemon.refresh_osqueryd()
+                self.c.daemon.enable_undecided_twigs()
             except DaemonNotRunningException:
                 self.c.gui.daemon_not_running()
                 return
@@ -144,13 +143,15 @@ class TwigsTab(QtWidgets.QWidget):
     def clicked_apply_button(self):
         self.c.log("TwigsTab ({})".format(self.mode), "clicked_apply_button")
 
+        twig_status = {}
+        for twig_view in self.twig_views:
+            if twig_view.enabled_status == "enabled":
+                twig_status[twig_view.twig_id] = True
+            elif twig_view.enabled_status == "disabled":
+                twig_status[twig_view.twig_id] = False
+
         try:
-            for twig_view in self.twig_views:
-                if twig_view.enabled_status == "enabled":
-                    self.c.daemon.enable_twig(twig_view.twig_id)
-                elif twig_view.enabled_status == "disabled":
-                    self.c.daemon.disable_twig(twig_view.twig_id)
-            self.c.daemon.refresh_osqueryd()
+            self.c.daemon.update_twig_status(twig_status)
         except DaemonNotRunningException:
             self.c.gui.daemon_not_running()
             return

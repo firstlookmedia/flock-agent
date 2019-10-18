@@ -4,6 +4,7 @@ import sys
 import grp
 import asyncio
 import json
+import time
 from urllib.parse import urlparse
 from aiohttp import web
 from aiohttp.abc import AbstractAccessLogger
@@ -11,6 +12,7 @@ from aiohttp.web_runner import GracefulExit
 
 from .global_settings import GlobalSettings
 from .osquery import Osquery
+from .flock_logs import FlockLog, FlockLogTypes
 from .api_client import (
     FlockApiClient,
     PermissionDenied,
@@ -47,15 +49,18 @@ class Daemon:
 
         self.api_client = FlockApiClient(self.c)
 
-        # Start with refreshing osqueryd
-        self.osquery.refresh_osqueryd()
-
-        # Prepare the unix socket path
+        # Flock Agent lib directory
         if Platform.current() == Platform.MACOS:
             lib_dir = "/usr/local/var/lib/flock-agent"
         else:
             lib_dir = "/var/lib/flock-agent"
         os.makedirs(lib_dir, exist_ok=True)
+
+        # Flock Agent keeps its own submission queue separate from osqueryd, for when users
+        # enable/disable the server, or enable/disable twigs
+        self.flock_log = FlockLog(self.c, lib_dir)
+
+        # Prepare the unix socket path
         self.unix_socket_path = os.path.join(lib_dir, "socket")
         if os.path.exists(self.unix_socket_path):
             os.remove(self.unix_socket_path)
@@ -77,6 +82,9 @@ class Daemon:
                 # Unknown, so make the group root
                 self.gid = 0
 
+        # Start with refreshing osqueryd
+        self.osquery.refresh_osqueryd()
+
     async def start(self):
         await asyncio.gather(self.submit_loop(), self.http_server())
 
@@ -85,19 +93,33 @@ class Daemon:
             if self.global_settings.get("use_server") and self.global_settings.get(
                 "gateway_token"
             ):
-                # Submit osquery logs
-                try:
-                    self.osquery.submit_logs()
-                except Exception as e:
-                    exception_type = type(e).__name__
-                    self.c.log(
-                        "Daemon",
-                        "submit_loop",
-                        "Exception submitting logs: {}".format(exception_type),
-                    )
+                await self.submit_logs_osquery()
+                await self.submit_logs_flock()
 
             # Wait a minute
             await asyncio.sleep(60)
+
+    async def submit_logs_osquery(self):
+        # Submit osquery logs
+        try:
+            self.osquery.submit_logs()
+        except Exception as e:
+            exception_type = type(e).__name__
+            self.c.log(
+                "Daemon", "submit_loop", f"Exception submitting logs: {exception_type}"
+            )
+
+    async def submit_logs_flock(self):
+        # Submit Flock Agent logs
+        try:
+            self.flock_log.submit_logs()
+        except Exception as e:
+            exception_type = type(e).__name__
+            self.c.log(
+                "Daemon",
+                "submit_loop",
+                f"Exception submitting flock logs: {exception_type}",
+            )
 
     async def http_server(self):
         self.c.log("Daemon", "http_server", "Starting http server")
@@ -114,7 +136,7 @@ class Daemon:
                 common_log(
                     "Daemon.http_server",
                     "AccessLogger",
-                    "{} {} {}".format(request.method, request.path, response.status),
+                    f"{request.method} {request.path} {response.status}",
                 )
 
         # Routes
@@ -135,16 +157,29 @@ class Daemon:
         async def set_setting(request):
             key = request.match_info.get("key", None)
             val = await request.json()
-            self.global_settings.set(key, val)
-            self.global_settings.save()
-            return response_object()
 
-        async def get_twig(request):
-            twig_id = request.match_info.get("twig_id", None)
-            try:
-                return response_object(self.global_settings.get_twig(twig_id))
-            except:
-                return response_object(error="invalid twig_id")
+            # Only change the setting if it's actually changing
+            old_val = self.global_settings.get(key)
+            if old_val == val:
+                self.c.log(
+                    "Daemon",
+                    "http_server.set_settings",
+                    f"skipping {key}={val}, because it's already set",
+                )
+            else:
+                self.c.log("Daemon", "http_server.set_settings", f"setting {key}={val}")
+                self.global_settings.set(key, val)
+                self.global_settings.save()
+
+                if key == "use_server":
+                    if val:
+                        self.flock_log.log(FlockLogTypes.SERVER_ENABLED)
+                    else:
+                        self.flock_log.log(FlockLogTypes.SERVER_DISABLED)
+                        # Submit flock logs right away
+                        await self.submit_logs_flock()
+
+            return response_object()
 
         async def exec_twig(request):
             twig_id = request.match_info.get("twig_id", None)
@@ -155,16 +190,25 @@ class Daemon:
             except:
                 return response_object(error="invalid twig_id")
 
-        async def enable_twig(request):
-            twig_id = await request.json()
-            self.global_settings.enable_twig(twig_id)
-            self.global_settings.save()
-            return response_object()
+        async def enable_undecided_twigs(request):
+            # If the user choose to automatically opt-in to new twigs, this enables them all
+            enabled_twig_ids = []
+            twig_ids = self.global_settings.get_undecided_twig_ids()
+            for twig_id in twig_ids:
+                if not self.global_settings.is_twig_enabled(twig_id):
+                    self.global_settings.enable_twig(twig_id)
+                    enabled_twig_ids.append(twig_id)
 
-        async def disable_twig(request):
-            twig_id = await request.json()
-            self.global_settings.disable_twig(twig_id)
-            self.global_settings.save()
+            if enabled_twig_ids:
+                self.c.log(
+                    "Daemon",
+                    "http_server.enable_undecided_twigs",
+                    f"enabled twigs: {enabled_twig_ids}",
+                )
+                self.global_settings.save()
+                self.osquery.refresh_osqueryd()
+                self.flock_log.log(FlockLogTypes.TWIGS_ENABLED, enabled_twig_ids)
+
             return response_object()
 
         async def get_decided_twig_ids(request):
@@ -175,6 +219,59 @@ class Daemon:
 
         async def get_enabled_twig_ids(request):
             return response_object(self.global_settings.get_enabled_twig_ids())
+
+        async def get_twig_enabled_statuses(request):
+            return response_object(self.global_settings.get_twig_enabled_statuses())
+
+        async def update_twig_status(request):
+            twig_status = await request.json()
+
+            # Validate twig_status
+            if type(twig_status) != dict:
+                return response_object(error="twig_status must be a dict")
+            for twig_id in twig_status:
+                if twig_id not in self.global_settings.settings["twigs"]:
+                    return response_object(
+                        error="twig_status contains invalid twig_ids"
+                    )
+                if type(twig_status[twig_id]) != bool:
+                    return response_object(error="twig_status is in an invalid format")
+
+            enabled_twig_ids = []
+            disabled_twig_ids = []
+
+            for twig_id in twig_status:
+                if twig_status[twig_id] and not self.global_settings.is_twig_enabled(
+                    twig_id
+                ):
+                    self.global_settings.enable_twig(twig_id)
+                    enabled_twig_ids.append(twig_id)
+                if not twig_status[twig_id] and self.global_settings.is_twig_enabled(
+                    twig_id
+                ):
+                    self.global_settings.disable_twig(twig_id)
+                    disabled_twig_ids.append(twig_id)
+
+            if enabled_twig_ids or disabled_twig_ids:
+                self.global_settings.save()
+                self.osquery.refresh_osqueryd()
+
+            if enabled_twig_ids:
+                self.c.log(
+                    "Daemon",
+                    "http_server.update_twig_status",
+                    f"enabled twigs: {enabled_twig_ids}",
+                )
+                self.flock_log.log(FlockLogTypes.TWIGS_ENABLED, enabled_twig_ids)
+            if disabled_twig_ids:
+                self.c.log(
+                    "Daemon",
+                    "http_server.update_twig_status",
+                    f"disabled twigs: {disabled_twig_ids}",
+                )
+                self.flock_log.log(FlockLogTypes.TWIGS_DISABLED, disabled_twig_ids)
+
+            return response_object()
 
         async def exec_health(request):
             health_item_name = request.match_info.get("health_item_name", None)
@@ -191,10 +288,6 @@ class Daemon:
                     return response_object(error="error executing health item query")
             else:
                 return response_object(error="invalid health_item_name")
-
-        async def refresh_osqueryd(request):
-            self.osquery.refresh_osqueryd()
-            return response_object()
 
         async def register_server(request):
             data = await request.json()
@@ -227,11 +320,11 @@ class Daemon:
             except PermissionDenied:
                 return response_object(error="Permission denied")
             except BadStatusCode as e:
-                return response_object(error="Bad status code: {}".format(e))
+                return response_object(error=f"Bad status code: {e}")
             except ResponseIsNotJson:
                 return response_object(error="Server response is not JSON")
             except RespondedWithError as e:
-                return response_object(error="Server error: {}".format(e))
+                return response_object(error=f"Server error: {e}")
             except InvalidResponse:
                 return response_object(error="Server returned an invalid response")
             except ConnectionError:
@@ -245,15 +338,14 @@ class Daemon:
         app.router.add_post("/shutdown", shutdown)
         app.router.add_get("/setting/{key}", get_setting)
         app.router.add_post("/setting/{key}", set_setting)
-        app.router.add_get("/twig/{twig_id}", get_twig)
         app.router.add_get("/exec_twig/{twig_id}", exec_twig)
-        app.router.add_post("/enable_twig", enable_twig)
-        app.router.add_post("/disable_twig", disable_twig)
+        app.router.add_post("/enable_undecided_twigs", enable_undecided_twigs)
         app.router.add_get("/decided_twig_ids", get_decided_twig_ids)
         app.router.add_get("/undecided_twig_ids", get_undecided_twig_ids)
         app.router.add_get("/enabled_twig_ids", get_enabled_twig_ids)
+        app.router.add_get("/twig_enabled_statuses", get_twig_enabled_statuses)
+        app.router.add_post("/update_twig_status", update_twig_status)
         app.router.add_get("/exec_health/{health_item_name}", exec_health)
-        app.router.add_get("/refresh_osqueryd", refresh_osqueryd)
         app.router.add_post("/register_server", register_server)
 
         loop = asyncio.get_event_loop()

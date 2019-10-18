@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-from .daemon_client import DaemonNotRunningException, PermissionDeniedException
 from ..twigs import twigs
 
 
@@ -10,13 +9,11 @@ class TwigView(QtWidgets.QWidget):
     The view of an individual twig
     """
 
-    def __init__(self, common, twig_id):
+    def __init__(self, common, twig_id, enabled_status):
         super(TwigView, self).__init__()
         self.c = common
         self.twig_id = twig_id
-
-        # Set the initial enabled status from settings
-        self.enabled_status = self.get_twig()["enabled"]
+        self.enabled_status = enabled_status
 
         # Widgets
         self.enabled_checkbox = QtWidgets.QCheckBox(twigs[twig_id]["name"])
@@ -75,14 +72,6 @@ class TwigView(QtWidgets.QWidget):
 
     def clicked_details_button(self):
         TwigDialog(self.c, self.twig_id)
-
-    def get_twig(self):
-        try:
-            return self.c.daemon.get_twig(self.twig_id)
-        except DaemonNotRunningException:
-            self.c.gui.daemon_not_running()
-        except PermissionDeniedException:
-            self.c.gui.daemon_permission_denied()
 
 
 class TwigDialog(QtWidgets.QDialog):

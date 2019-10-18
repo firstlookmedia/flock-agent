@@ -85,11 +85,17 @@ class FlockApiClient(object):
 
     def submit(self, data):
         """
-        Submit data to the Flock server.
-        data should a string, not an object.
+        Submit data to the Flock server
         """
         self.c.log("FlockApiClient", "submit")
         self._make_request("/submit", "post", True, data)
+
+    def submit_flock_logs(self, data):
+        """
+        Submit flock logs to the Flock server
+        """
+        self.c.log("FlockApiClient", "submit_flock_logs")
+        self._make_request("/submit_flock_logs", "post", True, data)
 
     def _make_request(self, path, method, auth, data=None):
         url = self._build_url(path)

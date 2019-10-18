@@ -31,6 +31,7 @@ class GlobalSettings(object):
             "gateway_username": None,
             "automatically_enable_twigs": False,
             "last_osquery_result_timestamp": 0,  # Timestamp of the last osquery result sent to the server
+            "last_flock_log_timestamp": 0,  # Timestamp of the last flock logs sent to the server
             # Twigs
             "twigs": {},
         }
@@ -57,6 +58,9 @@ class GlobalSettings(object):
     def disable_twig(self, twig_id):
         self.settings["twigs"][twig_id]["enabled"] = "disabled"
 
+    def is_twig_enabled(self, twig_id):
+        return self.settings["twigs"][twig_id]["enabled"] == "enabled"
+
     def get_decided_twig_ids(self):
         twig_ids = []
         for twig_id in self.settings["twigs"]:
@@ -77,6 +81,12 @@ class GlobalSettings(object):
             if self.settings["twigs"][twig_id]["enabled"] == "enabled":
                 twig_ids.append(twig_id)
         return twig_ids
+
+    def get_twig_enabled_statuses(self):
+        enabled_statuses = {}
+        for twig_id in self.settings["twigs"]:
+            enabled_statuses[twig_id] = self.settings["twigs"][twig_id]["enabled"]
+        return enabled_statuses
 
     def load(self):
         self.c.log("GlobalSettings", "load")

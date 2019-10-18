@@ -33,6 +33,7 @@ class Common(object):
             with open(self.log_filename, "a") as f:
                 time_str = time.strftime("%Y-%m-%d %H:%M:%S")
                 f.write("{} {}\n".format(time_str, final_msg))
+            os.chmod(self.log_filename, 0o600)
 
     def get_resource_path(self, filename):
         # In dev mode, look for resources directory relative to python file
