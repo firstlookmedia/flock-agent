@@ -101,11 +101,19 @@ class Daemon:
                     self.c.log(
                         "Daemon",
                         "submit_loop",
-                        "Exception submitting logs: {}".format(exception_type),
+                        f"Exception submitting logs: {exception_type}",
                     )
 
                 # Submit Flock Agent logs
-                self.flock_log.submit_logs()
+                try:
+                    self.flock_log.submit_logs()
+                except Exception as e:
+                    exception_type = type(e).__name__
+                    self.c.log(
+                        "Daemon",
+                        "submit_loop",
+                        f"Exception submitting flock logs: {exception_type}",
+                    )
 
             # Wait a minute
             await asyncio.sleep(60)
@@ -125,7 +133,7 @@ class Daemon:
                 common_log(
                     "Daemon.http_server",
                     "AccessLogger",
-                    "{} {} {}".format(request.method, request.path, response.status),
+                    f"{request.method} {request.path} {response.status}",
                 )
 
         # Routes
@@ -153,14 +161,10 @@ class Daemon:
                 self.c.log(
                     "Daemon",
                     "http_server.set_settings",
-                    "skipping {}={}, because it's already set".format(key, val),
+                    f"skipping {key}={val}, because it's already set",
                 )
             else:
-                self.c.log(
-                    "Daemon",
-                    "http_server.set_settings",
-                    "setting {}={}".format(key, val),
-                )
+                self.c.log("Daemon", "http_server.set_settings", f"setting {key}={val}")
                 self.global_settings.set(key, val)
                 self.global_settings.save()
 
@@ -193,7 +197,7 @@ class Daemon:
                 self.c.log(
                     "Daemon",
                     "http_server.enable_undecided_twigs",
-                    "enabled twigs: {}".format(enabled_twig_ids),
+                    f"enabled twigs: {enabled_twig_ids}",
                 )
                 self.global_settings.save()
                 self.osquery.refresh_osqueryd()
@@ -250,14 +254,14 @@ class Daemon:
                 self.c.log(
                     "Daemon",
                     "http_server.update_twig_status",
-                    "enabled twigs: {}".format(enabled_twig_ids),
+                    f"enabled twigs: {enabled_twig_ids}",
                 )
                 self.flock_log.log(FlockLogTypes.TWIGS_ENABLED, enabled_twig_ids)
             if len(disabled_twig_ids) > 0:
                 self.c.log(
                     "Daemon",
                     "http_server.update_twig_status",
-                    "disabled twigs: {}".format(disabled_twig_ids),
+                    f"disabled twigs: {disabled_twig_ids}",
                 )
                 self.flock_log.log(FlockLogTypes.TWIGS_DISABLED, disabled_twig_ids)
 
@@ -310,11 +314,11 @@ class Daemon:
             except PermissionDenied:
                 return response_object(error="Permission denied")
             except BadStatusCode as e:
-                return response_object(error="Bad status code: {}".format(e))
+                return response_object(error=f"Bad status code: {e}")
             except ResponseIsNotJson:
                 return response_object(error="Server response is not JSON")
             except RespondedWithError as e:
-                return response_object(error="Server error: {}".format(e))
+                return response_object(error=f"Server error: {e}")
             except InvalidResponse:
                 return response_object(error="Server returned an invalid response")
             except ConnectionError:

@@ -63,9 +63,7 @@ class Osquery(object):
             self.c.log(
                 "Osquery",
                 "refresh_osqueryd",
-                "enabling twigs: {}".format(
-                    ", ".join(self.c.global_settings.get_enabled_twig_ids())
-                ),
+                f"enabling twigs: {', '.join(self.c.global_settings.get_enabled_twig_ids())}",
             )
 
             # Rebuild osquery config
@@ -174,7 +172,7 @@ class Osquery(object):
             with open(self.results_filename, "r") as results_file:
                 lines = results_file.readlines()
                 if len(lines) > 0:
-                    self.c.log("Osquery", "submit_logs", "{} lines".format(len(lines)))
+                    self.c.log("Osquery", "submit_logs", f"{len(lines)} lines")
 
                     # Start an API client
                     api_client = FlockApiClient(self.c)
@@ -184,7 +182,7 @@ class Osquery(object):
                         self.c.log(
                             "Osquery",
                             "submit_logs",
-                            "API is not configured properly",
+                            "Unable to communicate with the server",
                             always=True,
                         )
                         return
@@ -209,22 +207,20 @@ class Osquery(object):
                                     self.c.log(
                                         "Osquery",
                                         "submit_logs",
-                                        'skipping "{}" result, already submitted'.format(
-                                            obj["name"]
-                                        ),
+                                        f"skipping \"{obj['name']}\" result, already submitted",
                                     )
                             else:
                                 self.c.log(
                                     "Osquery",
                                     "submit_logs",
-                                    "warning: unixTime not in line: {}".format(line),
+                                    f"warning: unixTime not in line: {line}",
                                 )
 
                         except json.decoder.JSONDecodeError:
                             self.c.log(
                                 "Osquery",
                                 "submit_logs",
-                                "warning: line is not valid JSON: {}".format(line),
+                                f"warning: line is not valid JSON: {line}",
                             )
 
                     # Submit them
@@ -232,9 +228,7 @@ class Osquery(object):
                     self.c.log(
                         "Osquery",
                         "submit_logs",
-                        "submitted logs: {}".format(
-                            ", ".join([obj["name"] for obj in logs])
-                        ),
+                        f"submitted logs: {', '.join([obj['name'] for obj in logs])}",
                     )
 
                     # Update the biggest timestamp, if needed
@@ -262,5 +256,5 @@ class Osquery(object):
             self.c.log(
                 "Osquery",
                 "submit_logs",
-                "warning: file not found: {}".format(self.results_filename),
+                f"warning: file not found: {self.results_filename}",
             )

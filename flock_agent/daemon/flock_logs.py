@@ -23,7 +23,7 @@ class FlockLog:
                     {
                         "type": flock_log_type,
                         "twig_ids": twig_ids,
-                        "timestamp": int(time.time()),
+                        "timestamp": int(time.time() * 1000),  # In milliseconds
                     }
                 )
                 + "\n"
@@ -41,74 +41,75 @@ class FlockLog:
             # Load the log file
             with open(self.filename, "r") as f:
                 lines = f.readlines()
-                if len(lines) > 0:
-                    self.c.log("FlockLog", "submit_logs", "{} lines".format(len(lines)))
+                if not lines:
+                    return
 
-                    # Start an API client
-                    api_client = FlockApiClient(self.c)
-                    try:
-                        api_client.ping()
-                    except:
-                        self.c.log(
-                            "FlockLog",
-                            "submit_logs",
-                            "API is not configured properly",
-                            always=True,
-                        )
-                        return
+                self.c.log("FlockLog", "submit_logs", f"{len(lines)} lines")
 
-                    # Make a list of logs
-                    logs = []
-                    for line in lines:
-                        line = line.strip()
-                        try:
-                            obj = json.loads(line)
-                            if "timestamp" in obj:
-                                if "type" not in obj:
-                                    obj["type"] = "unknown"
-
-                                # If we haven't submitted this yet
-                                if obj["timestamp"] > self.c.global_settings.get(
-                                    "last_flock_log_timestamp"
-                                ):
-                                    logs.append(obj)
-                                else:
-                                    # Already submitted
-                                    self.c.log(
-                                        "FlockLog",
-                                        "submit_logs",
-                                        'skipping "{}" result, already submitted'.format(
-                                            obj["type"]
-                                        ),
-                                    )
-                            else:
-                                self.c.log(
-                                    "FlockLog",
-                                    "submit_logs",
-                                    "warning: timestamp not in line: {}".format(line),
-                                )
-
-                        except json.decoder.JSONDecodeError:
-                            self.c.log(
-                                "FlockLog",
-                                "submit_logs",
-                                "warning: line is not valid JSON: {}".format(line),
-                            )
-
-                    # Submit them
-                    api_client.submit_flock_logs(json.dumps(logs))
+                # Start an API client
+                api_client = FlockApiClient(self.c)
+                try:
+                    api_client.ping()
+                except:
                     self.c.log(
                         "FlockLog",
                         "submit_logs",
-                        "submitted logs: {}".format(
-                            ", ".join([obj["type"] for obj in logs])
-                        ),
+                        "Unable to communicate with the server",
+                        always=True,
                     )
+                    return
 
-                    # Update the biggest timestamp, if needed
-                    if len(logs) > 0:
-                        if logs[-1]["timestamp"] > biggest_timestamp:
-                            biggest_timestamp = logs[-1]["timestamp"]
+                # Make a list of logs
+                logs = []
+                for line in lines:
+                    line = line.strip()
+
+                    try:
+                        obj = json.loads(line)
+                    except json.decoder.JSONDecodeError:
+                        self.c.log(
+                            "FlockLog",
+                            "submit_logs",
+                            f"warning: line is not valid JSON: {line}",
+                        )
+                        continue
+
+                    if "timestamp" not in obj:
+                        self.c.log(
+                            "FlockLog",
+                            "submit_logs",
+                            f"warning: timestamp not in line: {line}",
+                        )
+                        continue
+
+                    if "type" not in obj:
+                        obj["type"] = "unknown"
+
+                    # If we haven't submitted this yet
+                    if obj["timestamp"] > self.c.global_settings.get(
+                        "last_flock_log_timestamp"
+                    ):
+                        logs.append(obj)
+                    else:
+                        # Already submitted
+                        self.c.log(
+                            "FlockLog",
+                            "submit_logs",
+                            f"skipping \"{obj['type']}\" result, already submitted",
+                        )
+
+                # Submit them
+                api_client.submit_flock_logs(json.dumps(logs))
+                self.c.log(
+                    "FlockLog",
+                    "submit_logs",
+                    f"submitted logs: {', '.join([obj['type'] for obj in logs])}",
+                )
+
+                # Update the biggest timestamp, if needed
+                if len(logs) > 0:
+                    if logs[-1]["timestamp"] > biggest_timestamp:
+                        biggest_timestamp = logs[-1]["timestamp"]
 
             # Update timestamp in settings
             if (
@@ -127,9 +128,7 @@ class FlockLog:
 
         except FileNotFoundError:
             self.c.log(
-                "FlockLog",
-                "submit_logs",
-                "warning: file not found: {}".format(self.filename),
+                "FlockLog", "submit_logs", f"warning: file not found: {self.filename}"
             )
 
 
