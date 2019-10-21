@@ -39,7 +39,7 @@ class Daemon:
         log_filename = os.path.join(log_dir, "log")
         self.c.log_filename = log_filename
 
-        self.c.log("Daemon", "__init__")
+        self.c.log("Daemon", "__init__", f"version {self.c.version}")
 
         self.osquery = Osquery(common)
         self.c.osquery = self.osquery
