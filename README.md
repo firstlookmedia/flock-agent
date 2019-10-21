@@ -98,7 +98,7 @@ sudo rm -rf /Applications/Flock.app
 sudo rm -rf /usr/local/etc/flock-agent
 sudo rm -rf /usr/local/var/lib/flock-agent
 sudo rm -rf /usr/local/var/log/flock-agent
-sudo pkgutil --forget media.firstlook.flock_agent
+sudo pkgutil --forget media.firstlook.flock-agent
 rm -r ~/Library/Application\ Support/FlockAgent/
 ```
 

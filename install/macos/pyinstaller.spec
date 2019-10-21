@@ -50,7 +50,7 @@ app = BUNDLE(
     coll,
     name="Flock.app",
     icon="flock-agent.icns",
-    bundle_identifier="media.firstlook.flock_agent",
+    bundle_identifier="media.firstlook.flock-agent",
     info_plist={
         "LSUIElement": True,
         "NSHighResolutionCapable": True,
