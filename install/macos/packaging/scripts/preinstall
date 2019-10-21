@@ -9,5 +9,10 @@ if [ -f /usr/local/bin/brew ]; then
     fi
 fi
 
+# Quit the Flock Agent GUI
 /usr/bin/osascript -e 'quit app "Flock"'
+
+# Unload the Flock Agent daemon
+/bin/launchctl unload /Library/LaunchDaemons/media.firstlook.flock-agentd.plist
+
 exit 0
