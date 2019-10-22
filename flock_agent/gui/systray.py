@@ -15,7 +15,7 @@ class SysTray(QtWidgets.QSystemTrayIcon):
 
         menu = QtWidgets.QMenu()
         show_action = menu.addAction("Show Flock")
-        show_action.triggered.connect(lambda: self.show_clicked.emit())
+        show_action.triggered.connect(self.show_clicked.emit)
         self.setContextMenu(menu)
 
         if Platform.current() == Platform.MACOS:

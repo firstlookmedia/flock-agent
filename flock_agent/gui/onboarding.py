@@ -284,23 +284,18 @@ class AppletPage(QtWidgets.QWizardPage):
         label.setWordWrap(True)
         label.setStyleSheet(self.c.gui.css["Onboarding label"])
 
-        systray_image = QtWidgets.QLabel()
         if Platform.current() == Platform.MACOS:
-            systray_image.setPixmap(
-                QtGui.QPixmap.fromImage(
-                    QtGui.QImage(
-                        self.c.get_resource_path("images/onboarding-systray.png")
-                    )
-                )
+            systray_image_path = self.c.get_resource_path(
+                "images/onboarding-systray.png"
             )
         else:
-            systray_image.setPixmap(
-                QtGui.QPixmap.fromImage(
-                    QtGui.QImage(
-                        self.c.get_resource_path("images/onboarding-systray-linux.png")
-                    )
-                )
+            systray_image_path = self.c.get_resource_path(
+                "images/onboarding-systray-linux.png"
             )
+        systray_image = QtWidgets.QLabel()
+        systray_image.setPixmap(
+            QtGui.QPixmap.fromImage(QtGui.QImage(systray_image_path))
+        )
 
         # Layout
         layout = QtWidgets.QVBoxLayout()
