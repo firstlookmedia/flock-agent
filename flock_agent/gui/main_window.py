@@ -21,7 +21,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # System tray
         self.systray = SysTray(self.c)
-        self.systray.activated.connect(self.toggle_window)
+        self.systray.show_clicked.connect(self.show_window)
         self.systray.show()
 
         # Header
@@ -162,14 +162,11 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.update_ui()
 
-    def toggle_window(self):
-        self.c.log("MainWindow", "toggle_window")
-        if self.isVisible():
-            self.hide()
-        else:
-            self.show()
-            self.activateWindow()
-            self.raise_()
+    def show_window(self):
+        self.c.log("MainWindow", "show_window")
+        self.show()
+        self.activateWindow()
+        self.raise_()
 
     def quit(self):
         self.c.log("MainWindow", "quit")

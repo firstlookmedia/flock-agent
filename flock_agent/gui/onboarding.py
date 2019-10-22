@@ -284,12 +284,17 @@ class AppletPage(QtWidgets.QWizardPage):
         label.setWordWrap(True)
         label.setStyleSheet(self.c.gui.css["Onboarding label"])
 
-        # TODO: make separate macOS/Linux screenshots for this icon
+        if Platform.current() == Platform.MACOS:
+            systray_image_path = self.c.get_resource_path(
+                "images/onboarding-systray.png"
+            )
+        else:
+            systray_image_path = self.c.get_resource_path(
+                "images/onboarding-systray-linux.png"
+            )
         systray_image = QtWidgets.QLabel()
         systray_image.setPixmap(
-            QtGui.QPixmap.fromImage(
-                QtGui.QImage(self.c.get_resource_path("images/onboarding-systray.png"))
-            )
+            QtGui.QPixmap.fromImage(QtGui.QImage(systray_image_path))
         )
 
         # Layout
@@ -359,7 +364,9 @@ class Onboarding(QtWidgets.QWizard):
                     self.data_page.automatically_enable_twigs_checkbox.checkState()
                     == QtCore.Qt.CheckState.Checked
                 )
-                self.c.daemon.set("automatically_enable_twigs", automatically_enable_twigs)
+                self.c.daemon.set(
+                    "automatically_enable_twigs", automatically_enable_twigs
+                )
 
                 # Automatically enable the twigs, if checkbox was checked
                 if automatically_enable_twigs:
