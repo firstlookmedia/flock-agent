@@ -246,8 +246,9 @@ class Daemon:
                 ):
                     self.global_settings.enable_twig(twig_id)
                     enabled_twig_ids.append(twig_id)
-                if not twig_status[twig_id] and self.global_settings.is_twig_enabled(
-                    twig_id
+                if not twig_status[twig_id] and (
+                    self.global_settings.is_twig_enabled(twig_id)
+                    or self.global_settings.is_twig_undecided(twig_id)
                 ):
                     self.global_settings.disable_twig(twig_id)
                     disabled_twig_ids.append(twig_id)

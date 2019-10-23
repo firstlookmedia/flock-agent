@@ -61,6 +61,9 @@ class GlobalSettings(object):
     def is_twig_enabled(self, twig_id):
         return self.settings["twigs"][twig_id]["enabled"] == "enabled"
 
+    def is_twig_undecided(self, twig_id):
+        return self.settings["twigs"][twig_id]["enabled"] == "undecided"
+
     def get_decided_twig_ids(self):
         twig_ids = []
         for twig_id in self.settings["twigs"]:

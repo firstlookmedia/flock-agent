@@ -17,10 +17,6 @@ class TwigView(QtWidgets.QWidget):
 
         # Widgets
         self.enabled_checkbox = QtWidgets.QCheckBox(twigs[twig_id]["name"])
-        if self.enabled_status == "undecided":
-            self.enabled_checkbox.setTristate(True)
-        else:
-            self.enabled_checkbox.setTristate(False)
         self.enabled_checkbox.setStyleSheet(self.c.gui.css["TwigView enabled_checkbox"])
         self.enabled_checkbox.stateChanged.connect(self.toggle_enabled)
 
@@ -53,21 +49,14 @@ class TwigView(QtWidgets.QWidget):
     def update_ui(self):
         if self.enabled_status == "enabled":
             self.enabled_checkbox.setCheckState(QtCore.Qt.CheckState.Checked)
-        elif self.enabled_status == "disabled":
-            self.enabled_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
         else:
-            self.enabled_checkbox.setCheckState(QtCore.Qt.CheckState.PartiallyChecked)
+            self.enabled_checkbox.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
     def toggle_enabled(self, state):
         if state == QtCore.Qt.CheckState.Checked:
             self.enabled_status = "enabled"
-            self.enabled_checkbox.setTristate(False)
-        elif state == QtCore.Qt.CheckState.Unchecked:
-            self.enabled_status = "disabled"
-            self.enabled_checkbox.setTristate(False)
         else:
-            self.enabled_status = "undecided"
-            self.enabled_checkbox.setTristate(True)
+            self.enabled_status = "disabled"
         self.update_ui()
 
     def clicked_details_button(self):

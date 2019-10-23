@@ -53,7 +53,7 @@ class TwigsTab(QtWidgets.QWidget):
                 "Always share new data"
             )
 
-            enable_all_button = QtWidgets.QPushButton("Share New Data")
+            enable_all_button = QtWidgets.QPushButton("Share It All")
             enable_all_button.setStyleSheet(
                 self.c.gui.css["OptInTab enable_all_button"]
             )
@@ -143,13 +143,31 @@ class TwigsTab(QtWidgets.QWidget):
     def clicked_apply_button(self):
         self.c.log("TwigsTab ({})".format(self.mode), "clicked_apply_button")
 
+        # Build twig_status that maps the existing opt-in status of each twig
+        try:
+            twig_enabled_statuses = self.c.daemon.get_twig_enabled_statuses()
+        except DaemonNotRunningException:
+            self.c.gui.daemon_not_running()
+            return
+        except PermissionDeniedException:
+            self.c.gui.daemon_permission_denied()
+            return
+
         twig_status = {}
+        for twig_id in twig_enabled_statuses:
+            if twig_enabled_statuses[twig_id] == "enabled":
+                twig_status[twig_id] = True
+            else:
+                twig_status[twig_id] = False
+
+        # Update twig_status based on what has changed
         for twig_view in self.twig_views:
             if twig_view.enabled_status == "enabled":
                 twig_status[twig_view.twig_id] = True
-            elif twig_view.enabled_status == "disabled":
+            else:
                 twig_status[twig_view.twig_id] = False
 
+        # Update it in the daemon
         try:
             self.c.daemon.update_twig_status(twig_status)
         except DaemonNotRunningException:
