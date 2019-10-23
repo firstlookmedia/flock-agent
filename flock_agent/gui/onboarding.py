@@ -370,8 +370,7 @@ class Onboarding(QtWidgets.QWizard):
 
                 # Automatically enable the twigs, if checkbox was checked
                 if automatically_enable_twigs:
-                    for twig_id in self.c.daemon.get_undecided_twig_ids():
-                        self.c.daemon.enable_twig(twig_id)
+                    self.c.daemon.enable_undecided_twigs()
         except DaemonNotRunningException:
             self.c.gui.daemon_not_running()
             return
