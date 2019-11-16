@@ -8,42 +8,42 @@ twigs = {
     "os_version": {
         "name": "Operating system version",
         "query": "select * from os_version;",
-        "interval": 86400,
+        "interval": 28800,
         "description": "The current version of operating system that's on your computer",
         "platforms": ["macos", "linux"],
     },
     "browser_plugins": {
         "name": "Browser plugins",
         "query": "select browser_plugins.* from users join browser_plugins using (uid);",
-        "interval": 86400,
+        "interval": 28800,
         "description": "List of browser plugins, which can allow us to detect if you have malicious ones installed",
         "platforms": ["macos"],
     },
     "safari_extensions": {
         "name": "Safari extensions",
         "query": "select safari_extensions.* from users join safari_extensions using (uid);",
-        "interval": 86400,
+        "interval": 28800,
         "description": "List of Safari extensions, which can allow us to detect if you have malicious ones installed",
         "platforms": ["macos"],
     },
     "opera_extensions": {
         "name": "Opera extensions",
         "query": "select opera_extensions.* from users join opera_extensions using (uid);",
-        "interval": 86400,
+        "interval": 28800,
         "description": "List of Opera extensions, which can allow us to detect if you have malicious ones installed",
         "platforms": ["macos", "linux"],
     },
     "chrome_extensions": {
         "name": "Chrome extensions",
         "query": "select chrome_extensions.* from users join chrome_extensions using (uid);",
-        "interval": 86400,
+        "interval": 28800,
         "description": "List of Chrome extensions, which can allow us to detect if you have malicious ones installed",
         "platforms": ["macos", "linux"],
     },
     "firefox_addons": {
         "name": "Firefox add-ons",
         "query": "select firefox_addons.* from users join firefox_addons using (uid);",
-        "interval": 86400,
+        "interval": 28800,
         "description": "List of Firefox add-ons, which can allow us to detect if you have malicious ones installed",
         "platforms": ["macos", "linux"],
     },
@@ -71,7 +71,7 @@ twigs = {
     "loginwindow1": {
         "name": "Login window values",
         "query": "select key, subkey, value from plist where path = '/Library/Preferences/com.apple.loginwindow.plist';",
-        "interval": 86400,
+        "interval": 28800,
         "description": "What loginwindow values are set, including if the guest user is enabled, and which malware could use for persistence on system boot",
         "platforms": ["macos"],
     },
@@ -92,7 +92,7 @@ twigs = {
     "etc_hosts": {
         "name": "Local hostnames",
         "query": "select * from etc_hosts;",
-        "interval": 86400,
+        "interval": 28800,
         "description": "Values from the /etc/hosts file, which could be used to redirect or block network communications",
         "platforms": ["macos", "linux"],
     },
@@ -120,28 +120,28 @@ twigs = {
     "disk_encryption": {
         "name": "Disk encryption",
         "query": "select disk_encryption.* from mounts join disk_encryption on mounts.device_alias = disk_encryption.name where mounts.path = '/'",
-        "interval": 86400,
+        "interval": 28800,
         "description": "Whether disk encryption is enabled",
         "platforms": ["macos", "linux"],
     },
     "sharing_preferences": {
         "name": "Remote sharing preferences",
         "query": "select * from sharing_preferences",
-        "interval": 86400,
+        "interval": 28800,
         "description": "Whether people can remotely login to your computer to access your screen, files, printers, or other services",
         "platforms": ["macos"],
     },
     "gatekeeper": {
         "name": "Gatekeeper",
         "query": "select * from gatekeeper",
-        "interval": 86400,
+        "interval": 28800,
         "description": "Whether Gatekeeper is enabled, which protects your computer from running malicious apps",
         "platforms": ["macos"],
     },
     "sip": {
         "name": "System Integrity Protection",
         "query": "select * from sip_config where config_flag='sip'",
-        "interval": 86400,
+        "interval": 28800,
         "description": "Whether System Integrity Protection is enabled, which protects your macOS system files from getting modified by malware",
         "platforms": ["macos"],
     },
@@ -159,19 +159,19 @@ twigs = {
     # "loginwindow2": {
     #     "name": "Login window values (2)",
     #     "query": "select key, subkey, value from plist where path = '/Library/Preferences/loginwindow.plist';",
-    #     "interval": 86400,
+    #     "interval": 28800,
     #     "description": "What loginwindow values are set, which malware could use for persistence on system boot"
     # },
     # "loginwindow3": {
     #     "name": "Login window values (3)",
     #     "query": "select username, key, subkey, value from plist p, (select * from users where directory like '/Users/%') u where p.path = u.directory || '/Library/Preferences/com.apple.loginwindow.plist';",
-    #     "interval": 86400,
+    #     "interval": 28800,
     #     "description": "What loginwindow values are set, which malware could use for persistence on system boot"
     # },
     # "loginwindow4": {
     #     "name": "Login window values (4)",
     #     "query": "select username, key, subkey, value from plist p, (select * from users where directory like '/Users/%') u where p.path = u.directory || '/Library/Preferences/loginwindow.plist';",
-    #     "interval": 86400,
+    #     "interval": 28800,
     #     "description": "What loginwindow values are set, which malware could use for persistence on system boot"
     # },
     # "alf_exceptions": {
@@ -195,7 +195,7 @@ twigs = {
     # "open_sockets": {
     #     "name": "Open network connections",
     #     "query": "select distinct pid, family, protocol, local_address, local_port, remote_address, remote_port, path from process_open_sockets where path <> '' or remote_address <> '';",
-    #     "interval": 86400,
+    #     "interval": 28800,
     #     "description": "List of all the open network sockets per process, which could help identify connections to known-bad IP addresses, or odd local or remote port bindings"
     # },
     # "logged_in_users": {
