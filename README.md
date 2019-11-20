@@ -2,7 +2,7 @@
 
 Flock is a privacy-preserving fleet management system. The goal of Flock is to gain visibility into a fleet of laptops while protecting the privacy of the laptop users. It achieves this by only collecting information needed to inform security decisions, and by not allowing the IT team to access arbitrary files or execute arbitrary code on the laptops they are monitoring.
 
-Flock Agent is available for macOS and Linux. It runs on endpoints, collects data, and shares it with the [Flock server](https://github.com/firstlookmedia/flock).
+Flock Agent is available for macOS and Linux. It runs on endpoints, collects data, and shares it with the [Flock server](https://github.com/firstlookmedia/flock-server).
 
 ## Install Flock Agent on macOS
 
