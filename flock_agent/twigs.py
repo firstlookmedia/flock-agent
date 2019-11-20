@@ -145,11 +145,10 @@ twigs = {
         "description": "Whether System Integrity Protection is enabled, which protects your macOS system files from getting modified by malware",
         "platforms": ["macos"],
     },
-    # Detect reverse shells, from https://clo.ng/blog/osquery_reverse_shell/
-    # Note: this doesn't seem to work reliably in linux, only in macOS
+    # Detect reverse shells, inspired by https://clo.ng/blog/osquery_reverse_shell/
     "reverse_shell": {
         "name": "Reverse shells",
-        "query": "SELECT DISTINCT(processes.pid), processes.parent, processes.name, processes.path, processes.cmdline, processes.cwd, processes.root, processes.uid, processes.gid, processes.start_time, process_open_sockets.remote_address, process_open_sockets.remote_port, (SELECT cmdline FROM processes AS parent_cmdline WHERE pid=processes.parent) AS parent_cmdline FROM processes JOIN (SELECT * FROM process_open_sockets WHERE family is 2 OR family is 10 ) AS process_open_sockets USING (pid) WHERE ( name is 'sh' OR name is 'bash' OR name is 'dash' OR name is 'zsh');",
+        "query": "SELECT DISTINCT(processes.pid), processes.parent, processes.name, processes.path, processes.cmdline, processes.cwd, processes.root, processes.uid, processes.gid, processes.start_time, process_open_sockets.remote_address, process_open_sockets.remote_port, (SELECT cmdline FROM processes AS parent_cmdline WHERE pid=processes.parent) AS parent_cmdline FROM processes JOIN (SELECT * FROM process_open_sockets WHERE family is 2 OR family is 10 ) AS process_open_sockets USING (pid) WHERE ( name is 'sh' OR name is 'bash' OR name is 'dash' OR name is 'zsh') AND process_open_sockets.remote_address != '127.0.0.1';",
         "interval": 60,
         "description": "Detect reverse shells, which is the first step attackers often take after an initial compromise in order to more easily run commands on your computer",
         "platforms": ["macos", "linux"],
