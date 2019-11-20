@@ -1,3 +1,5 @@
 # Changelog
 
-The changelog will begin at version 0.1.0.
+## 0.1.0
+
+* First stable release
