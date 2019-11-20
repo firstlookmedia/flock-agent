@@ -71,8 +71,9 @@ This section documents the release process. Unless you're a Flock Agent develope
 Before making a release, all of these should be complete:
 
 - Update `flock_agent_version` in `flock-agent/__init__.py`
-- There must be a PGP-signed git tag for the version, e.g. for Flock Agent 0.1.0, the tag must be `v0.1.0`
 - `CHANGELOG.md` should be updated to include a list of all major changes since the last release
+- Check https://osquery.io/downloads to see what the latest version of osquery is, and make sure `install/macos/build_pkg.py` is bundling the latest version
+- There must be a PGP-signed git tag for the version, e.g. for Flock Agent 0.1.0, the tag must be `v0.1.0`
 
 Before making a release, verify the release git tag:
 
