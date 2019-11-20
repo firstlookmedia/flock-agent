@@ -71,8 +71,8 @@ This section documents the release process. Unless you're a Flock Agent develope
 Before making a release, all of these should be complete:
 
 - Update `flock_agent_version` in `flock-agent/__init__.py`
-- There must be a PGP-signed git tag for the version, e.g. for Flock Agent 0.0.6, the tag must be `v0.0.6`
-- ~~`CHANGELOG.md` should be updated to include a list of all major changes since the last release~~ (waiting until version `0.1.0` to start a changelog)
+- There must be a PGP-signed git tag for the version, e.g. for Flock Agent 0.1.0, the tag must be `v0.1.0`
+- `CHANGELOG.md` should be updated to include a list of all major changes since the last release
 
 Before making a release, verify the release git tag:
 
