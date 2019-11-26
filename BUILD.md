@@ -50,7 +50,7 @@ Install the needed dependencies:
 
 For Fedora-like distros: `dnf install -y rpm-build python3-qt5 python3-requests python3-appdirs python3-aiohttp`
 
-For Debian-like distros: `sudo apt install -y build-essential fakeroot python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp`
+For Debian-like distros: `sudo apt install -y build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp`
 
 Here's how you run Flock Agent, without having to build a package:
 

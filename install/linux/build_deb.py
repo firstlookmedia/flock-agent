@@ -27,17 +27,17 @@ def main():
     dist_path = os.path.join(root, "dist")
     deb_dist_path = os.path.join(root, "deb_dist")
 
-    print("○ Deleting old dist and deb_dist")
+    print("* Deleting old dist and deb_dist")
     if os.path.exists(dist_path):
         shutil.rmtree(dist_path)
     if os.path.exists(deb_dist_path):
         shutil.rmtree(deb_dist_path)
 
-    print("○ Building DEB package")
+    print("* Building DEB package")
     run(["python3", "setup.py", "--command-packages=stdeb.command", "bdist_deb"])
 
     print("")
-    print("○ To install run:")
+    print("* To install run:")
     print("sudo dpkg -i deb_dist/flock-agent_{}-1_all.deb".format(version))
 
 

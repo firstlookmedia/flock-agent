@@ -1,0 +1,38 @@
+version: 2.1
+
+jobs:
+
+  build-ubuntu-bionic:
+    docker:
+      - image: ubuntu:18.04
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: >
+            apt-get update
+            # install packagecloud.io CLI
+            apt-get install -y ruby-dev rubygems
+            gem install --no-ri --no-rdoc rake
+            gem install --no-ri --no-rdoc package_cloud
+            # install dependencies
+            apt-get install -y build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp
+      - run:
+          name: Create the .deb package
+          command: ./install/linux/build_deb.sh
+      - run:
+          name: Deploy to package packagecloud.io
+          command: >
+            VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
+            package_cloud push firstlookmedia/code/ubuntu/bionic deb_dist/flock_agent_${VERSION}-1_all.deb
+
+workflows:
+  version: 2
+  build-tags:
+    jobs:
+      - build-ubuntu-bionic:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/

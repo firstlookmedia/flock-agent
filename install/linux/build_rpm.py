@@ -27,13 +27,13 @@ def main():
     build_path = os.path.join(root, "build")
     dist_path = os.path.join(root, "dist")
 
-    print("○ Deleting old build and dist")
+    print("* Deleting old build and dist")
     if os.path.exists(build_path):
         shutil.rmtree(build_path)
     if os.path.exists(dist_path):
         shutil.rmtree(dist_path)
 
-    print("○ Building RPM package")
+    print("* Building RPM package")
     run(
         [
             "python3",
@@ -44,7 +44,7 @@ def main():
     )
 
     print("")
-    print("○ To install run:")
+    print("* To install run:")
     print("sudo dnf install dist/flock-agent-{}-1.noarch.rpm".format(version))
 
 
