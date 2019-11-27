@@ -192,9 +192,11 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
-      - build-fedora-31:
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
+      # Commenting out fedora 31 for now because of a potential package_cloud bug
+      # repository: RPM package appears to be corrupt and can not be processed! If you think this is a mistake, email us: support@packagecloud.io
+      # - build-fedora-31:
+      #     filters:
+      #       tags:
+      #         only: /^v.*/
+      #       branches:
+      #         ignore: /.*/
