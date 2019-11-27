@@ -65,6 +65,48 @@ jobs:
             VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
             package_cloud push firstlookmedia/code/ubuntu/eoan deb_dist/flock-agent_${VERSION}-1_all.deb
 
+  build-debian-buster:
+    docker:
+      - image: debian:buster
+    steps:
+      - run:
+          name: Install dependencies
+          command: |
+            apt-get update
+            apt-get install -y git ssh ruby-dev rubygems build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp
+            gem install --no-ri --no-rdoc rake
+            gem install --no-ri --no-rdoc package_cloud
+      - checkout
+      - run:
+          name: Create the .deb package
+          command: ./install/linux/build_deb.py
+      - run:
+          name: Deploy to packagecloud.io
+          command: |
+            VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
+            package_cloud push firstlookmedia/code/debian/buster deb_dist/flock-agent_${VERSION}-1_all.deb
+
+  build-debian-bullseye:
+    docker:
+      - image: debian:bullseye
+    steps:
+      - run:
+          name: Install dependencies
+          command: |
+            apt-get update
+            apt-get install -y git ssh ruby-dev rubygems build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp
+            gem install --no-ri --no-rdoc rake
+            gem install --no-ri --no-rdoc package_cloud
+      - checkout
+      - run:
+          name: Create the .deb package
+          command: ./install/linux/build_deb.py
+      - run:
+          name: Deploy to packagecloud.io
+          command: |
+            VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
+            package_cloud push firstlookmedia/code/debian/bullseye deb_dist/flock-agent_${VERSION}-1_all.deb
+
 workflows:
   version: 2
   build-tags:
@@ -82,6 +124,18 @@ workflows:
             branches:
               ignore: /.*/
       - build-ubuntu-eoan:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - build-debian-buster:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - build-debian-bullseye:
           filters:
             tags:
               only: /^v.*/
