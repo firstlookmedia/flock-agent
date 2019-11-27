@@ -124,7 +124,8 @@ jobs:
           name: Deploy to packagecloud.io
           command: |
             VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
-            package_cloud push firstlookmedia/code/fedora/30 dist/flock-agent_${VERSION}-1.noarch.rpm
+            package_cloud push firstlookmedia/code/fedora/30 dist/flock-agent-${VERSION}-1.noarch.rpm
+            package_cloud push firstlookmedia/code/fedora/30 dist/flock-agent-${VERSION}-1.src.rpm
 
 workflows:
   version: 2
