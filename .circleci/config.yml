@@ -160,3 +160,9 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
+      - build-fedora-30:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
