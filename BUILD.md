@@ -48,7 +48,7 @@ After making a release, you should have `dist/FlockAgent-[version].pkg`.
 
 Install the needed dependencies:
 
-For Fedora-like distros: `dnf install -y rpm-build python3-qt5 python3-requests python3-appdirs python3-aiohttp`
+For Fedora-like distros: `dnf install -y rpm-build qt5-devel python3-qt5 python3-requests python3-appdirs python3-aiohttp`
 
 For Debian-like distros: `sudo apt install -y build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp`
 

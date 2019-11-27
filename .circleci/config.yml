@@ -107,6 +107,25 @@ jobs:
             VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
             package_cloud push firstlookmedia/code/debian/bullseye deb_dist/flock-agent_${VERSION}-1_all.deb
 
+  build-fedora-30:
+    docker:
+      - image: fedora:30
+    steps:
+      - run:
+          name: Install dependencies
+          command: |
+            dnf install -y git openssh ruby-devel make automake gcc gcc-c++ rpm-build qt5-devel python3-qt5 python3-requests python3-appdirs python3-aiohttp
+            gem install package_cloud
+      - checkout
+      - run:
+          name: Create the .rpm package
+          command: ./install/linux/build_rpm.py
+      - run:
+          name: Deploy to packagecloud.io
+          command: |
+            VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
+            package_cloud push firstlookmedia/code/fedora/30 dist/flock-agent_${VERSION}-1.noarch.rpm
+
 workflows:
   version: 2
   build-tags:
