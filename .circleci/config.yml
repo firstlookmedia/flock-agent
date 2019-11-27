@@ -21,7 +21,7 @@ jobs:
       - checkout
       - run:
           name: Create the .deb package
-          command: ./install/linux/build_deb.sh
+          command: cd ~/project && ./install/linux/build_deb.sh
       - run:
           name: Deploy to package packagecloud.io
           command: |
