@@ -22,6 +22,7 @@ jobs:
           command: |
             VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
             package_cloud push firstlookmedia/code/ubuntu/bionic deb_dist/flock-agent_${VERSION}-1_all.deb
+            package_cloud push firstlookmedia/code/ubuntu/bionic deb_dist/flock-agent_${VERSION}-1.dsc
 
   build-ubuntu-disco:
     docker:
@@ -43,6 +44,7 @@ jobs:
           command: |
             VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
             package_cloud push firstlookmedia/code/ubuntu/disco deb_dist/flock-agent_${VERSION}-1_all.deb
+            package_cloud push firstlookmedia/code/ubuntu/disco deb_dist/flock-agent_${VERSION}-1.dsc
 
   build-ubuntu-eoan:
     docker:
@@ -64,6 +66,7 @@ jobs:
           command: |
             VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
             package_cloud push firstlookmedia/code/ubuntu/eoan deb_dist/flock-agent_${VERSION}-1_all.deb
+            package_cloud push firstlookmedia/code/ubuntu/eoan deb_dist/flock-agent_${VERSION}-1.dsc
 
   build-debian-buster:
     docker:
@@ -85,6 +88,7 @@ jobs:
           command: |
             VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
             package_cloud push firstlookmedia/code/debian/buster deb_dist/flock-agent_${VERSION}-1_all.deb
+            package_cloud push firstlookmedia/code/debian/buster deb_dist/flock-agent_${VERSION}-1.dsc
 
   build-debian-bullseye:
     docker:
@@ -106,6 +110,7 @@ jobs:
           command: |
             VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
             package_cloud push firstlookmedia/code/debian/bullseye deb_dist/flock-agent_${VERSION}-1_all.deb
+            package_cloud push firstlookmedia/code/debian/bullseye deb_dist/flock-agent_${VERSION}-1.dsc
 
   build-fedora-30:
     docker:

@@ -35,6 +35,7 @@ def main():
 
     print("* Building DEB package")
     run(["python3", "setup.py", "--command-packages=stdeb.command", "bdist_deb"])
+    run(["python3", "setup.py", "--command-packages=stdeb.command", "sdist_dsc"])
 
     print("")
     print("* To install run:")
