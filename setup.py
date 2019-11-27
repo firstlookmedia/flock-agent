@@ -18,6 +18,7 @@ setuptools.setup(
     version=flock_agent_version,
     author="Micah Lee",
     author_email="micah.lee@firstlook.org",
+    license="GPLv3",
     description="Agent for Flock, the privacy-preserving fleet management system",
     long_description="Agent for Flock, the privacy-preserving fleet management system. The goal of Flock is to gain visibility into a fleet of workstation computers while protecting the privacy of their users. It achieves this by only collecting information needed to inform security decisions, and by not allowing the IT team to access arbitrary files or execute arbitrary code on the computers they are monitoring.",
     url="https://github.com/firstlookmedia/flock-agent",
