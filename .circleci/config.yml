@@ -9,13 +9,8 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            # install git
             apt-get update
-            apt-get install -y git ssh
-            # install dependencies
-            apt-get install -y build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp
-            # install packagecloud.io CLI
-            apt-get install -y ruby-dev rubygems
+            apt-get install -y git ssh ruby-dev rubygems build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp
             gem install --no-ri --no-rdoc rake
             gem install --no-ri --no-rdoc package_cloud
       - checkout
@@ -28,11 +23,65 @@ jobs:
             VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
             package_cloud push firstlookmedia/code/ubuntu/bionic deb_dist/flock-agent_${VERSION}-1_all.deb
 
+  build-ubuntu-disco:
+    docker:
+      - image: ubuntu:19.04
+    steps:
+      - run:
+          name: Install dependencies
+          command: |
+            apt-get update
+            apt-get install -y git ssh ruby-dev rubygems build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp
+            gem install --no-ri --no-rdoc rake
+            gem install --no-ri --no-rdoc package_cloud
+      - checkout
+      - run:
+          name: Create the .deb package
+          command: ./install/linux/build_deb.py
+      - run:
+          name: Deploy to packagecloud.io
+          command: |
+            VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
+            package_cloud push firstlookmedia/code/ubuntu/disco deb_dist/flock-agent_${VERSION}-1_all.deb
+
+  build-ubuntu-eoan:
+    docker:
+      - image: ubuntu:19.10
+    steps:
+      - run:
+          name: Install dependencies
+          command: |
+            apt-get update
+            apt-get install -y git ssh ruby-dev rubygems build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp
+            gem install --no-ri --no-rdoc rake
+            gem install --no-ri --no-rdoc package_cloud
+      - checkout
+      - run:
+          name: Create the .deb package
+          command: ./install/linux/build_deb.py
+      - run:
+          name: Deploy to packagecloud.io
+          command: |
+            VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
+            package_cloud push firstlookmedia/code/ubuntu/eoan deb_dist/flock-agent_${VERSION}-1_all.deb
+
 workflows:
   version: 2
   build-tags:
     jobs:
       - build-ubuntu-bionic:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - build-ubuntu-disco:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - build-ubuntu-eoan:
           filters:
             tags:
               only: /^v.*/
