@@ -7,9 +7,6 @@ jobs:
       - image: ubuntu:18.04
     steps:
       - run:
-          name: Where am I?
-          command: pwd
-      - run:
           name: Install dependencies
           command: |
             # install git
@@ -24,14 +21,10 @@ jobs:
       - checkout
       - run:
           name: Create the .deb package
-          command: |
-            pwd
-            cd ~/project
-            ./install/linux/build_deb.sh
+          command: ./install/linux/build_deb.py
       - run:
           name: Deploy to packagecloud.io
           command: |
-            cd ~/project
             VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
             package_cloud push firstlookmedia/code/ubuntu/bionic deb_dist/flock_agent_${VERSION}-1_all.deb
 
