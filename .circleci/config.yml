@@ -26,7 +26,7 @@ jobs:
           name: Deploy to packagecloud.io
           command: |
             VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
-            package_cloud push firstlookmedia/code/ubuntu/bionic deb_dist/flock_agent_${VERSION}-1_all.deb
+            package_cloud push firstlookmedia/code/ubuntu/bionic deb_dist/flock-agent_${VERSION}-1_all.deb
 
 workflows:
   version: 2
