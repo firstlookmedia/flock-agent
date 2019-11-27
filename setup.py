@@ -30,21 +30,15 @@ setuptools.setup(
     ],
     data_files=[
         (
-            os.path.join(sys.prefix, "share/applications"),
+            "share/applications",
             ["share/autostart/linux/media.firstlook.flock-agent.desktop"],
         ),
         (
-            os.path.join(sys.prefix, "share/icons/hicolor/64x64/apps"),
+            "share/icons/hicolor/64x64/apps",
             ["install/linux/media.firstlook.flock-agent.png"],
         ),
-        (
-            os.path.join(sys.prefix, "share/flock-agent/images"),
-            file_list("share/images"),
-        ),
-        (
-            os.path.join(sys.prefix, "share/flock-agent/autostart/linux"),
-            file_list("share/autostart/linux"),
-        ),
+        ("share/flock-agent/images", file_list("share/images")),
+        ("share/flock-agent/autostart/linux", file_list("share/autostart/linux")),
         ("/etc/systemd/system", ["install/linux/flock-agent.service"]),
     ],
     classifiers=(
