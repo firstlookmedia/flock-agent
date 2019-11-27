@@ -7,17 +7,17 @@ jobs:
       - image: ubuntu:18.04
     steps:
       - run:
-          name: Install other depdendencies
+          name: Install dependencies
           command: |
             # install git
             apt-get update
             apt-get install -y git ssh
+            # install dependencies
+            apt-get install -y build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp
             # install packagecloud.io CLI
             apt-get install -y ruby-dev rubygems
             gem install --no-ri --no-rdoc rake
             gem install --no-ri --no-rdoc package_cloud
-            # install dependencies
-            apt-get install -y build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp
       - checkout
       - run:
           name: Create the .deb package
