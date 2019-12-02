@@ -16,7 +16,9 @@ jobs:
       - checkout
       - run:
           name: Create the .deb package
-          command: ./install/linux/build_deb.py
+          command: |
+            ./install/linux/build_deb.py
+            dpkg -i deb_dist/flock-agent_*-1_all.deb
       - run:
           name: Deploy to packagecloud.io
           command: |
@@ -38,7 +40,9 @@ jobs:
       - checkout
       - run:
           name: Create the .deb package
-          command: ./install/linux/build_deb.py
+          command: |
+            ./install/linux/build_deb.py
+            dpkg -i deb_dist/flock-agent_*-1_all.deb
       - run:
           name: Deploy to packagecloud.io
           command: |
@@ -60,7 +64,9 @@ jobs:
       - checkout
       - run:
           name: Create the .deb package
-          command: ./install/linux/build_deb.py
+          command: |
+            ./install/linux/build_deb.py
+            dpkg -i deb_dist/flock-agent_*-1_all.deb
       - run:
           name: Deploy to packagecloud.io
           command: |
@@ -82,7 +88,9 @@ jobs:
       - checkout
       - run:
           name: Create the .deb package
-          command: ./install/linux/build_deb.py
+          command: |
+            ./install/linux/build_deb.py
+            dpkg -i deb_dist/flock-agent_*-1_all.deb
       - run:
           name: Deploy to packagecloud.io
           command: |
@@ -102,13 +110,37 @@ jobs:
       - checkout
       - run:
           name: Create the .rpm package
-          command: ./install/linux/build_rpm.py
+          command: |
+            ./install/linux/build_rpm.py
+            dnf install -y dist/flock-agent-*-1.noarch.rpm
       - run:
           name: Deploy to packagecloud.io
           command: |
             VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
             package_cloud push firstlookmedia/code/fedora/30 dist/flock-agent-${VERSION}-1.noarch.rpm
             package_cloud push firstlookmedia/code/fedora/30 dist/flock-agent-${VERSION}-1.src.rpm
+
+  build-fedora-31:
+    docker:
+      - image: fedora:31
+    steps:
+      - run:
+          name: Install dependencies
+          command: |
+            dnf install -y git openssh ruby-devel make automake gcc gcc-c++ rpm-build qt5-devel python3-qt5 python3-requests python3-appdirs python3-aiohttp
+            gem install package_cloud
+      - checkout
+      - run:
+          name: Create the .rpm package
+          command: |
+            ./install/linux/build_rpm.py
+            dnf install -y dist/flock-agent-*-1.noarch.rpm
+      - run:
+          name: Deploy to packagecloud.io
+          command: |
+            VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
+            package_cloud push firstlookmedia/code/fedora/31 dist/flock-agent-${VERSION}-1.noarch.rpm
+            package_cloud push firstlookmedia/code/fedora/31 dist/flock-agent-${VERSION}-1.src.rpm
 
 workflows:
   version: 2
@@ -144,20 +176,17 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
+      - build-fedora-31:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
 
       # Commenting out ubuntu 18.04 for now because Flock Agent requires python 3.7+, and
       # 18.04 comes with 3.6. This problem is solvable, but I'll wait to see if there's any
       # demand before trying to solve it
       # - build-ubuntu-bionic:
-      #     filters:
-      #       tags:
-      #         only: /^v.*/
-      #       branches:
-      #         ignore: /.*/
-
-      # Commenting out fedora 31 for now because of a potential package_cloud bug
-      # repository: RPM package appears to be corrupt and can not be processed! If you think this is a mistake, email us: support@packagecloud.io
-      # - build-fedora-31:
       #     filters:
       #       tags:
       #         only: /^v.*/
