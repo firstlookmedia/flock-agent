@@ -367,6 +367,8 @@ class Daemon:
         if Platform.current() != Platform.MACOS:
             return
 
+        update_check_delay = 43200  # 12 hours
+
         while True:
             self.c.log("Daemon", "autoupdate_loop", "Checking for updates")
 
@@ -383,6 +385,7 @@ class Daemon:
                     f"installed version: {self.c.version}, latest version: {latest_version}",
                 )
                 if latest_version <= self.c.version:
+                    await asyncio.sleep(update_check_delay)
                     continue
 
                 # Find the pkg asset
@@ -396,6 +399,7 @@ class Daemon:
 
                 if not url:
                     self.c.log("Daemon", "autoupdate_loop", "could not find .pkg file")
+                    await asyncio.sleep(update_check_delay)
                     continue
 
                 # Download the update
@@ -430,6 +434,7 @@ class Daemon:
                         "autoupdate_loop",
                         f"codesign verification failed: {p.stdout.decode()}",
                     )
+                    await asyncio.sleep(update_check_delay)
                     continue
 
                 # Install the update
@@ -449,6 +454,3 @@ class Daemon:
                     "autoupdate_loop",
                     f"Exception while checking for updates: {e}",
                 )
-
-            # Wait 12 hours
-            await asyncio.sleep(43200)
