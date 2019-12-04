@@ -422,7 +422,7 @@ class Daemon:
                     p.returncode != 0
                     or "Status: signed by a developer certificate issued by Apple for distribution"
                     not in p.stdout.decode()
-                    or "Developer ID Installer: FIRST LOOK PRODUCTIONS"
+                    or "Developer ID Installer: FIRST LOOK PRODUCTIONS, INC. ("
                     not in p.stdout.decode()
                 ):
                     self.c.log(
