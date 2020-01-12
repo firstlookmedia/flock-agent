@@ -7,14 +7,17 @@ from ..common import Platform
 
 
 class GlobalSettings(object):
-    def __init__(self, common):
+    def __init__(self, common, testing=False):
         self.c = common
+        self.testing = testing
 
         if Platform.current() == Platform.MACOS:
             etc_dir = "/usr/local/etc/flock-agent"
         else:
             etc_dir = "/etc/flock-agent"
-        os.makedirs(etc_dir, exist_ok=True)
+        # If we're doing unit testing this directory isn't important.
+        if not testing:
+            os.makedirs(etc_dir, exist_ok=True)
         self.settings_filename = os.path.join(etc_dir, "global_settings.json")
 
         self.c.log(
@@ -172,7 +175,10 @@ class GlobalSettings(object):
 
     def save(self):
         self.c.log("GlobalSettings", "save")
-        os.makedirs(self.c.appdata_path, exist_ok=True)
-        with open(self.settings_filename, "w") as settings_file:
-            json.dump(self.settings, settings_file, indent=4)
-        os.chmod(self.settings_filename, 0o600)
+        # When unit testing we likely won't have access to these directories and there's no point
+        # saving config data.
+        if not self.testing:
+            os.makedirs(self.c.appdata_path, exist_ok=True)
+            with open(self.settings_filename, "w") as settings_file:
+                json.dump(self.settings, settings_file, indent=4)
+            os.chmod(self.settings_filename, 0o600)
