@@ -8,6 +8,7 @@ import time
 import requests
 import subprocess
 from urllib.parse import urlparse
+from packaging.version import parse as parse_version
 from aiohttp import web
 from aiohttp.abc import AbstractAccessLogger
 from aiohttp.web_runner import GracefulExit
@@ -384,7 +385,7 @@ class Daemon:
                     "autoupdate_loop",
                     f"installed version: {self.c.version}, latest version: {latest_version}",
                 )
-                if latest_version <= self.c.version:
+                if parse_version(latest_version) <= parse_version(self.c.version):
                     await asyncio.sleep(update_check_delay)
                     continue
 
