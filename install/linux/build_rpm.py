@@ -39,7 +39,7 @@ def main():
             "python3",
             "setup.py",
             "bdist_rpm",
-            "--requires=python3-qt5,python3-requests,python3-appdirs,python3-aiohttp",
+            "--requires=python3-qt5,python3-requests,python3-appdirs,python3-aiohttp,python3-packaging",
         ]
     )
 

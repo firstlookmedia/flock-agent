@@ -54,9 +54,9 @@ pipenv run python -m pytest tests
 
 Install the needed dependencies:
 
-For Fedora-like distros: `dnf install -y rpm-build qt5-devel python3-qt5 python3-requests python3-appdirs python3-aiohttp python3-pytest python3-responses`
+For Fedora-like distros: `dnf install -y rpm-build qt5-devel python3-qt5 python3-requests python3-appdirs python3-aiohttp python3-packaging python3-pytest python3-responses`
 
-For Debian-like distros: `sudo apt install -y build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp python3-pytest python3-responses`
+For Debian-like distros: `sudo apt install -y build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp python3-packaging python3-pytest python3-responses`
 
 Here's how you run Flock Agent, without having to build a package:
 

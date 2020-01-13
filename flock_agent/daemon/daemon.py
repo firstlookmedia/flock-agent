@@ -5,7 +5,10 @@ import grp
 import asyncio
 import json
 import time
+import requests
+import subprocess
 from urllib.parse import urlparse
+from packaging.version import parse as parse_version
 from aiohttp import web
 from aiohttp.abc import AbstractAccessLogger
 from aiohttp.web_runner import GracefulExit
@@ -51,17 +54,17 @@ class Daemon:
 
         # Flock Agent lib directory
         if Platform.current() == Platform.MACOS:
-            lib_dir = "/usr/local/var/lib/flock-agent"
+            self.lib_dir = "/usr/local/var/lib/flock-agent"
         else:
-            lib_dir = "/var/lib/flock-agent"
-        os.makedirs(lib_dir, exist_ok=True)
+            self.lib_dir = "/var/lib/flock-agent"
+        os.makedirs(self.lib_dir, exist_ok=True)
 
         # Flock Agent keeps its own submission queue separate from osqueryd, for when users
         # enable/disable the server, or enable/disable twigs
-        self.flock_log = FlockLog(self.c, lib_dir)
+        self.flock_log = FlockLog(self.c, self.lib_dir)
 
         # Prepare the unix socket path
-        self.unix_socket_path = os.path.join(lib_dir, "socket")
+        self.unix_socket_path = os.path.join(self.lib_dir, "socket")
         if os.path.exists(self.unix_socket_path):
             os.remove(self.unix_socket_path)
 
@@ -86,7 +89,9 @@ class Daemon:
         self.osquery.refresh_osqueryd()
 
     async def start(self):
-        await asyncio.gather(self.submit_loop(), self.http_server())
+        await asyncio.gather(
+            self.submit_loop(), self.http_server(), self.autoupdate_loop()
+        )
 
     async def submit_loop(self):
         while True:
@@ -357,3 +362,96 @@ class Daemon:
         # Change permissions of unix socket
         os.chmod(self.unix_socket_path, 0o660)
         os.chown(self.unix_socket_path, 0, self.gid)
+
+    async def autoupdate_loop(self):
+        # Autoupdate is only available for macOS right now; Linux uses package managers
+        if Platform.current() != Platform.MACOS:
+            return
+
+        update_check_delay = 43200  # 12 hours
+
+        while True:
+            self.c.log("Daemon", "autoupdate_loop", "Checking for updates")
+
+            try:
+                # Query github for the latest version of Flock Agent
+                r = requests.get(
+                    "https://api.github.com/repos/firstlookmedia/flock-agent/releases/latest"
+                )
+                release = r.json()
+                latest_version = release["tag_name"].lstrip("v")
+                self.c.log(
+                    "Daemon",
+                    "autoupdate_loop",
+                    f"installed version: {self.c.version}, latest version: {latest_version}",
+                )
+                if parse_version(latest_version) <= parse_version(self.c.version):
+                    await asyncio.sleep(update_check_delay)
+                    continue
+
+                # Find the pkg asset
+                url = None
+                filename = None
+                for asset in release["assets"]:
+                    if asset["name"].endswith(".pkg"):
+                        url = asset["browser_download_url"]
+                        filename = asset["name"]
+                        break
+
+                if not url:
+                    self.c.log("Daemon", "autoupdate_loop", "could not find .pkg file")
+                    await asyncio.sleep(update_check_delay)
+                    continue
+
+                # Download the update
+                self.c.log("Daemon", "autoupdate_loop", f"downloading {url}")
+                r = requests.get(url)
+
+                os.makedirs(os.path.join(self.lib_dir, "updates"), exist_ok=True)
+                download_filename = os.path.join(self.lib_dir, "updates", filename)
+                with open(download_filename, "wb") as f:
+                    f.write(r.content)
+
+                self.c.log(
+                    "Daemon",
+                    "autoupdate_loop",
+                    f"download complete: {download_filename}",
+                )
+
+                # Verify that it's codesigned
+                p = subprocess.run(
+                    ["/usr/sbin/pkgutil", "--check-signature", download_filename],
+                    stdout=subprocess.PIPE,
+                )
+                if (
+                    p.returncode != 0
+                    or "Status: signed by a developer certificate issued by Apple for distribution"
+                    not in p.stdout.decode()
+                    or "Developer ID Installer: FIRST LOOK PRODUCTIONS, INC. ("
+                    not in p.stdout.decode()
+                ):
+                    self.c.log(
+                        "Daemon",
+                        "autoupdate_loop",
+                        f"codesign verification failed: {p.stdout.decode()}",
+                    )
+                    await asyncio.sleep(update_check_delay)
+                    continue
+
+                # Install the update
+                self.c.log(
+                    "Daemon",
+                    "autoupdate_loop",
+                    "launching installer background process and quitting daemon",
+                )
+                subprocess.Popen(
+                    ["/usr/sbin/installer", "-pkg", download_filename, "-target", "/"]
+                )
+                sys.exit(0)
+
+            except Exception as e:
+                self.c.log(
+                    "Daemon",
+                    "autoupdate_loop",
+                    f"Exception while checking for updates: {e}",
+                )
