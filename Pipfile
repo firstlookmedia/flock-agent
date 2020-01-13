@@ -16,9 +16,10 @@ aiohttp = "==3.6.2"
 appdirs = "*"
 urllib3 = "*"
 pyqt5 = "*"
-pyobjc-core = { version = "*", platform_system = "== 'Darwin'" }
-pyobjc-framework-cocoa = { version = "*", platform_system = "== 'Darwin'" }
-pyobjc-framework-quartz = { version = "*", platform_system = "== 'Darwin'" }
+packaging = "*"
+pyobjc-core = {version = "*",platform_system = "== 'Darwin'"}
+pyobjc-framework-cocoa = {version = "*",platform_system = "== 'Darwin'"}
+pyobjc-framework-quartz = {version = "*",platform_system = "== 'Darwin'"}
 
 [requires]
 python_version = "3.7"
