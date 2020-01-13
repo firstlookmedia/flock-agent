@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import requests
 import base64
-import json
 
 
 class PermissionDenied(Exception):
@@ -98,16 +97,23 @@ class FlockApiClient(object):
         self._make_request("/submit_flock_logs", "post", True, data)
 
     def _make_request(self, path, method, auth, data=None):
+        """
+        Makes a request to the api.
+
+        path: uri path to which to make a request (string)
+        method: the http method to use (string)
+        auth: whether to use http authentication. (bool)
+        data: Data to send with the reuqest (dict)
+        """
         url = self._build_url(path)
-        if method == "get":
-            requests_func = requests.get
-        elif method == "post":
-            requests_func = requests.post
 
         self.c.log("FlockApiClient", "_make_request", "{} {}".format(method, url))
 
         try:
-            res = requests_func(url, data=data, headers=self._get_headers(auth))
+            res = requests.request(
+                method, url, json=data, headers=self._get_headers(auth)
+            )
+
             self.c.log(
                 "FlockApiClient",
                 "_make_request",
@@ -119,11 +125,17 @@ class FlockApiClient(object):
         if res.status_code == 401:
             raise PermissionDenied()
 
+        if res.status_code != 200:
+            raise BadStatusCode(res)
+
         if res.content:
             try:
-                obj = json.loads(res.content)
-            except:
+                obj = res.json()
+            except ValueError:
                 raise ResponseIsNotJson()
+
+            if "error" not in obj:
+                raise InvalidResponse()
 
             if obj["error"]:
                 if "error_msg" in obj:
@@ -132,9 +144,6 @@ class FlockApiClient(object):
                     raise InvalidResponse()
 
             return obj
-
-        if res.status_code != 200:
-            raise BadStatusCode(res)
 
     def _build_url(self, path):
         """

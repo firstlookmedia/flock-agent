@@ -99,7 +99,7 @@ class FlockLog:
                         )
 
                 # Submit them
-                api_client.submit_flock_logs(json.dumps(logs))
+                api_client.submit_flock_logs(logs)
                 self.c.log(
                     "FlockLog",
                     "submit_logs",
