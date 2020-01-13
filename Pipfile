@@ -7,7 +7,7 @@ verify_ssl = true
 pylint = "*"
 black = "*"
 pyinstaller = "*"
-bpytest = "*"
+pytest = "*"
 responses = "*"
 
 [packages]
