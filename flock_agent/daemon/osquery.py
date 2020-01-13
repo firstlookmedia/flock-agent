@@ -224,7 +224,7 @@ class Osquery(object):
                             )
 
                     # Submit them
-                    api_client.submit(json.dumps(logs))
+                    api_client.submit(logs)
                     self.c.log(
                         "Osquery",
                         "submit_logs",
