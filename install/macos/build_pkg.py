@@ -42,10 +42,10 @@ def main():
         return
 
     # Download osquery
-    osquery_url = "https://pkg.osquery.io/darwin/osquery-4.0.2.pkg"
-    osquery_filename = os.path.join(root, "build", "osquery-4.0.2.pkg")
+    osquery_url = "https://pkg.osquery.io/darwin/osquery-4.1.1.pkg"
+    osquery_filename = os.path.join(root, "build", "osquery-4.1.1.pkg")
     osquery_expected_sha256 = (
-        "91932b1eb4a7d1ed684611f25686a5a72b7342b54ca20a990ac647ce6c42a381"
+        "256dea9da891a94b176943ba661d1f2a791ce488224ab5df3e95d8099ee7dea0"
     )
 
     if not os.path.exists(osquery_filename):
