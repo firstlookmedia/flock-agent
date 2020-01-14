@@ -104,20 +104,16 @@ git checkout v$VERSION
 
 To make a macOS release, go to macOS build machine:
 
-- Build machine should be running macOS 10.13
-- Verify and checkout the git tag for this release
-- Run `pipenv run ./install/macos/build_app.py`; this will make `dist/Flock.app` but won't codesign it
-- Copy `dist/Flock.app` from the build machine to the `dist` folder on the release machine
-
-Then move to the macOS release machine:
-
-- Release machine should be running the latest version of macOS, and must have:
+- Build machine must have:
+  - macOS 10.14
   - Apple-trusted `Developer ID Application: FIRST LOOK PRODUCTIONS, INC.` and `Developer ID Installer: FIRST LOOK PRODUCTIONS, INC.` code-signing certificates installed
   - An app-specific Apple ID password saved in the login keychain called `flockagent-notarize`
 - Verify and checkout the git tag for this release
+- Run `pipenv run ./install/macos/build_app.py`; this will make `dist/Flock.app` but won't codesign it
 - Run `pipenv run ./install/macos/build_pkg.py`; this will make a codesigned installer package called `dist/FlockAgent-$VERSION.pkg`
 - Notarize it: `xcrun altool --notarize-app --primary-bundle-id "media.firstlook.flock-agent" -u "micah@firstlook.org" -p "@keychain:flockagent-notarize" --file dist/FlockAgent-$VERSION.pkg`
 - Wait for it to get approved, check status with: `xcrun altool --notarization-history 0 -u "micah@firstlook.org" -p "@keychain:flockagent-notarize"`
+- (If it gets rejected, you can see why with: `xcrun altool --notarization-info [RequestUUID] -u "micah@firstlook.org" -p "@keychain:flockagent-notarize"`
 - After it's approved, staple the ticket: `xcrun stapler staple dist/FlockAgent-$VERSION.pkg`
 
 This process ends up with the final file:
