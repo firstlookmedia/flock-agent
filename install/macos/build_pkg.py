@@ -22,6 +22,9 @@ def run(cmd):
 
 
 def runtime_harden_osquery(build_path, osquery_filename, identity_name_application):
+    print(
+        "○ Extracting osquery package, re-signing it with hardened runtime, and flatting it"
+    )
     hardened_osquery_filename = os.path.splitext(osquery_filename)[0] + "-hardened.pkg"
 
     osquery_expanded_path = os.path.join(build_path, "osquery")
@@ -147,6 +150,9 @@ def main():
     version = flock_agent.flock_agent_version
 
     component_plist_path = os.path.join(root, "install/macos/packaging/component.plist")
+    entitlements_plist_path = os.path.join(
+        root, "install/macos/packaging/entitlements.plist"
+    )
     scripts_path = os.path.join(root, "install/macos/packaging/scripts")
     component_path = os.path.join(dist_path, "FlockAgentComponent.pkg")
     pkg_path = os.path.join(dist_path, "FlockAgent-{}.pkg".format(version))
@@ -201,7 +207,19 @@ def main():
 
         # Package with codesigning
         print("○ Codesigning app bundle")
-        run(["codesign", "--deep", "-s", identity_name_application, app_path])
+        run(
+            [
+                "codesign",
+                "--deep",
+                "-s",
+                identity_name_application,
+                "--entitlements",
+                entitlements_plist_path,
+                "-o",
+                "runtime",
+                app_path,
+            ]
+        )
 
         print("○ Creating an installer")
         run(
