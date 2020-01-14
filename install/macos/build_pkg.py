@@ -21,6 +21,83 @@ def run(cmd):
     subprocess.run(cmd, cwd=root, check=True)
 
 
+def runtime_harden_osquery(build_path, osquery_filename, identity_name_application):
+    hardened_osquery_filename = os.path.splitext(osquery_filename)[0] + "-hardened.pkg"
+
+    osquery_expanded_path = os.path.join(build_path, "osquery")
+    os.makedirs(osquery_expanded_path, exist_ok=True)
+
+    # Expand the osquery package
+    run(
+        [
+            "pkgutil",
+            "--expand",
+            osquery_filename,
+            os.path.join(osquery_expanded_path, "Contents"),
+        ]
+    )
+
+    # Rename Payload to Payload.cpio.gz, and extract it
+    shutil.move(
+        os.path.join(osquery_expanded_path, "Contents/Payload"),
+        os.path.join(osquery_expanded_path, "Contents/Payload.cpio.gz"),
+    )
+    os.makedirs(os.path.join(osquery_expanded_path, "Contents/Payload"), exist_ok=True)
+    subprocess.run(
+        "gzip -dc ../Payload.cpio.gz | cpio -idm -",
+        shell=True,
+        cwd=os.path.join(osquery_expanded_path, "Contents/Payload"),
+    )
+
+    # Re-sign osqueryd, with hardened runtime enabled
+    run(
+        [
+            "codesign",
+            "--remove-signature",
+            os.path.join(
+                osquery_expanded_path, "Contents/Payload/usr/local/bin/osqueryd"
+            ),
+        ]
+    )
+    run(
+        [
+            "codesign",
+            "-s",
+            identity_name_application,
+            "-o",
+            "runtime",
+            os.path.join(
+                osquery_expanded_path, "Contents/Payload/usr/local/bin/osqueryd"
+            ),
+        ]
+    )
+
+    # Recompress the payload
+    os.remove(os.path.join(osquery_expanded_path, "Contents/Payload.cpio.gz"))
+    subprocess.run(
+        "find . -print -depth | cpio -ov > ../Payload.cpio",
+        shell=True,
+        cwd=os.path.join(osquery_expanded_path, "Contents/Payload"),
+    )
+    run(["gzip", os.path.join(osquery_expanded_path, "Contents/Payload.cpio")])
+    shutil.rmtree(os.path.join(osquery_expanded_path, "Contents/Payload"))
+    shutil.move(
+        os.path.join(osquery_expanded_path, "Contents/Payload.cpio.gz"),
+        os.path.join(osquery_expanded_path, "Contents/Payload"),
+    )
+
+    # Flatten the osquery package
+    run(
+        [
+            "pkgutil",
+            "--flatten",
+            os.path.join(osquery_expanded_path, "Contents"),
+            hardened_osquery_filename,
+        ]
+    )
+    return hardened_osquery_filename
+
+
 def main():
     # Parse arguments
     parser = argparse.ArgumentParser()
@@ -117,6 +194,11 @@ def main():
         )
 
     else:
+        # Re-sign osquery binary, with hardened runtime enabled
+        hardened_osquery_filename = runtime_harden_osquery(
+            build_path, osquery_filename, identity_name_application
+        )
+
         # Package with codesigning
         print("○ Codesigning app bundle")
         run(["codesign", "--deep", "-s", identity_name_application, app_path])
@@ -144,7 +226,7 @@ def main():
                 "--package",
                 component_path,
                 "--package",
-                osquery_filename,
+                hardened_osquery_filename,
                 pkg_path,
             ]
         )
