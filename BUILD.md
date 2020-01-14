@@ -113,7 +113,7 @@ To make a macOS release, go to macOS build machine:
 - Run `pipenv run ./install/macos/build_pkg.py`; this will make a codesigned installer package called `dist/FlockAgent-$VERSION.pkg`
 - Notarize it: `xcrun altool --notarize-app --primary-bundle-id "media.firstlook.flock-agent" -u "micah@firstlook.org" -p "@keychain:flockagent-notarize" --file dist/FlockAgent-$VERSION.pkg`
 - Wait for it to get approved, check status with: `xcrun altool --notarization-history 0 -u "micah@firstlook.org" -p "@keychain:flockagent-notarize"`
-- (If it gets rejected, you can see why with: `xcrun altool --notarization-info [RequestUUID] -u "micah@firstlook.org" -p "@keychain:flockagent-notarize"`
+- (If it gets rejected, you can see why with: `xcrun altool --notarization-info [RequestUUID] -u "micah@firstlook.org" -p "@keychain:flockagent-notarize"`)
 - After it's approved, staple the ticket: `xcrun stapler staple dist/FlockAgent-$VERSION.pkg`
 
 This process ends up with the final file:
