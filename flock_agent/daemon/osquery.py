@@ -32,6 +32,11 @@ class Osquery(object):
             # https://github.com/firstlookmedia/flock-agent/issues/87
             if not os.path.exists(self.osqueryi_bin):
                 os.symlink("/usr/local/bin/osqueryd", self.osqueryi_bin)
+            # Ensure osquery binaries have the right owners and permissions
+            os.chown("/usr/local/bin/osqueryd", 0, 80)  # root:admin
+            os.chmod("/usr/local/bin/osqueryd", 0o755)
+            os.chown("/usr/local/bin/osqueryctl", 0, 80)  # root:admin
+            os.chmod("/usr/local/bin/osqueryctl", 0o755)
         else:
             self.osqueryi_bin = "/usr/bin/osqueryi"
             self.log_dir = "/var/log/osquery"
