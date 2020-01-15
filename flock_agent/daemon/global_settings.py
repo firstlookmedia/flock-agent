@@ -116,20 +116,21 @@ class GlobalSettings(object):
                     "load",
                     "error loading settings, falling back to default",
                 )
-                self.settings = self.default_settings
+                self.settings = self.default_settings.copy()
 
         else:
             self.first_run = True
 
-            # Save with default settings
+            # Use default settings
             self.c.log(
                 "GlobalSettings",
                 "load",
                 "settings file doesn't exist, starting with default",
             )
-            self.settings = self.default_settings
+            self.settings = self.default_settings.copy()
 
-            # Figure out the default gateway username
+        # Make sure gateway username is set
+        if self.settings["gateway_username"] == None:
             res = self.c.osquery.exec("SELECT uuid AS host_uuid FROM system_info;")
             if res:
                 self.set("gateway_username", res[0]["host_uuid"])
