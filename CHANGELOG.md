@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2
+
+* macOS: Minor bugfixes related to packaging
+
 ## 0.1.1
 
 * macOS: Automatically installs updates

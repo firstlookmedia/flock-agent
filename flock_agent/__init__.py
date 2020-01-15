@@ -9,7 +9,7 @@ from . import gui
 from . import daemon
 
 
-flock_agent_version = "0.1.1"
+flock_agent_version = "0.1.2"
 
 
 def main():
