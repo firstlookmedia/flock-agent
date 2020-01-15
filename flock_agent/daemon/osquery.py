@@ -27,6 +27,11 @@ class Osquery(object):
             self.results_filename = os.path.join(self.log_dir, "osqueryd.results.log")
             self.plist_filename = "/Library/LaunchAgents/com.facebook.osqueryd.plist"
             os.makedirs(self.lib_dir, exist_ok=True)
+
+            # osqueryi should be a symlink to osqueryd -- if it doesn't exist, create it
+            # https://github.com/firstlookmedia/flock-agent/issues/87
+            if not os.path.exists(self.osqueryi_bin):
+                os.symlink("/usr/local/bin/osqueryd", self.osqueryi_bin)
         else:
             self.osqueryi_bin = "/usr/bin/osqueryi"
             self.log_dir = "/var/log/osquery"

@@ -63,9 +63,9 @@ class Bootstrap(object):
         else:
             self.c.log("Bootstrap", "go", "Making sure osquery is installed")
             if platform == Platform.MACOS:
-                if not os.path.exists("/usr/local/bin/osqueryd") or not os.path.exists(
-                    "/usr/local/bin/osqueryi"
-                ):
+                # macOS version doesn't check for osqueryi, which is just a symlink of
+                # osqueryd anyway -- the daemon's Osquery object the symlink if it isn't there
+                if not os.path.exists("/usr/local/bin/osqueryd"):
                     message = '<b>Osquery is not installed.</b><br><br>You can either install it with Homebrew, or download it from <a href="https://osquery.io/downloads">https://osquery.io/downloads</a>. Install osquery and then run Flock again.'
                     Alert(self.c, message, contains_links=True).launch()
                     return False
