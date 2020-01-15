@@ -121,3 +121,7 @@ This process ends up with the final file:
 ```
 dist/FlockAgent-$VERSION.pkg
 ```
+
+## Linux
+
+Linux binaries are automatically built and deployed to repositories when a new tag is pushed.
