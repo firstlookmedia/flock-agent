@@ -429,8 +429,14 @@ class Daemon:
                 )
                 if (
                     p.returncode != 0
-                    or "Status: signed by a developer certificate issued by Apple for distribution"
-                    not in p.stdout.decode()
+                    or (
+                        # macOS 10.15
+                        "Status: signed by a developer certificate issued by Apple for distribution"
+                        not in p.stdout.decode()
+                        # macOS 10.14
+                        and "Status: signed by a certificate trusted by Mac OS X"
+                        not in p.stdout.decode()
+                    )
                     or "Developer ID Installer: FIRST LOOK PRODUCTIONS, INC. ("
                     not in p.stdout.decode()
                 ):
