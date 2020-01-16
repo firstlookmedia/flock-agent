@@ -2,6 +2,18 @@ version: 2.1
 
 jobs:
 
+  test:
+    docker:
+      - image: circleci/python:3.7-buster
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: pipenv install --dev
+      - run:
+          name: Run tests
+          command: pipenv run python -m pytest tests
+
   build-ubuntu-disco:
     docker:
       - image: ubuntu:19.04
@@ -144,6 +156,9 @@ jobs:
 
 workflows:
   version: 2
+  tests:
+    jobs:
+      - test
   build-tags:
     jobs:
       - build-ubuntu-disco:
