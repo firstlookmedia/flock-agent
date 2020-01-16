@@ -5,17 +5,14 @@ jobs:
   test:
     docker:
       - image: circleci/python:3.7-buster
-    working_directory: ~/repo
     steps:
       - run:
           name: Install dependencies
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp python3-packaging python3-pytest python3-responses
+          command: pipenv install --dev
       - checkout
       - run:
           name: Run tests
-          command: python3 -m pytest tests
+          command: pipenv run python -m pytest tests
 
   build-ubuntu-disco:
     docker:
