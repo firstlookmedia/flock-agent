@@ -7,7 +7,7 @@ from ..common import Platform
 
 
 class GlobalSettings(object):
-    def __init__(self, common, testing=False):
+    def __init__(self, common, hostname=None, testing=False):
         self.c = common
         self.testing = testing
 
@@ -43,7 +43,7 @@ class GlobalSettings(object):
         # the twig. Those dicts include the fields 'query' and 'enabled', where 'enabled'
         # is either 'undecided', 'enabled', or 'disabled'.
 
-        self.load()
+        self.load(hostname)
 
     def get(self, key):
         return self.settings[key]
@@ -94,7 +94,7 @@ class GlobalSettings(object):
             enabled_statuses[twig_id] = self.settings["twigs"][twig_id]["enabled"]
         return enabled_statuses
 
-    def load(self):
+    def load(self, hostname):
         self.c.log("GlobalSettings", "load")
         if os.path.isfile(self.settings_filename):
             self.first_run = False
@@ -131,9 +131,8 @@ class GlobalSettings(object):
 
         # Make sure gateway username is set
         if self.settings["gateway_username"] == None:
-            res = self.c.osquery.exec("SELECT uuid AS host_uuid FROM system_info;")
-            if res:
-                self.set("gateway_username", res[0]["host_uuid"])
+            if hostname:
+                self.set("gateway_username", hostname)
 
         # Fill in new twigs, and update existing twigs
         for twig_id in twigs:
