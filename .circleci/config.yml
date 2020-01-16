@@ -5,12 +5,11 @@ jobs:
   test:
     docker:
       - image: circleci/python:3.7-buster
-    working_directory: ~/repo
     steps:
+      - checkout
       - run:
           name: Install dependencies
           command: pipenv install --dev
-      - checkout
       - run:
           name: Run tests
           command: pipenv run python -m pytest tests
