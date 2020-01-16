@@ -47,7 +47,11 @@ class Daemon:
         self.osquery = Osquery(common)
         self.c.osquery = self.osquery
 
-        self.global_settings = GlobalSettings(common)
+        hostname = self.osquery.exec("SELECT uuid AS host_uuid FROM system_info;")
+        if hostname:
+            hostname = hostname[0]["host_uuid"]
+
+        self.global_settings = GlobalSettings(common, hostname)
         self.c.global_settings = self.global_settings
 
         self.api_client = FlockApiClient(self.c)
