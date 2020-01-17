@@ -78,21 +78,25 @@ class Bootstrap(object):
                     return False
 
         self.c.log("Bootstrap", "go", "Making sure the Flock Agent daemon is running")
-        try:
-            connected = False
-            for _ in range(10):
-                try:
-                    self.c.daemon.ping()
-                    connected = True
-                    break
-                except DaemonNotRunningException:
-                    self.c.log("Bootstrap", "go", "Failed to connect to daemon ...")
-                    time.sleep(1)
-            if not connected:
+        connected = False
+        permission_denied = False
+        for _ in range(5):
+            try:
+                self.c.daemon.ping()
+                connected = True
+                break
+            except DaemonNotRunningException:
+                self.c.log("Bootstrap", "go", "Failed to connect to daemon ...")
+                time.sleep(1)
+            except PermissionDeniedException:
+                self.c.log("Bootstrap", "go", "Permission denied ...")
+                permission_denied = True
+                time.sleep(1)
+        if not connected:
+            if permission_denied:
+                self.c.gui.daemon_permission_denied()
+            else:
                 self.c.gui.daemon_not_running()
-                return False
-        except PermissionDeniedException:
-            self.c.gui.daemon_permission_denied()
             return False
 
         self.c.log("Bootstrap", "go", "Bootstrap complete")
