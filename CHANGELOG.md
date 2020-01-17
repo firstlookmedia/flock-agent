@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3
+
+* macOS: Minor bugfixes related to autoupdate
+* Improved tests, and make them run in continuous integration
+
 ## 0.1.2
 
 * macOS: Minor bugfixes related to packaging
