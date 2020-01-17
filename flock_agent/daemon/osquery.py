@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-import os
-import subprocess
 import json
+import logging
+import os
 import shutil
+import subprocess
 
 from .api_client import FlockApiClient
 from ..twigs import twigs
@@ -17,7 +18,8 @@ class Osquery(object):
 
     def __init__(self, common):
         self.c = common
-        self.c.log("Osquery", "__init__")
+        logger = logging.getLogger("Osquery.__init__")
+        logger.debug("")
 
         if Platform.current() == Platform.MACOS:
             self.osqueryi_bin = "/usr/local/bin/osqueryi"
@@ -70,10 +72,9 @@ class Osquery(object):
         the osqueryd daemon
         """
         if self.c.global_settings.get("use_server"):
-            self.c.log(
-                "Osquery",
-                "refresh_osqueryd",
-                f"enabling twigs: {', '.join(self.c.global_settings.get_enabled_twig_ids())}",
+            logger = logging.getLogger("Osquery.refresh_osqueryd")
+            logger.info(
+                f"enabling twigs: {', '.join(self.c.global_settings.get_enabled_twig_ids())}"
             )
 
             # Rebuild osquery config
@@ -131,11 +132,8 @@ class Osquery(object):
                 )
 
         else:
-            self.c.log(
-                "Osquery",
-                "refresh_osqueryd",
-                "use_server=False, so making sure osqueryd is disabled",
-            )
+            logger = logging.getLogger("Osquery.refresh_osqueryd")
+            logger.info("use_server=False, so making sure osqueryd is disabled")
 
             if Platform.current() == Platform.MACOS:
                 if os.path.exists(self.plist_filename):
@@ -154,16 +152,17 @@ class Osquery(object):
         """
         Run an osquery query, return the response as an object
         """
-        self.c.log("Osquery", "exec", query)
+        logger = logging.getLogger("Osquery.exec")
+        logger.info(query)
         try:
             p = subprocess.run(
                 [self.osqueryi_bin, "--json", query], capture_output=True, check=True
             )
-            self.c.log("Osquery", "exec", repr(p.stdout))
+            logger.info(f"{repr(p.stdout)}")
             return json.loads(p.stdout)
         except:
             # Error running query
-            self.c.log("Osquery", "exec", "error executing query")
+            logger.info("error executing query")
             return None
 
     def submit_logs(self):
@@ -171,6 +170,7 @@ class Osquery(object):
         If there are new osquery result logs, forward them to the Flock server and
         truncate the result file.
         """
+        logger = logging.getLogger("Osquery.submit_logs")
         # Keep track of the biggest timestamp we see
         biggest_timestamp = self.c.global_settings.get("last_osquery_result_timestamp")
 
@@ -182,19 +182,14 @@ class Osquery(object):
             with open(self.results_filename, "r") as results_file:
                 lines = results_file.readlines()
                 if len(lines) > 0:
-                    self.c.log("Osquery", "submit_logs", f"{len(lines)} lines")
+                    logger.debug(f"{len(lines)} lines")
 
                     # Start an API client
                     api_client = FlockApiClient(self.c)
                     try:
                         api_client.ping()
                     except:
-                        self.c.log(
-                            "Osquery",
-                            "submit_logs",
-                            "Unable to communicate with the server",
-                            always=True,
-                        )
+                        logger.warning("Unable to communicate with the server")
                         return
 
                     # Make a list of logs
@@ -214,31 +209,19 @@ class Osquery(object):
                                     logs.append(obj)
                                 else:
                                     # Already submitted
-                                    self.c.log(
-                                        "Osquery",
-                                        "submit_logs",
-                                        f"skipping \"{obj['name']}\" result, already submitted",
+                                    logger.info(
+                                        f"skipping \"{obj['name']}\" result, already submitted"
                                     )
                             else:
-                                self.c.log(
-                                    "Osquery",
-                                    "submit_logs",
-                                    f"warning: unixTime not in line: {line}",
-                                )
+                                logger.info(f"warning: unixTime not in line: {line}")
 
                         except json.decoder.JSONDecodeError:
-                            self.c.log(
-                                "Osquery",
-                                "submit_logs",
-                                f"warning: line is not valid JSON: {line}",
-                            )
+                            logger.info(f"warning: line is not valid JSON: {line}")
 
                     # Submit them
                     api_client.submit(logs)
-                    self.c.log(
-                        "Osquery",
-                        "submit_logs",
-                        f"submitted logs: {', '.join([obj['name'] for obj in logs])}",
+                    logger.info(
+                        f"submitted logs: {', '.join([obj['name'] for obj in logs])}"
                     )
 
                     # Update the biggest timestamp, if needed
@@ -263,8 +246,4 @@ class Osquery(object):
                     results_file.truncate()
 
         except FileNotFoundError:
-            self.c.log(
-                "Osquery",
-                "submit_logs",
-                f"warning: file not found: {self.results_filename}",
-            )
+            logger.info(f"warning: file not found: {self.results_filename}")

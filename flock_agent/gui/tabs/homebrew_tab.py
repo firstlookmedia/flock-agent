@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-import subprocess
+import logging
 import os
-from PyQt5 import QtCore, QtWidgets, QtGui
+import subprocess
+
+from PyQt5 import QtCore, QtWidgets
 
 
 class HomebrewTab(QtWidgets.QWidget):
@@ -12,7 +14,8 @@ class HomebrewTab(QtWidgets.QWidget):
         self.c = common
         self.systray = systray
 
-        self.c.log("HomebrewTab", "__init__")
+        logger = logging.getLogger("HomebrewTab.__init__")
+        logger.debug("")
 
         self.should_show = False
         self.outdated_casks = []
@@ -69,12 +72,9 @@ class HomebrewTab(QtWidgets.QWidget):
         self.homebrew_thread.start()
 
     def updates_available(self, outdated_formulae, outdated_casks):
-        self.c.log(
-            "HomebrewTab",
-            "updates_available",
-            "outdated_formulae: {}, outdated_casks: {}".format(
-                outdated_formulae, outdated_casks
-            ),
+        logger = logging.getLogger("HomebrewTab.updates_available")
+        logger.info(
+            f"outdated_formulae: {outdated_formulae}, outdated_casks: {outdated_casks}"
         )
 
         self.outdated_casks = outdated_casks
@@ -104,11 +104,13 @@ class HomebrewTab(QtWidgets.QWidget):
         self.update_homebrew_tab.emit()
 
     def installing_updates(self, package_list):
-        self.c.log("HomebrewTab", "homebrew_installing_updates", package_list)
+        logger = logging.getLogger("HomebrewTab.homebrew_installing_updates")
+        logger.info("{package_list}")
         self.systray.showMessage("Installing Homebrew Updates", "\n".join(package_list))
 
     def clicked_install_updates_button(self):
-        self.c.log("HomebrewTab", "clicked_install_updates_button")
+        logger = logging.getLogger("HomebrewTab.clicked_install_updates_button")
+        logger.debug("")
 
         self.should_show = False
         self.update_homebrew_tab.emit()
@@ -144,15 +146,12 @@ class HomebrewUpdateCheckThread(QtCore.QThread):
         self.homebrew_path = "/usr/local/bin/brew"
 
     def run(self):
-        self.c.log("HomebrewUpdateCheckThread", "run")
+        logger = logging.getLogger("HomebrewUpdateCheckThread.run")
+        logger.debug("")
 
         # If homebrew is not installed, skip
         if not os.path.exists(self.homebrew_path):
-            self.c.log(
-                "HomebrewUpdateCheckThread",
-                "run",
-                "Homebrew is not installed, returning early",
-            )
+            logger.info("Homebrew is not installed, returning early")
             return
 
         homebrew_update_prompt = self.c.gui.settings.get("homebrew_update_prompt")
@@ -200,19 +199,11 @@ class HomebrewUpdateCheckThread(QtCore.QThread):
 
     def exec(self, command):
         try:
-            self.c.log(
-                "HomebrewUpdateCheckThread",
-                "exec",
-                "Executing: {}".format(" ".join(command)),
-                always=True,
-            )
+            logger = logging.getLogger("HomebrewUpdateCheckThread.exec")
+
+            logger.warning(f"Executing: {' '.join(command)}")
             p = subprocess.run(command, capture_output=True, check=True)
             return p
         except subprocess.CalledProcessError:
-            self.c.log(
-                "HomebrewUpdateCheckThread",
-                "exec",
-                "Error running command",
-                always=True,
-            )
+            logger.warning("Error running command")
             return False

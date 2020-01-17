@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import logging
 import requests
 
 from .gui_common import Alert
@@ -104,13 +105,12 @@ class DaemonClient:
         return self._http_request("post", path, data)
 
     def _http_request(self, method, path, data=None):
+        logger = logging.getLogger("DaemonClient._http_request")
         url = "http+unix://{}{}".format(self.unix_socket_path.replace("/", "%2F"), path)
         if data:
-            self.c.log(
-                "DaemonClient", "_request", "{} {} {}".format(method, path, data)
-            )
+            logger.info(f"{method} {path} {data}")
         else:
-            self.c.log("DaemonClient", "_request", "{} {}".format(method, path))
+            logger.info(f"{method} {path}")
 
         try:
             if method == "get":
@@ -132,7 +132,7 @@ class DaemonClient:
         if r.status_code == 200:
             obj = json.loads(r.text)
             if obj["error"]:
-                self.c.log("DaemonClient", "_request", "Error: {}".format(obj["error"]))
+                logger.info(f"Error: {obj['error']}'")
             return obj
 
         raise UnknownErrorException

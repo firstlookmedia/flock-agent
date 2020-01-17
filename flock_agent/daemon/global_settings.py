@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-import os
 import json
+import logging
+import os
+
 
 from ..twigs import twigs
 from ..common import Platform
@@ -20,11 +22,8 @@ class GlobalSettings(object):
             os.makedirs(etc_dir, exist_ok=True)
         self.settings_filename = os.path.join(etc_dir, "global_settings.json")
 
-        self.c.log(
-            "GlobalSettings",
-            "__init__",
-            "settings_filename: {}".format(self.settings_filename),
-        )
+        logger = logging.getLogger("GlobalSettings.__init__")
+        logger.info(f"settings_filename: {self.settings_filename}")
 
         self.default_settings = {
             # Server settings
@@ -49,7 +48,8 @@ class GlobalSettings(object):
         return self.settings[key]
 
     def set(self, key, val):
-        self.c.log("GlobalSettings", "set", "{} = {}".format(key, val))
+        logger = logging.getLogger("GlobalSettings.set")
+        logger.debug(f"{key} = {val}")
         self.settings[key] = val
 
     def get_twig(self, twig_id):
@@ -95,7 +95,8 @@ class GlobalSettings(object):
         return enabled_statuses
 
     def load(self, hostname):
-        self.c.log("GlobalSettings", "load")
+        logger = logging.getLogger("GlobalSettings.load")
+        logger.debug("")
         if os.path.isfile(self.settings_filename):
             self.first_run = False
 
@@ -111,22 +112,14 @@ class GlobalSettings(object):
 
             except:
                 # If there's an error loading settings, fallback to default settings
-                self.c.log(
-                    "GlobalSettings",
-                    "load",
-                    "error loading settings, falling back to default",
-                )
+                logger.info("error loading settings, falling back to default")
                 self.settings = self.default_settings.copy()
 
         else:
             self.first_run = True
 
             # Use default settings
-            self.c.log(
-                "GlobalSettings",
-                "load",
-                "settings file doesn't exist, starting with default",
-            )
+            logger.info("settings file doesn't exist, starting with default")
             self.settings = self.default_settings.copy()
 
         # Make sure gateway username is set
@@ -174,7 +167,8 @@ class GlobalSettings(object):
         self.save()
 
     def save(self):
-        self.c.log("GlobalSettings", "save")
+        logger = logging.getLogger("GlobalSettings.save")
+        logger.debug("saving")
         # When unit testing we likely won't have access to these directories and there's no point
         # saving config data.
         if not self.testing:

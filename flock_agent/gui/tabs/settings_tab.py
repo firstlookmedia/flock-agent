@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from ..gui_common import Alert, HidableSpacer
@@ -21,7 +23,8 @@ class SettingsTab(QtWidgets.QWidget):
         super(SettingsTab, self).__init__()
         self.c = common
 
-        self.c.log("SettingsTab", "__init__")
+        logger = logging.getLogger("SettingsTab.__init__")
+        logger.debug("")
 
         # Use server checkbox
         self.use_server_checkbox = QtWidgets.QCheckBox(
@@ -134,7 +137,8 @@ class SettingsTab(QtWidgets.QWidget):
         self.update_ui()
 
     def update_ui(self):
-        self.c.log("SettingsTab", "update_ui")
+        logger = logging.getLogger("SettingsTab.update_ui")
+        logger.debug("")
 
         try:
             # Determine server status
@@ -213,7 +217,8 @@ class SettingsTab(QtWidgets.QWidget):
             self.c.gui.daemon_permission_denied()
 
     def server_button_clicked(self):
-        self.c.log("SettingsTab", "server_button_clicked")
+        logger = logging.getLogger("SettingsTab.server_button_clicked")
+        logger.debug("")
 
         if self.status == self.STATUS_NOT_REGISTERED:
             self.server_button.setEnabled(False)
@@ -234,7 +239,8 @@ class SettingsTab(QtWidgets.QWidget):
         self.update_ui()
 
     def use_server_toggled(self):
-        self.c.log("SettingsTab", "use_server_toggled")
+        logger = logging.getLogger("SettingsTab.use_server_toggled")
+        logger.debug("")
         is_checked = (
             self.use_server_checkbox.checkState() == QtCore.Qt.CheckState.Checked
         )
@@ -250,7 +256,8 @@ class SettingsTab(QtWidgets.QWidget):
         self.update_ui()
 
     def automatically_enable_twigs_toggled(self):
-        self.c.log("SettingsTab", "automatically_enable_twigs_toggled")
+        logger = logging.getLogger("SettingsTab.automatically_enable_twigs_toggled")
+        logger.debug("")
         is_checked = (
             self.automatically_enable_twigs_checkbox.checkState()
             == QtCore.Qt.CheckState.Checked
@@ -263,7 +270,8 @@ class SettingsTab(QtWidgets.QWidget):
             self.c.gui.daemon_permission_denied()
 
     def homebrew_update_prompt_toggled(self):
-        self.c.log("SettingsTab", "homebrew_update_prompt_toggled")
+        logger = logging.getLogger("SettingsTab.homebrew_update_prompt_toggled")
+        logger.debug("")
         is_checked = (
             self.homebrew_update_prompt_checkbox.checkState()
             == QtCore.Qt.CheckState.Checked
@@ -272,7 +280,8 @@ class SettingsTab(QtWidgets.QWidget):
         self.c.gui.settings.save()
 
     def homebrew_autoupdate_toggled(self):
-        self.c.log("SettingsTab", "homebrew_autoupdate_toggled")
+        logger = logging.getLogger("SettingsTab.homebrew_autoupdate_toggled")
+        logger.debug("")
         is_checked = (
             self.homebrew_autoupdate_checkbox.checkState()
             == QtCore.Qt.CheckState.Checked
@@ -281,5 +290,6 @@ class SettingsTab(QtWidgets.QWidget):
         self.c.gui.settings.save()
 
     def quit_clicked(self):
-        self.c.log("SettingsTab", "quit_clicked")
+        logger = logging.getLogger("SettingsTab.quit_clicked")
+        logger.debug("")
         self.quit.emit()

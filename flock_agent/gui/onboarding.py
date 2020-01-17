@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import logging
 import os
+
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from .daemon_client import DaemonNotRunningException, PermissionDeniedException
@@ -157,7 +159,8 @@ class DataPage(QtWidgets.QWizardPage):
         return self.is_registered
 
     def server_button_clicked(self):
-        self.c.log("DataPage", "server_button_clicked")
+        logger = logging.getLogger("DataPage.server_button_clicked")
+        logger.debug("")
 
         self.server_button.setEnabled(False)
         self.server_button.setText("Registering...")
@@ -314,8 +317,9 @@ class Onboarding(QtWidgets.QWizard):
 
     def __init__(self, common):
         super(Onboarding, self).__init__()
+        logger = logging.getLogger("Onboarding.__init__")
         self.c = common
-        self.c.log("Onboarding", "__init__")
+        logger.debug("")
 
         self.setWindowTitle("Configuring Flock")
         self.setMinimumWidth(790)
@@ -384,5 +388,6 @@ class Onboarding(QtWidgets.QWizard):
         """
         Start the onboarding process
         """
-        self.c.log("Onboarding", "go", "Starting the onboarding wizard", always=True)
+        logger = logging.getLogger("Onboarding.go")
+        logger.warning("Starting the onboarding wizard")
         self.show()

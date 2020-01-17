@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-import os
-import sys
 import inspect
-import json
+import logging
+import os
 import platform
-import time
+import sys
+
 import appdirs
 
 
@@ -15,25 +15,12 @@ class Common(object):
 
     def __init__(self, verbose, version):
         self.verbose = verbose
-        self.log_filename = None
-        self.log("Common", "__init__")
+
+        logger = logging.getLogger("Common.__init__")
+        logger.debug("")
 
         self.version = version
         self.appdata_path = appdirs.user_config_dir("FlockAgent")
-
-    def log(self, module, func, msg="", always=False):
-        final_msg = "{}.{}".format(module, func)
-        if msg:
-            final_msg = "{}: {}".format(final_msg, msg)
-
-        if always or self.verbose:
-            print("○ {}".format(final_msg))
-
-        if self.log_filename:
-            with open(self.log_filename, "a") as f:
-                time_str = time.strftime("%Y-%m-%d %H:%M:%S")
-                f.write("{} {}\n".format(time_str, final_msg))
-            os.chmod(self.log_filename, 0o600)
 
     def get_resource_path(self, filename):
         # In dev mode, look for resources directory relative to python file
