@@ -367,6 +367,8 @@ class Daemon:
         os.chmod(self.unix_socket_path, 0o660)
         os.chown(self.unix_socket_path, 0, self.gid)
 
+        self.c.log("Daemon", "http_server", "Started http server")
+
     async def autoupdate_loop(self):
         # Autoupdate is only available for macOS right now; Linux uses package managers
         if Platform.current() != Platform.MACOS:
