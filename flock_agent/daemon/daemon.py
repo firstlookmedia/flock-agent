@@ -154,6 +154,7 @@ class Daemon:
 
         async def shutdown(request):
             self.c.log("Daemon", "http_server", "GET /shutdown, shutting down daemon")
+            self.cleanup()
             raise GracefulExit()
 
         async def get_setting(request):
@@ -374,6 +375,12 @@ class Daemon:
         if Platform.current() != Platform.MACOS:
             return
 
+        # Run requests.get in asyncio
+        async def load_url(url):
+            loop = asyncio.get_event_loop()
+            future = loop.run_in_executor(None, requests.get, url)
+            return await future
+
         update_check_delay = 43200  # 12 hours
 
         while True:
@@ -381,7 +388,7 @@ class Daemon:
 
             try:
                 # Query github for the latest version of Flock Agent
-                r = requests.get(
+                r = await load_url(
                     "https://api.github.com/repos/firstlookmedia/flock-agent/releases/latest"
                 )
                 release = r.json()
@@ -467,3 +474,8 @@ class Daemon:
                     "autoupdate_loop",
                     f"Exception while checking for updates: {e}",
                 )
+                await asyncio.sleep(30)
+
+    def cleanup(self, sig=None, frame=None):
+        if os.path.exists(self.unix_socket_path):
+            os.remove(self.unix_socket_path)
