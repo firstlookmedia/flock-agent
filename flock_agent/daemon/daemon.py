@@ -476,6 +476,6 @@ class Daemon:
                 )
                 await asyncio.sleep(30)
 
-    def cleanup(self, sig=None, frame=None):
+    def cleanup(self):
         if os.path.exists(self.unix_socket_path):
             os.remove(self.unix_socket_path)
