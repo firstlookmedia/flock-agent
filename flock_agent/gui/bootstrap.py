@@ -29,7 +29,7 @@ class Bootstrap(object):
         platform = Platform.current()
 
         logger = logging.getLogger("Bootstrap.go")
-        logger.warning("Bootstrapping Flock Agent")
+        logger.info("Bootstrapping Flock Agent")
 
         if platform == Platform.UNKNOWN:
             logger.warning(
@@ -56,7 +56,7 @@ class Bootstrap(object):
         if platform == Platform.UNKNOWN:
             logger.warning("Unknown platform: Unable to make sure osquery is installed")
         else:
-            logger.warning("Making sure osquery is installed")
+            logger.info("Making sure osquery is installed")
             if platform == Platform.MACOS:
                 # macOS version doesn't check for osqueryi, which is just a symlink of
                 # osqueryd anyway -- the daemon's Osquery object the symlink if it isn't there
@@ -89,7 +89,7 @@ class Bootstrap(object):
                 connected = True
                 break
             except DaemonNotRunningException:
-                logger.info("Failed to connect to daemon ...")
+                logger.warning("Failed to connect to daemon ...")
                 time.sleep(1)
             except PermissionDeniedException:
                 logger.info("Permission denied ...")

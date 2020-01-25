@@ -65,11 +65,11 @@ class FlockLog:
                     try:
                         obj = json.loads(line)
                     except json.decoder.JSONDecodeError:
-                        logger.info(f"warning: line is not valid JSON: {line}")
+                        logger.warning(f"warning: line is not valid JSON: {line}")
                         continue
 
                     if "timestamp" not in obj:
-                        logger.info(f"warning: timestamp not in line: {line}")
+                        logger.warning(f"warning: timestamp not in line: {line}")
                         continue
 
                     if "type" not in obj:
@@ -113,7 +113,7 @@ class FlockLog:
                     f.truncate()
 
         except FileNotFoundError:
-            logger.info(f"warning: file not found: {self.filename}")
+            logger.warning(f"warning: file not found: {self.filename}")
 
 
 class FlockLogTypes:

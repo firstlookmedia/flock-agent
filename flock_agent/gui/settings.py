@@ -26,7 +26,7 @@ class Settings(object):
 
     def set(self, key, val):
         logger = logging.getLogger("Settings.set")
-        logger.debug(f"{key} = {value}")
+        logger.debug(f"{key} = {val}")
         self.settings[key] = val
 
     def load(self):

@@ -130,7 +130,7 @@ class Daemon:
             self.flock_log.submit_logs()
         except Exception as e:
             exception_type = type(e).__name__
-            logger.info(f"Exception submitting flock logs: {exception_type}")
+            logger.warning(f"Exception submitting flock logs: {exception_type}")
 
     async def http_server(self):
         logger = logging.getLogger("Daemon.http_server")
@@ -382,7 +382,7 @@ class Daemon:
                         break
 
                 if not url:
-                    logger.info("could not find .pkg file")
+                    logger.warning("could not find .pkg file")
                     await asyncio.sleep(update_check_delay)
                     continue
 
@@ -415,7 +415,7 @@ class Daemon:
                     or "Developer ID Installer: FIRST LOOK PRODUCTIONS, INC. ("
                     not in p.stdout.decode()
                 ):
-                    logger.info(f"codesign verification failed: {p.stdout.decode()}")
+                    logger.warning(f"codesign verification failed: {p.stdout.decode()}")
                     await asyncio.sleep(update_check_delay)
                     continue
 
@@ -429,4 +429,4 @@ class Daemon:
                 sys.exit(0)
 
             except Exception as e:
-                logger.info(f"Exception while checking for updates: {e}")
+                logger.warning(f"Exception while checking for updates: {e}")

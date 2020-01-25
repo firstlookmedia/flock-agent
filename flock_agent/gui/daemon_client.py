@@ -132,7 +132,7 @@ class DaemonClient:
         if r.status_code == 200:
             obj = json.loads(r.text)
             if obj["error"]:
-                logger.info(f"Error: {obj['error']}'")
+                logger.warning(f"Error: {obj['error']}'")
             return obj
 
         raise UnknownErrorException

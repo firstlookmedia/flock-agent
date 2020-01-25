@@ -216,7 +216,7 @@ class Osquery(object):
                                 logger.info(f"warning: unixTime not in line: {line}")
 
                         except json.decoder.JSONDecodeError:
-                            logger.info(f"warning: line is not valid JSON: {line}")
+                            logger.warning(f"warning: line is not valid JSON: {line}")
 
                     # Submit them
                     api_client.submit(logs)
@@ -246,4 +246,4 @@ class Osquery(object):
                     results_file.truncate()
 
         except FileNotFoundError:
-            logger.info(f"warning: file not found: {self.results_filename}")
+            logger.warning(f"warning: file not found: {self.results_filename}")
