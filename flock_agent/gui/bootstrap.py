@@ -92,7 +92,7 @@ class Bootstrap(object):
                 logger.warning("Failed to connect to daemon ...")
                 time.sleep(1)
             except PermissionDeniedException:
-                logger.info("Permission denied ...")
+                logger.warning("Permission denied ...")
                 permission_denied = True
                 time.sleep(1)
         if not connected:

@@ -112,7 +112,7 @@ class GlobalSettings(object):
 
             except:
                 # If there's an error loading settings, fallback to default settings
-                logger.info("error loading settings, falling back to default")
+                logger.warning("error loading settings, falling back to default")
                 self.settings = self.default_settings.copy()
 
         else:

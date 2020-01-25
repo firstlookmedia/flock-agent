@@ -213,7 +213,7 @@ class Osquery(object):
                                         f"skipping \"{obj['name']}\" result, already submitted"
                                     )
                             else:
-                                logger.info(f"warning: unixTime not in line: {line}")
+                                logger.warning(f"warning: unixTime not in line: {line}")
 
                         except json.decoder.JSONDecodeError:
                             logger.warning(f"warning: line is not valid JSON: {line}")
