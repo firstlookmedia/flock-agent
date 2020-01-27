@@ -129,27 +129,27 @@ class FlockApiClient(object):
         if res.status_code == 401:
             raise PermissionDenied()
 
-        if res.status_code == 400:
-            try:
-                obj = res.json()
-            except ValueError:
-                raise ResponseIsNotJson()
+        if res.status_code == 200 or res.status_code == 400:
+            if res.content:
+                try:
+                    obj = res.json()
+                except ValueError:
+                    raise ResponseIsNotJson()
 
-            if obj["error"]:
-                if "error_msg" in obj:
-                    raise RespondedWithError(obj["error_msg"])
-                else:
+                if "error" not in obj:
                     raise InvalidResponse()
+
+                if obj["error"]:
+                    if "error_msg" in obj:
+                        raise RespondedWithError(obj["error_msg"])
+                    else:
+                        raise InvalidResponse()
+
+                if res.status_code == 200:
+                    return obj
 
         if res.status_code != 200:
             raise BadStatusCode(res)
-
-        if res.content:
-            try:
-                obj = res.json()
-            except ValueError:
-                raise ResponseIsNotJson()
-            return obj
 
     def _build_url(self, path):
         """

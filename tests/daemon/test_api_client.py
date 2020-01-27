@@ -98,12 +98,12 @@ class TestApiClient:
         }
         common = self._build_common()
         responses.add(
-            responses.GET, f"{self.test_url}/test", json=response_data, status=200,
+            responses.GET, f"{self.test_url}/test", json=response_data, status=400,
         )
         with pytest.raises(api_client.RespondedWithError) as excinfo:
             FlockApiClient(common)._make_request("/test", "get", False)
         responses.add(
-            responses.POST, f"{self.test_url}/test", json=response_data, status=200,
+            responses.POST, f"{self.test_url}/test", json=response_data, status=400,
         )
         with pytest.raises(api_client.RespondedWithError) as excinfo:
             FlockApiClient(common)._make_request("/test", "post", False)
@@ -119,12 +119,12 @@ class TestApiClient:
         }
         common = self._build_common()
         responses.add(
-            responses.GET, f"{self.test_url}/test", json=response_data, status=200,
+            responses.GET, f"{self.test_url}/test", json=response_data, status=400,
         )
         with pytest.raises(api_client.InvalidResponse) as excinfo:
             FlockApiClient(common)._make_request("/test", "get", False)
         responses.add(
-            responses.POST, f"{self.test_url}/test", json=response_data, status=200,
+            responses.POST, f"{self.test_url}/test", json=response_data, status=400,
         )
         with pytest.raises(api_client.InvalidResponse) as excinfo:
             FlockApiClient(common)._make_request("/test", "post", False)
