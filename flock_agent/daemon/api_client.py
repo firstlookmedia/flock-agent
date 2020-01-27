@@ -114,7 +114,7 @@ class FlockApiClient(object):
         url = self._build_url(path)
 
         logger = logging.getLogger("FlockApiClient._make_request")
-        logger.debug("{method} {url}")
+        logger.debug(f"{method} {url}")
 
         try:
             res = requests.request(
@@ -129,6 +129,18 @@ class FlockApiClient(object):
         if res.status_code == 401:
             raise PermissionDenied()
 
+        if res.status_code == 400:
+            try:
+                obj = res.json()
+            except ValueError:
+                raise ResponseIsNotJson()
+
+            if obj["error"]:
+                if "error_msg" in obj:
+                    raise RespondedWithError(obj["error_msg"])
+                else:
+                    raise InvalidResponse()
+
         if res.status_code != 200:
             raise BadStatusCode(res)
 
@@ -137,16 +149,6 @@ class FlockApiClient(object):
                 obj = res.json()
             except ValueError:
                 raise ResponseIsNotJson()
-
-            if "error" not in obj:
-                raise InvalidResponse()
-
-            if obj["error"]:
-                if "error_msg" in obj:
-                    raise RespondedWithError(obj["error_msg"])
-                else:
-                    raise InvalidResponse()
-
             return obj
 
     def _build_url(self, path):
