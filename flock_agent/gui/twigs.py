@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore, QtWidgets, QtGui
+import logging
+
+from PyQt5 import QtCore, QtWidgets
 
 from ..twigs import twigs
 
@@ -70,10 +72,11 @@ class TwigDialog(QtWidgets.QDialog):
 
     def __init__(self, common, twig_id):
         super(TwigDialog, self).__init__()
+        logger = logging.getLogger("TwigDialog.__init__")
         self.c = common
         self.twig_id = twig_id
 
-        self.c.log("TwigDialog", "__init__", twig_id)
+        logger.info(twig_id)
 
         self.setWindowTitle("Details of: {}".format(twigs[self.twig_id]["name"]))
         self.setWindowIcon(self.c.gui.icon)
@@ -158,7 +161,8 @@ class TwigDialog(QtWidgets.QDialog):
         return text
 
     def query_finished(self, data):
-        self.c.log("TwigDialog", "query_finished")
+        logger = logging.getLogger("TwigDialog.query_finished")
+        logger.debug("")
 
         # Count rows and columns
         row_count = len(data)
@@ -208,12 +212,14 @@ class TwigOsqueryThread(QtCore.QThread):
 
     def __init__(self, common, twig_id):
         super(TwigOsqueryThread, self).__init__()
+        logger = logging.getLogger("TwigOsqueryThread.__init__")
         self.c = common
         self.twig_id = twig_id
-        self.c.log("TwigOsqueryThread", "__init__", twig_id)
+        logger.debug(f"{twig_id}")
 
     def run(self):
-        self.c.log("TwigOsqueryThread", "run")
+        logger = logging.getLogger("TwigOsqueryThread.run")
+        logger.debug("")
 
         try:
             data = self.c.daemon.exec_twig(self.twig_id)

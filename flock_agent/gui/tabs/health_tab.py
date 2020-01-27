@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from ...health import health_items
@@ -11,10 +13,11 @@ class HealthTab(QtWidgets.QWidget):
     """
 
     def __init__(self, common):
+        logger = logging.getLogger("HealthTab.__init__")
         super(HealthTab, self).__init__()
         self.c = common
 
-        self.c.log("HealthTab", "__init__")
+        logger.debug("")
 
         # Health item widgets
         self.health_item_widgets = []
@@ -49,7 +52,8 @@ class HealthTab(QtWidgets.QWidget):
         self.refresh()
 
     def refresh(self):
-        self.c.log("HealthTab", "refresh")
+        logger = logging.getLogger("HealthTab.refresh")
+        logger.debug("")
         for widget in self.health_item_widgets:
             widget.refresh()
 
@@ -57,10 +61,11 @@ class HealthTab(QtWidgets.QWidget):
 class HealthItemWidget(QtWidgets.QWidget):
     def __init__(self, common, health_item):
         super(HealthItemWidget, self).__init__()
+        logger = logging.getLogger("HealthItemWidget.__init__")
         self.c = common
         self.health_item = health_item
 
-        self.c.log("HealthItemWidget", "__init__", self.health_item["name"])
+        logger.info(f"{self.health_item['name']}")
 
         # Widgets
         self.good_image = QtWidgets.QLabel()
@@ -100,7 +105,7 @@ class HealthItemWidget(QtWidgets.QWidget):
     def refresh(self):
         self.good_image.hide()
         self.bad_image.hide()
-        self.label.setText("Loading: {} ...".format(self.health_item["name"]))
+        self.label.setText(f"Loading: {self.health_item['name']} ...")
 
         # Run the osquery command in a separate thread
         self.t = HealthOsqueryThread(self.c, self.health_item["name"])
@@ -126,13 +131,10 @@ class HealthItemWidget(QtWidgets.QWidget):
         self.help_button.show()
 
     def help_button_clicked(self):
-        self.c.log(
-            "HealthItem",
-            "help_button_clicked",
-            "name={}, help clicked, loading {}".format(
-                self.health_item["name"], self.health_item["help_url"]
-            ),
-        )
+        logger = logging.getLogger("HealthItemWidget.help_button_clicked")
+        logger.debug(
+            f"name={self.health_item['name']}, help clicked, loading {self.health_item['help_url']}"
+        ),
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(self.health_item["help_url"]))
 
 
