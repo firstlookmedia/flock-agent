@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from .systray import SysTray
@@ -14,7 +16,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.app = app
         self.c = common
 
-        self.c.log("MainWindow", "__init__")
+        logger = logging.getLogger("MainWindow.__init__")
+        logger.debug("")
 
         self.setWindowTitle("Flock")
         self.setWindowIcon(self.c.gui.icon)
@@ -79,12 +82,14 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         Intercept close event, and instead minimize to systray
         """
-        self.c.log("MainWindow", "closeEvent", "Hiding window")
+        logger = logging.getLogger("MainWindow.closeEvent", "Hiding window")
+        logger.debug("")
         self.hide()
         e.ignore()
 
     def update_ui(self, active_tab=None):
-        self.c.log("MainWindow", "update_ui")
+        logger = logging.getLogger("MainWindow.update_ui")
+        logger.debug("")
 
         # Update the tabs
         self.opt_in_tab.update_ui()
@@ -163,14 +168,17 @@ class MainWindow(QtWidgets.QMainWindow):
             self.update_ui()
 
     def show_window(self):
-        self.c.log("MainWindow", "show_window")
+        logger = logging.getLogger("MainWindow.show_window")
+        logger.debug("")
         self.show()
         self.activateWindow()
         self.raise_()
 
     def quit(self):
-        self.c.log("MainWindow", "quit")
+        logger = logging.getLogger("MainWindow.quit")
+        logger.debug("")
         self.app.quit()
 
     def shutdown(self):
-        self.c.log("MainWindow", "shutdown")
+        logger = logging.getLogger("MainWindow.shutdown")
+        logger.debug("")

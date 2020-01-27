@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from ..twigs import TwigView
@@ -22,8 +24,8 @@ class TwigsTab(QtWidgets.QWidget):
             self.mode = "opt-in"
         else:
             self.mode = "data"
-
-        self.c.log("TwigsTab ({})".format(self.mode), "__init__")
+        logger = logging.getLogger("TwigsTab.__init__")
+        logger.debug(f"mode:  ({self.mode})")
 
         # Keep track of the twig views
         self.twig_views = []
@@ -81,7 +83,8 @@ class TwigsTab(QtWidgets.QWidget):
         self.setLayout(layout)
 
     def update_ui(self):
-        self.c.log("TwigsTab ({})".format(self.mode), "update_ui")
+        logger = logging.getLogger("TwigsTab.update_ui")
+        logger.debug(f"mode: {self.mode}")
 
         # Remove all twig views from the layout
         for twig_view in self.twig_views:
@@ -116,18 +119,16 @@ class TwigsTab(QtWidgets.QWidget):
 
     def clicked_enable_all_button(self):
         if self.mode == "opt-in":
-            self.c.log("TwigsTab ({})".format(self.mode), "clicked_enable_all_button")
+            logger = logging.getLogger("TwigsTab.clicked_enable_all_button")
+            logger.debug(f"mode: {self.mode}")
 
             try:
                 if (
                     self.automatically_enable_twigs_checkbox.checkState()
                     == QtCore.Qt.CheckState.Checked
                 ):
-                    self.c.log(
-                        "TwigsTab ({})".format(self.mode),
-                        "clicked_enable_all_button",
-                        "automatically_enable_twigs=True",
-                    )
+
+                    logger.debug("automatically_enable_twigs=True")
                     self.c.daemon.set("automatically_enable_twigs", True)
 
                 self.c.daemon.enable_undecided_twigs()
@@ -141,7 +142,8 @@ class TwigsTab(QtWidgets.QWidget):
             self.refresh.emit(self.mode)
 
     def clicked_apply_button(self):
-        self.c.log("TwigsTab ({})".format(self.mode), "clicked_apply_button")
+        logger = logging.getLogger("TwigsTab.clicked_apply_button")
+        logger.debug("mode: {self.mode}")
 
         # Build twig_status that maps the existing opt-in status of each twig
         try:

@@ -3,14 +3,12 @@ import os
 import sys
 import grp
 import asyncio
-import json
-import time
 import requests
 import subprocess
+import logging
 from urllib.parse import urlparse
 from packaging.version import parse as parse_version
 from aiohttp import web
-from aiohttp.abc import AbstractAccessLogger
 from aiohttp.web_runner import GracefulExit
 
 from .global_settings import GlobalSettings
@@ -31,6 +29,7 @@ from ..health import health_items
 
 class Daemon:
     def __init__(self, common):
+        logger = logging.getLogger(f"Daemon.__init__")
         self.c = common
 
         # Daemon's log
@@ -39,10 +38,17 @@ class Daemon:
         else:
             log_dir = "/var/log/flock-agent"
         os.makedirs(log_dir, exist_ok=True)
-        log_filename = os.path.join(log_dir, "log")
-        self.c.log_filename = log_filename
 
-        self.c.log("Daemon", "__init__", f"version {self.c.version}")
+        # Set up logging to a file.
+        base_logger = logging.getLogger("")
+        ch = logging.FileHandler(os.path.join(log_dir, "log"))
+        basic_formatter = logging.Formatter(
+            "%(asctime)s: %(levelname)s - %(name)s: %(message)s"
+        )
+        ch.setFormatter(basic_formatter)
+        base_logger.addHandler(ch)
+
+        logger.info(f"version {self.c.version}")
 
         self.osquery = Osquery(common)
         self.c.osquery = self.osquery
@@ -114,47 +120,33 @@ class Daemon:
             self.osquery.submit_logs()
         except Exception as e:
             exception_type = type(e).__name__
-            self.c.log(
-                "Daemon", "submit_loop", f"Exception submitting logs: {exception_type}"
-            )
+            logger = logging.getLogger("Daemon.submit_loop")
+            logger.debug(f"Exception submitting logs: {exception_type}")
 
     async def submit_logs_flock(self):
+        logger = logging.getLogger("Daemon.submit_logs_flock")
         # Submit Flock Agent logs
         try:
             self.flock_log.submit_logs()
         except Exception as e:
             exception_type = type(e).__name__
-            self.c.log(
-                "Daemon",
-                "submit_loop",
-                f"Exception submitting flock logs: {exception_type}",
-            )
+            logger.warning(f"Exception submitting flock logs: {exception_type}")
 
     async def http_server(self):
-        self.c.log("Daemon", "http_server", "Starting http server")
+        logger = logging.getLogger("Daemon.http_server")
+        logger.info("Starting http server")
 
         def response_object(data=None, error=False):
             obj = {"data": data, "error": error}
             return web.json_response(obj)
-
-        # Access logs
-        common_log = self.c.log
-
-        class AccessLogger(AbstractAccessLogger):
-            def log(self, request, response, time):
-                common_log(
-                    "Daemon.http_server",
-                    "AccessLogger",
-                    f"{request.method} {request.path} {response.status}",
-                )
 
         # Routes
         async def ping(request):
             return response_object()
 
         async def shutdown(request):
-            self.c.log("Daemon", "http_server", "GET /shutdown, shutting down daemon")
-            self.cleanup()
+            logger = logging.getLogger("Daemon.http_server")
+            logger.info("GET /shutdown, shutting down daemon")
             raise GracefulExit()
 
         async def get_setting(request):
@@ -171,13 +163,10 @@ class Daemon:
             # Only change the setting if it's actually changing
             old_val = self.global_settings.get(key)
             if old_val == val:
-                self.c.log(
-                    "Daemon",
-                    "http_server.set_settings",
-                    f"skipping {key}={val}, because it's already set",
-                )
+                logger = logging.getLogger("Daemon.http_server.set_settings")
+                logger.debug(f"skipping {key}={val}, because it's already set",)
             else:
-                self.c.log("Daemon", "http_server.set_settings", f"setting {key}={val}")
+                logger.debug(f"setting {key}={val}")
                 self.global_settings.set(key, val)
                 self.global_settings.save()
 
@@ -201,6 +190,7 @@ class Daemon:
                 return response_object(error="invalid twig_id")
 
         async def enable_undecided_twigs(request):
+            logger = logging.getLogger("Daemon.http_server.enable_undecided_twigs")
             # If the user choose to automatically opt-in to new twigs, this enables them all
             enabled_twig_ids = []
             twig_ids = self.global_settings.get_undecided_twig_ids()
@@ -210,11 +200,7 @@ class Daemon:
                     enabled_twig_ids.append(twig_id)
 
             if enabled_twig_ids:
-                self.c.log(
-                    "Daemon",
-                    "http_server.enable_undecided_twigs",
-                    f"enabled twigs: {enabled_twig_ids}",
-                )
+                logger.debug(f"enabled twigs: {enabled_twig_ids}")
                 self.global_settings.save()
                 self.osquery.refresh_osqueryd()
                 self.flock_log.log(FlockLogTypes.TWIGS_ENABLED, enabled_twig_ids)
@@ -234,6 +220,7 @@ class Daemon:
             return response_object(self.global_settings.get_twig_enabled_statuses())
 
         async def update_twig_status(request):
+            logger = logging.getLogger("Daemon.update_twig_status")
             twig_status = await request.json()
 
             # Validate twig_status
@@ -268,18 +255,10 @@ class Daemon:
                 self.osquery.refresh_osqueryd()
 
             if enabled_twig_ids:
-                self.c.log(
-                    "Daemon",
-                    "http_server.update_twig_status",
-                    f"enabled twigs: {enabled_twig_ids}",
-                )
+                logger.info(f"enabled twigs: {enabled_twig_ids}")
                 self.flock_log.log(FlockLogTypes.TWIGS_ENABLED, enabled_twig_ids)
             if disabled_twig_ids:
-                self.c.log(
-                    "Daemon",
-                    "http_server.update_twig_status",
-                    f"disabled twigs: {disabled_twig_ids}",
-                )
+                logger.info(f"disabled twigs: {disabled_twig_ids}")
                 self.flock_log.log(FlockLogTypes.TWIGS_DISABLED, disabled_twig_ids)
 
             return response_object()
@@ -360,15 +339,13 @@ class Daemon:
         app.router.add_post("/register_server", register_server)
 
         loop = asyncio.get_event_loop()
-        await loop.create_unix_server(
-            app.make_handler(access_log_class=AccessLogger), self.unix_socket_path
-        )
+        await loop.create_unix_server(app.make_handler(), self.unix_socket_path)
 
         # Change permissions of unix socket
         os.chmod(self.unix_socket_path, 0o660)
         os.chown(self.unix_socket_path, 0, self.gid)
 
-        self.c.log("Daemon", "http_server", "Started http server")
+        logger.info("Started http server")
 
     async def autoupdate_loop(self):
         # Autoupdate is only available for macOS right now; Linux uses package managers
@@ -384,7 +361,8 @@ class Daemon:
         update_check_delay = 43200  # 12 hours
 
         while True:
-            self.c.log("Daemon", "autoupdate_loop", "Checking for updates")
+            logger = logging.getLogger("Daemon.autoupdate_loop")
+            logger.info("Checking for updates")
 
             try:
                 # Query github for the latest version of Flock Agent
@@ -393,9 +371,7 @@ class Daemon:
                 )
                 release = r.json()
                 latest_version = release["tag_name"].lstrip("v")
-                self.c.log(
-                    "Daemon",
-                    "autoupdate_loop",
+                logger.info(
                     f"installed version: {self.c.version}, latest version: {latest_version}",
                 )
                 if parse_version(latest_version) <= parse_version(self.c.version):
@@ -412,12 +388,12 @@ class Daemon:
                         break
 
                 if not url:
-                    self.c.log("Daemon", "autoupdate_loop", "could not find .pkg file")
+                    logger.warning("could not find .pkg file")
                     await asyncio.sleep(update_check_delay)
                     continue
 
                 # Download the update
-                self.c.log("Daemon", "autoupdate_loop", f"downloading {url}")
+                logger.info(f"downloading {url}")
                 r = requests.get(url)
 
                 os.makedirs(os.path.join(self.lib_dir, "updates"), exist_ok=True)
@@ -425,11 +401,7 @@ class Daemon:
                 with open(download_filename, "wb") as f:
                     f.write(r.content)
 
-                self.c.log(
-                    "Daemon",
-                    "autoupdate_loop",
-                    f"download complete: {download_filename}",
-                )
+                logger.info(f"download complete: {download_filename}")
 
                 # Verify that it's codesigned
                 p = subprocess.run(
@@ -449,18 +421,12 @@ class Daemon:
                     or "Developer ID Installer: FIRST LOOK PRODUCTIONS, INC. ("
                     not in p.stdout.decode()
                 ):
-                    self.c.log(
-                        "Daemon",
-                        "autoupdate_loop",
-                        f"codesign verification failed: {p.stdout.decode()}",
-                    )
+                    logger.warning(f"codesign verification failed: {p.stdout.decode()}")
                     await asyncio.sleep(update_check_delay)
                     continue
 
                 # Install the update
-                self.c.log(
-                    "Daemon",
-                    "autoupdate_loop",
+                logger.info(
                     "launching installer background process and quitting daemon",
                 )
                 subprocess.Popen(
@@ -469,11 +435,7 @@ class Daemon:
                 sys.exit(0)
 
             except Exception as e:
-                self.c.log(
-                    "Daemon",
-                    "autoupdate_loop",
-                    f"Exception while checking for updates: {e}",
-                )
+                logger.warning(f"Exception while checking for updates: {e}")
                 await asyncio.sleep(30)
 
     def cleanup(self):

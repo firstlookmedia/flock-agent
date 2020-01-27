@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import logging
 import subprocess
+
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from .settings import Settings
@@ -164,10 +166,11 @@ class GuiCommon:
         """
         Handling when the daemon isn't running
         """
-        self.c.log("GuiCommon", "daemon_not_running")
+        logger = logging.getLogger("GuiCommon.daemon_not_running")
+        logger.debug("")
         message = "<b>Flock Agent daemon is not running.</b><br><br>Click Ok to try starting it in the background. You will have to type your login password."
         if Alert(self.c, message, has_cancel_button=True).launch():
-            self.c.log("GuiCommon", "daemon_not_running", "enabling background daemon")
+            logger.info("enabling background daemon")
             if Platform.current() == Platform.UNKNOWN:
                 # Unknown platform
                 message = "<b>Flock Agent doesn't recognize your operating system.</b><br><br>Sorry, I don't know how to start the daemon."
@@ -211,7 +214,8 @@ class GuiCommon:
         """
         Handling when permission to use the daemon is denied
         """
-        self.c.log("GuiCommon", "daemon_permission_denied")
+        logger = logging.getLogger("GuiCommon.daemon_permission_denied")
+        logger.debug("")
         message = "<b>Permission denied.</b><br><br>Sorry, you must have admin rights on your computer to configure Flock Agent."
         Alert(self.c, message).launch()
         # Quit the app

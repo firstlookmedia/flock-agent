@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-import os
-import sys
-import signal
 import argparse
+import logging
+import os
+import signal
 
 from .common import Common
 from . import gui
@@ -12,7 +12,34 @@ from . import daemon
 flock_agent_version = "0.1.3"
 
 
+def setup_logging(verbose, debug):
+    logger = logging.getLogger()
+
+    all_logger_level = logging.INFO
+    console_logger_level = logging.WARNING
+    basic_formatter = logging.Formatter("%(message)s")
+
+    if debug:
+        all_logger_level = logging.DEBUG
+        console_logger_level = logging.DEBUG
+        basic_formatter = logging.Formatter(
+            "%(asctime)s: %(levelname)s - %(name)s: %(message)s"
+        )
+    elif verbose:
+        console_logger_level = logging.INFO
+        basic_formatter = logging.Formatter("%(name)s: %(levelname)s - %(message)s")
+
+    logger.setLevel(all_logger_level)
+
+    ch = logging.StreamHandler()
+    ch.setLevel(console_logger_level)
+
+    ch.setFormatter(basic_formatter)
+    logger.addHandler(ch)
+
+
 def main():
+    logger = logging.getLogger("main")
     # Allow Ctrl-C to smoothly quit the program instead of throwing an exception
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -26,6 +53,13 @@ def main():
         action="store_true",
         dest="verbose",
         help="Display verbose output",
+    )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        dest="debug",
+        help="Display and log debug output",
     )
     parser.add_argument(
         "--daemon",
@@ -45,18 +79,20 @@ def main():
     start_daemon = args.start_daemon
     stop_daemon = args.stop_daemon
 
+    setup_logging(args.verbose, args.debug)
+
     # Create the common object
     common = Common(verbose, flock_agent_version)
 
     if start_daemon:
         if os.geteuid() != 0:
-            print("This command must be run as root")
+            logger.error("This command must be run as root")
             return
         daemon.main(common)
 
     elif stop_daemon:
         if os.geteuid() != 0:
-            print("This command must be run as root")
+            logger.error("This command must be run as root")
             return
         daemon.stop(common)
 

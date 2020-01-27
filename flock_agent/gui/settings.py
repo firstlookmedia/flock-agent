@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
-import os
 import json
+import logging
+import os
 
 
 class Settings(object):
     def __init__(self, common):
+        logger = logging.getLogger("Settings.__init__")
         self.c = common
         self.settings_filename = os.path.join(self.c.appdata_path, "settings.json")
-        self.c.log(
-            "Settings",
-            "__init__",
-            "settings_filename: {}".format(self.settings_filename),
-        )
+        logger.info(f"settings_filename: {self.settings_filename}")
 
         self.default_settings = {
             # First run
@@ -27,11 +25,13 @@ class Settings(object):
         return self.settings[key]
 
     def set(self, key, val):
-        self.c.log("Settings", "set", "{} = {}".format(key, val))
+        logger = logging.getLogger("Settings.set")
+        logger.debug(f"{key} = {val}")
         self.settings[key] = val
 
     def load(self):
-        self.c.log("Settings", "load")
+        logger = logging.getLogger("Settings.load")
+        logger.debug("")
         if os.path.isfile(self.settings_filename):
             # If the settings file exists, load it
             try:
@@ -45,16 +45,12 @@ class Settings(object):
 
             except:
                 # If there's an error loading settings, fallback to default settings
-                self.c.log(
-                    "Settings",
-                    "load",
-                    "error loading settings, falling back to default",
-                )
+                logger.info("error loading settings, falling back to default")
                 self.settings = self.default_settings
 
         else:
             # Save with default settings
-            self.c.log(
+            logger.info(
                 "Settings", "load", "settings file doesn't exist, starting with default"
             )
             self.settings = self.default_settings
@@ -62,7 +58,8 @@ class Settings(object):
         self.save()
 
     def save(self):
-        self.c.log("Settings", "save")
+        logger = logging.getLogger("Settings.save")
+        logger.debug("")
         os.makedirs(self.c.appdata_path, exist_ok=True)
         with open(self.settings_filename, "w") as settings_file:
             json.dump(self.settings, settings_file, indent=4)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-import requests
 import base64
+import logging
+import requests
 
 
 class PermissionDenied(Exception):
@@ -58,10 +59,12 @@ class FlockApiClient(object):
 
     def __init__(self, common):
         self.c = common
-        self.c.log("FlockApiClient", "__init__")
+        logger = logging.getLogger("FlockApiClient.__init__")
+        logger.debug("")
 
     def register(self, name):
-        self.c.log("FlockApiClient", "register")
+        logger = logging.getLogger("FlockApiClient.register")
+        logger.debug("")
 
         obj = self._make_request(
             "/register",
@@ -79,21 +82,24 @@ class FlockApiClient(object):
         self.c.global_settings.save()
 
     def ping(self):
-        self.c.log("FlockApiClient", "ping")
+        logger = logging.getLogger("FlockApiClient.ping")
+        logger.debug("")
         self._make_request("/ping", "get", True)
 
     def submit(self, data):
         """
         Submit data to the Flock server
         """
-        self.c.log("FlockApiClient", "submit")
+        logger = logging.getLogger("FlockApiClient.submit")
+        logger.debug("")
         self._make_request("/submit", "post", True, data)
 
     def submit_flock_logs(self, data):
         """
         Submit flock logs to the Flock server
         """
-        self.c.log("FlockApiClient", "submit_flock_logs")
+        logger = logging.getLogger("FlockApiClient.submit_flock_logs")
+        logger.debug("")
         self._make_request("/submit_flock_logs", "post", True, data)
 
     def _make_request(self, path, method, auth, data=None):
@@ -107,18 +113,16 @@ class FlockApiClient(object):
         """
         url = self._build_url(path)
 
-        self.c.log("FlockApiClient", "_make_request", "{} {}".format(method, url))
+        logger = logging.getLogger("FlockApiClient._make_request")
+        logger.debug("{method} {url}")
 
         try:
             res = requests.request(
                 method, url, json=data, headers=self._get_headers(auth)
             )
 
-            self.c.log(
-                "FlockApiClient",
-                "_make_request",
-                "status_code: {}, data: {}".format(res.status_code, res.content),
-            )
+            logger.debug(f"status_code: {res.status_code}, data: {res.content}")
+
         except requests.exceptions.ConnectionError:
             raise ConnectionError()
 
