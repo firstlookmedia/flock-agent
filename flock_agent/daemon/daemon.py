@@ -157,13 +157,14 @@ class Daemon:
                 return response_object(error="invalid key")
 
         async def set_setting(request):
+            logger = logging.getLogger("Daemon.http_server.set_settings")
+
             key = request.match_info.get("key", None)
             val = await request.json()
 
             # Only change the setting if it's actually changing
             old_val = self.global_settings.get(key)
             if old_val == val:
-                logger = logging.getLogger("Daemon.http_server.set_settings")
                 logger.debug(f"skipping {key}={val}, because it's already set",)
             else:
                 logger.debug(f"setting {key}={val}")

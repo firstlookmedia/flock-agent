@@ -50,9 +50,7 @@ class Settings(object):
 
         else:
             # Save with default settings
-            logger.info(
-                "Settings", "load", "settings file doesn't exist, starting with default"
-            )
+            logger.info("settings file doesn't exist, starting with default")
             self.settings = self.default_settings
 
         self.save()
