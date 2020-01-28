@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.4
+
+* macOS: Allow daemon to start even if update check fails
+* Improvements to logging, and add --debug flag
+* Properly display error messages from the server
+* Increase the frequency that twigs run
+
 ## 0.1.3
 
 * macOS: Minor bugfixes related to autoupdate
