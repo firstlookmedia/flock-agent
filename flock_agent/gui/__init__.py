@@ -9,6 +9,15 @@ from .onboarding import Onboarding
 from .main_window import MainWindow
 
 
+# Different versions of PyQt5 have differences in QtCore.Qt.CheckState
+# Monkey patch them here
+try:
+    checked = QtCore.Qt.CheckState.Checked
+except:
+    QtCore.Qt.CheckState.Checked = QtCore.Qt.Checked
+    QtCore.Qt.CheckState.Unchecked = QtCore.Qt.Unchecked
+
+
 def main(common):
     # Create the Qt app
     app = QtWidgets.QApplication(sys.argv)
