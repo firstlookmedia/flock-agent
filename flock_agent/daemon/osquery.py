@@ -156,7 +156,7 @@ class Osquery(object):
         logger.info(query)
         try:
             p = subprocess.run(
-                [self.osqueryi_bin, "--json", query], capture_output=True, check=True
+                [self.osqueryi_bin, "--json", query], stdout=subprocess.PIPE, check=True
             )
             logger.info(f"{repr(p.stdout)}")
             return json.loads(p.stdout)

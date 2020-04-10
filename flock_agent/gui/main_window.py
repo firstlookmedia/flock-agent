@@ -82,8 +82,8 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         Intercept close event, and instead minimize to systray
         """
-        logger = logging.getLogger("MainWindow.closeEvent", "Hiding window")
-        logger.debug("")
+        logger = logging.getLogger("MainWindow.closeEvent")
+        logger.debug("Hiding window")
         self.hide()
         e.ignore()
 
