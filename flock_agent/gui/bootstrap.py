@@ -110,13 +110,30 @@ class Bootstrap(object):
             if type(command) == list:
                 logger = logging.getLogger("Bootstrap.exec")
                 logger.warning("Executing: {' '.join(command)}")
-                p = subprocess.run(command, capture_output=capture_output, check=True)
+                if capture_output:
+                    p = subprocess.run(
+                        command,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        check=True,
+                    )
+                else:
+                    p = subprocess.run(command, check=True)
             else:
                 logger.warning("Executing: {command}")
                 # If command is a string, shell must be true
-                p = subprocess.run(
-                    command, shell=True, capture_output=capture_output, check=True
-                )
+                if capture_output:
+                    p = subprocess.run(
+                        command,
+                        shell=True,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        check=True,
+                    )
+                else:
+                    p = subprocess.run(
+                        command, shell=True, check=True
+                    )
             return p
         except subprocess.CalledProcessError:
             message = "Error running <br><b>{}</b>.".format(" ".join(command))

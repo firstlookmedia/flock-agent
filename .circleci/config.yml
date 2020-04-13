@@ -4,15 +4,41 @@ jobs:
 
   test:
     docker:
-      - image: circleci/python:3.7-buster
+      - image: debian:buster
     steps:
       - checkout
       - run:
           name: Install dependencies
-          command: pipenv install --dev
+          command: |
+            apt-get update
+            apt-get install -y build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp python3-packaging python3-pytest python3-responses
       - run:
           name: Run tests
-          command: pipenv run python -m pytest tests
+          command: python3 -m pytest tests
+
+  build-ubuntu-bionic:
+    docker:
+      - image: ubuntu:18.04
+    steps:
+      - run:
+          name: Install dependencies
+          command: |
+            apt-get update
+            apt-get install -y git ssh ruby-dev rubygems build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp python3-packaging
+            gem install --no-ri --no-rdoc rake
+            gem install --no-ri --no-rdoc package_cloud
+      - checkout
+      - run:
+          name: Create the .deb package
+          command: |
+            ./install/linux/build_deb.py
+            dpkg -i deb_dist/flock-agent_*-1_all.deb
+      - run:
+          name: Deploy to packagecloud.io
+          command: |
+            VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
+            package_cloud push firstlookmedia/code/ubuntu/bionic deb_dist/flock-agent_${VERSION}-1_all.deb
+            package_cloud push firstlookmedia/code/ubuntu/bionic deb_dist/flock-agent_${VERSION}-1.dsc
 
   build-ubuntu-disco:
     docker:
@@ -161,6 +187,12 @@ workflows:
       - test
   build-tags:
     jobs:
+      - build-ubuntu-bionic:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
       - build-ubuntu-disco:
           filters:
             tags:
@@ -197,13 +229,3 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
-
-      # Commenting out ubuntu 18.04 for now because Flock Agent requires python 3.7+, and
-      # 18.04 comes with 3.6. This problem is solvable, but I'll wait to see if there's any
-      # demand before trying to solve it
-      # - build-ubuntu-bionic:
-      #     filters:
-      #       tags:
-      #         only: /^v.*/
-      #       branches:
-      #         ignore: /.*/

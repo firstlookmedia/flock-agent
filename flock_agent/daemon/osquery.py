@@ -93,7 +93,7 @@ class Osquery(object):
                     subprocess.run(["/bin/launchctl", "unload", self.plist_filename])
             elif Platform.current() == Platform.LINUX:
                 subprocess.run(
-                    ["/usr/bin/pkexec", "/usr/bin/systemctl", "stop", "osqueryd"]
+                    ["/usr/bin/pkexec", "/bin/systemctl", "stop", "osqueryd"]
                 )
 
             # Write the config file
@@ -125,10 +125,10 @@ class Osquery(object):
                 subprocess.run(["/bin/launchctl", "load", self.plist_filename])
             elif Platform.current() == Platform.LINUX:
                 subprocess.run(
-                    ["/usr/bin/pkexec", "/usr/bin/systemctl", "start", "osqueryd"]
+                    ["/usr/bin/pkexec", "/bin/systemctl", "start", "osqueryd"]
                 )
                 subprocess.run(
-                    ["/usr/bin/pkexec", "/usr/bin/systemctl", "enable", "osqueryd"]
+                    ["/usr/bin/pkexec", "/bin/systemctl", "enable", "osqueryd"]
                 )
 
         else:
@@ -142,10 +142,10 @@ class Osquery(object):
                     os.remove(self.plist_filename)
             elif Platform.current() == Platform.LINUX:
                 subprocess.run(
-                    ["/usr/bin/pkexec", "/usr/bin/systemctl", "stop", "osqueryd"]
+                    ["/usr/bin/pkexec", "/bin/systemctl", "stop", "osqueryd"]
                 )
                 subprocess.run(
-                    ["/usr/bin/pkexec", "/usr/bin/systemctl", "disable", "osqueryd"]
+                    ["/usr/bin/pkexec", "/bin/systemctl", "disable", "osqueryd"]
                 )
 
     def exec(self, query):
@@ -156,7 +156,7 @@ class Osquery(object):
         logger.info(query)
         try:
             p = subprocess.run(
-                [self.osqueryi_bin, "--json", query], capture_output=True, check=True
+                [self.osqueryi_bin, "--json", query], stdout=subprocess.PIPE, check=True
             )
             logger.info(f"{repr(p.stdout)}")
             return json.loads(p.stdout)

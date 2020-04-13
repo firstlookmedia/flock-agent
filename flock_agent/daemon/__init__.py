@@ -5,7 +5,13 @@ from .daemon import Daemon
 
 def main(common):
     d = Daemon(common)
-    asyncio.run(d.start())
+
+    # This requires python 3.7+
+    # asyncio.run(d.start())
+
+    # This works in python 3.6
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(asyncio.wait([d.start()]))
 
 
 def stop(common):
