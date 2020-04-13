@@ -4,15 +4,17 @@ jobs:
 
   test:
     docker:
-      - image: circleci/python:3.7-buster
+      - image: debian:buster
     steps:
       - checkout
       - run:
           name: Install dependencies
-          command: pipenv install --dev
+          command: |
+            apt-get update
+            apt-get install -y build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp python3-packaging python3-pytest python3-responses
       - run:
           name: Run tests
-          command: pipenv run python -m pytest tests
+          command: python3 -m pytest tests
 
   build-ubuntu-bionic:
     docker:
