@@ -218,11 +218,13 @@ class Osquery(object):
                         except json.decoder.JSONDecodeError:
                             logger.warning(f"warning: line is not valid JSON: {line}")
 
-                    # Submit them
-                    api_client.submit(logs)
-                    logger.info(
-                        f"submitted logs: {', '.join([obj['name'] for obj in logs])}"
-                    )
+                    # Submit up to 200 log items at a time
+                    chunks = [logs[x : x + 200] for x in range(0, len(logs), 200)]
+                    for chunk in chunks:
+                        api_client.submit(chunk)
+                        logger.info(
+                            f"submitted logs: {', '.join([obj['name'] for obj in chunk])}"
+                        )
 
                     # Update the biggest timestamp, if needed
                     if logs[-1]["unixTime"] > biggest_timestamp:

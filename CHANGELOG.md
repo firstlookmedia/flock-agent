@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.5
+
+* Submit logs in chunks to avoid sending enormous log files in a single request
+* macOS: Upgrade osquery to 4.3.0
+* Linux: Support for Ubuntu 18.04/Python 3.6, and for Ubuntu 20.04
+
 ## 0.1.4
 
 * macOS: Allow daemon to start even if update check fails
