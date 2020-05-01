@@ -40,30 +40,6 @@ jobs:
             package_cloud push firstlookmedia/code/ubuntu/bionic deb_dist/flock-agent_${VERSION}-1_all.deb
             package_cloud push firstlookmedia/code/ubuntu/bionic deb_dist/flock-agent_${VERSION}-1.dsc
 
-  build-ubuntu-disco:
-    docker:
-      - image: ubuntu:19.04
-    steps:
-      - run:
-          name: Install dependencies
-          command: |
-            apt-get update
-            DEBIAN_FRONTEND=noninteractive apt-get install -y git ssh ruby-dev rubygems build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp python3-packaging
-            gem install --no-ri --no-rdoc rake
-            gem install --no-ri --no-rdoc package_cloud
-      - checkout
-      - run:
-          name: Create the .deb package
-          command: |
-            ./install/linux/build_deb.py
-            dpkg -i deb_dist/flock-agent_*-1_all.deb
-      - run:
-          name: Deploy to packagecloud.io
-          command: |
-            VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
-            package_cloud push firstlookmedia/code/ubuntu/disco deb_dist/flock-agent_${VERSION}-1_all.deb
-            package_cloud push firstlookmedia/code/ubuntu/disco deb_dist/flock-agent_${VERSION}-1.dsc
-
   build-ubuntu-eoan:
     docker:
       - image: ubuntu:19.10
@@ -87,7 +63,7 @@ jobs:
             VERSION=$(cat flock_agent/__init__.py |grep "flock_agent_version = " |cut -d '"' -f2)
             package_cloud push firstlookmedia/code/ubuntu/eoan deb_dist/flock-agent_${VERSION}-1_all.deb
             package_cloud push firstlookmedia/code/ubuntu/eoan deb_dist/flock-agent_${VERSION}-1.dsc
-    
+
   build-ubuntu-focal:
     docker:
       - image: ubuntu:20.04
@@ -145,8 +121,8 @@ jobs:
           command: |
             apt-get update
             DEBIAN_FRONTEND=noninteractive apt-get install -y git ssh ruby-dev rubygems build-essential fakeroot python-all python3-all python3-stdeb dh-python python3-pyqt5 python3-requests python3-appdirs python3-aiohttp python3-packaging
-            gem install --no-ri --no-rdoc rake
-            gem install --no-ri --no-rdoc package_cloud
+            gem install rake
+            gem install package_cloud
       - checkout
       - run:
           name: Create the .deb package
@@ -212,12 +188,6 @@ workflows:
   build-tags:
     jobs:
       - build-ubuntu-bionic:
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
-      - build-ubuntu-disco:
           filters:
             tags:
               only: /^v.*/
