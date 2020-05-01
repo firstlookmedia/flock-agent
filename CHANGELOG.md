@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.5.dev1
+## 0.1.5
 
 * Submit logs in chunks to avoid sending enormous log files in a single request
 * macOS: Upgrade osquery to 4.3.0

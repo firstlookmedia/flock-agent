@@ -9,7 +9,7 @@ from . import gui
 from . import daemon
 
 
-flock_agent_version = "0.1.5.dev1"
+flock_agent_version = "0.1.5"
 
 
 def setup_logging(verbose, debug):
